@@ -1,67 +1,140 @@
 /* ---------------------------------------------------------------------------
  * Purple theme — IFMIS default brand palette (light mode).
  *
- * All values below are PLACEHOLDERS. Replace each `TODO` with the exact
- * value from the IFMIS purple design system before shipping.
+ * Layered structure:
  *
- * Token format:
- *   - Surface / control colors are stored as raw HSL triplets
- *     (e.g. `270 50% 50%`) and consumed by Tailwind via `hsl(var(--token))`
- *     in `globals.css`. This lets us apply `/<alpha>` modifiers natively.
- *   - Typography colors and the neutral grey are stored as full color
- *     values (hex / rgb / hsl()) because they are consumed directly.
+ *   1. Theme palette  — purple scale + purple-tinted neutral scale.
+ *                       These are the colors that change between themes.
  *
- * To add a new theme (e.g. blue), copy this file, rename to `blue.css`,
- * swap the selector to `[data-theme="blue"]`, replace values, then add
- * the file to `themes/index.css` and register it in `src/themes/registry.ts`.
- * See `src/themes/README.md` for the full checklist.
+ *   2. Surface tokens — named surface roles from Figma (page bg, header bg,
+ *                       cards, borders). Map directly to palette entries
+ *                       or to fixed Figma hex values.
+ *
+ *   3. Text tokens    — typography colors (heading, sub-heading, body).
+ *
+ *   4. Semantic tokens — the theme-agnostic API (--background, --primary,
+ *                        --border, --success, …) that components consume
+ *                        via Tailwind utilities. Switching themes only
+ *                        changes which palette entry each semantic token
+ *                        points to — components never reference palette
+ *                        steps directly.
+ *
+ * Accent scales (green / red / orange / yellow / blue / grey) are shared
+ * across themes — see `./_brand.css`. This file only redefines purple
+ * and purple-tinted neutrals.
+ *
+ * To add a new theme: copy this file, swap the selector, replace the
+ * palette + surface + text blocks. Semantic mappings stay structurally
+ * the same. See `src/themes/README.md` for the full checklist.
  * ------------------------------------------------------------------------- */
 
 :root,
 [data-theme="purple"] {
-  /* ---- Surfaces -------------------------------------------------------- */
-  --background: 0 0% 100%;            /* TODO: purple theme background */
-  --foreground: 0 0% 10%;             /* TODO: primary on-background text */
+  /* =====================================================================
+   * 1. THEME PALETTE
+   * Purple-specific scales. Override these per theme.
+   * ===================================================================== */
 
-  --card: 0 0% 100%;                  /* TODO: card surface */
-  --card-foreground: 0 0% 10%;        /* TODO: card text */
+  /* ---- Primary purple ------------------------------------------------- */
+  --brand-primary-purple-25:  #FAF7FD;
+  --brand-primary-purple-50:  #F3ECFA;
+  --brand-primary-purple-100: #E8D8F5;
+  --brand-primary-purple-200: #D4B3EB;
+  --brand-primary-purple-300: #BE8AE0;
+  --brand-primary-purple-400: #A663D4;
+  --brand-primary-purple-500: #8B39C2;
+  --brand-primary-purple-600: #701FA7;
+  --brand-primary-purple-700: #56108A;
+  --brand-primary-purple-800: #470D73;
+  --brand-primary-purple-900: #37095A;
+  --brand-primary-purple-950: #24043D;
 
-  --muted: 0 0% 96%;                  /* TODO: muted surface (subtle bg) */
-  --muted-foreground: 0 0% 40%;       /* TODO: muted text */
+  /* ---- Neutral (purple-tinted greys, theme-specific) ------------------ */
+  --brand-neutral-25:  #FCFBFD;
+  --brand-neutral-50:  #F8F6FA;
+  --brand-neutral-100: #F1EDF5;
+  --brand-neutral-200: #E5DFEB;
+  --brand-neutral-300: #D4CBDD;
+  --brand-neutral-400: #B5A9C2;
+  --brand-neutral-500: #8E7E9F;
+  --brand-neutral-600: #6F617E;
+  --brand-neutral-700: #564A63;
+  --brand-neutral-800: #3E3548;
+  --brand-neutral-900: #2A2431;
+  --brand-neutral-950: #1A1620;
 
-  /* ---- Brand ----------------------------------------------------------- */
-  --primary: 0 0% 50%;                /* TODO: purple/500 — main brand */
-  --primary-foreground: 0 0% 100%;    /* TODO: text on primary */
+  /* =====================================================================
+   * 2. SURFACE TOKENS
+   * Named roles from Figma — `--surface-<role>` form, mirroring the
+   * Figma "Brand/Surface/*" token names 1:1.
+   * ===================================================================== */
+  --surface-page-bg:        #F1EFF3;  /* Page chrome background           */
+  --surface-grey-bg:        #F7F7F7;  /* Brand/Surface/Grey/bg            */
+  --surface-grey-header:    #EDEDED;  /* Brand/Surface/Grey/header        */
+  --surface-border-grey:    #A6A6A6;  /* Brand/Surface/Borders/grey       */
+  --surface-border-purple:  #A58FBC;  /* Brand/Surface/Borders/purple     */
+  --surface-card-white:     #FFFFFF;  /* Brand/Surface/Cards/White-text   */
 
-  --secondary: 0 0% 90%;              /* TODO: secondary surface */
-  --secondary-foreground: 0 0% 10%;   /* TODO: text on secondary */
+  /* =====================================================================
+   * 3. TEXT TOKENS
+   * Typography colors used directly (no alpha modifiers required).
+   * ===================================================================== */
+  --text-heading:        #4B3960;  /* Header text                          */
+  --text-subheading:     #371452;  /* Sub-header text                      */
+  --text-body-primary:   #2E2E2E;  /* Primary body text                    */
+  --text-body-secondary: #595959;  /* Secondary / muted body text          */
 
-  --accent: 0 0% 90%;                 /* TODO: accent surface (e.g. purple/50) */
-  --accent-foreground: 0 0% 10%;      /* TODO: text on accent */
+  /* =====================================================================
+   * 4. SEMANTIC TOKENS
+   * Theme-agnostic API consumed by Tailwind via `globals.css`.
+   *
+   * Surface/control tokens are stored as the resolved color value (hex
+   * via the palette vars above). Switching themes only requires changing
+   * which palette step a semantic token points to.
+   * ===================================================================== */
 
-  /* ---- Status ---------------------------------------------------------- */
-  --destructive: 0 0% 50%;            /* TODO: destructive / error */
-  --destructive-foreground: 0 0% 100%;/* TODO: text on destructive */
+  /* ---- Surfaces ------------------------------------------------------- */
+  --background:            var(--surface-page-bg);
+  --foreground:            var(--text-body-primary);
 
-  --success: 0 0% 50%;                /* TODO: success */
-  --success-foreground: 0 0% 100%;    /* TODO: text on success */
+  --card:                  var(--surface-card-white);
+  --card-foreground:       var(--text-body-primary);
 
-  --warning: 0 0% 50%;                /* TODO: warning */
-  --warning-foreground: 0 0% 100%;    /* TODO: text on warning */
+  --muted:                 var(--surface-grey-bg);
+  --muted-foreground:      var(--text-body-secondary);
 
-  /* ---- Lines / focus --------------------------------------------------- */
-  --border: 0 0% 88%;                 /* TODO: default border */
-  --input: 0 0% 88%;                  /* TODO: input border */
-  --ring: 0 0% 50%;                   /* TODO: focus ring (usually = primary) */
+  /* ---- Brand ---------------------------------------------------------- */
+  --primary:               var(--brand-primary-purple-500);
+  --primary-foreground:    var(--surface-card-white);
 
-  /* ---- Shape ----------------------------------------------------------- */
-  --radius: 0.5rem;                   /* TODO: confirm radius */
+  --secondary:             var(--brand-primary-purple-50);
+  --secondary-foreground:  var(--brand-primary-purple-700);
 
-  /* ---- Typography (direct color values, not HSL triplets) -------------- */
-  --text-heading: #000000;            /* TODO: heading color */
-  --text-body-primary: #000000;       /* TODO: primary body text */
-  --text-body-secondary: #555555;     /* TODO: secondary body text */
+  --accent:                var(--brand-primary-purple-100);
+  --accent-foreground:     var(--brand-primary-purple-800);
 
-  /* ---- Neutral accent greys (Figma "Accent/Grey/*") -------------------- */
-  --grey-25: #F7F7F7;                 /* TODO: lightest neutral */
+  /* ---- Status (shared accent scales from _brand.css) ------------------ */
+  --destructive:           var(--brand-red-500);
+  --destructive-foreground: var(--surface-card-white);
+
+  --success:               var(--brand-green-600);
+  --success-foreground:    var(--surface-card-white);
+
+  --warning:               var(--brand-yellow-500);
+  --warning-foreground:    var(--surface-card-white);
+
+  --info:                  var(--brand-blue-500);
+  --info-foreground:       var(--surface-card-white);
+
+  --pending:               var(--brand-orange-500);
+  --pending-foreground:    var(--surface-card-white);
+
+  /* ---- Lines / focus -------------------------------------------------- */
+  --border:                var(--surface-border-grey);
+  --border-strong:         var(--surface-border-purple);
+  --input:                 var(--surface-border-grey);
+  --ring:                  var(--brand-primary-purple-500);
+
+  /* ---- Shape ---------------------------------------------------------- */
+  --radius: 0.5rem;
 }

@@ -1,57 +1,68 @@
 /* ---------------------------------------------------------------------------
  * Dark theme — IFMIS dark-mode palette.
  *
- * Values below carry forward the previous globals.css dark palette as a
- * sensible default. Update once the Figma dark spec is finalised.
+ * Provisional values; the dark spec is not yet finalised in Figma. Values
+ * carry forward the legacy dark palette using shared accent scales from
+ * `./_brand.css` where it makes sense, with placeholder surface/text
+ * tokens until the design lands.
  *
  * See `purple.css` for token-format conventions and `src/themes/README.md`
- * for how to add a new theme.
+ * for the full theme-authoring checklist.
  * ------------------------------------------------------------------------- */
 
 [data-theme="dark"] {
-  /* ---- Surfaces -------------------------------------------------------- */
-  --background: 222 47% 11%;
-  --foreground: 210 40% 98%;
+  /* ---- Surface tokens (placeholders — update when dark spec lands) ---- */
+  --surface-page-bg:        #1A1620;
+  --surface-grey-bg:        #2B2B2B;
+  --surface-grey-header:    #3F3F3F;
+  --surface-border-grey:    #575757;
+  --surface-border-purple:  #4B3960;
+  --surface-card-white:     #2A2431;
 
-  --card: 222 47% 14%;
-  --card-foreground: 210 40% 98%;
-
-  --muted: 217 33% 17%;
-  --muted-foreground: 215 20% 65%;
-
-  /* ---- Brand ----------------------------------------------------------- */
-  --primary: 210 100% 60%;
-  --primary-foreground: 222 47% 11%;
-
-  --secondary: 217 33% 17%;
-  --secondary-foreground: 210 40% 98%;
-
-  --accent: 217 33% 17%;
-  --accent-foreground: 210 40% 98%;
-
-  /* ---- Status ---------------------------------------------------------- */
-  --destructive: 0 73% 50%;
-  --destructive-foreground: 210 40% 98%;
-
-  --success: 142 71% 45%;
-  --success-foreground: 0 0% 100%;
-
-  --warning: 38 92% 50%;
-  --warning-foreground: 0 0% 100%;
-
-  /* ---- Lines / focus --------------------------------------------------- */
-  --border: 217 33% 17%;
-  --input: 217 33% 17%;
-  --ring: 210 100% 60%;
-
-  /* ---- Shape ----------------------------------------------------------- */
-  --radius: 0.5rem;
-
-  /* ---- Typography ------------------------------------------------------ */
-  --text-heading: #D4C5E8;
-  --text-body-primary: #F1F1F1;
+  /* ---- Text tokens ---------------------------------------------------- */
+  --text-heading:        #D4C5E8;
+  --text-subheading:     #B5A9C2;
+  --text-body-primary:   #F1F1F1;
   --text-body-secondary: #B5B5B5;
 
-  /* ---- Neutral accent greys ------------------------------------------- */
-  --grey-25: #1F1F1F;
+  /* ---- Semantic tokens ------------------------------------------------ */
+  --background:            var(--surface-page-bg);
+  --foreground:            var(--text-body-primary);
+
+  --card:                  var(--surface-card-white);
+  --card-foreground:       var(--text-body-primary);
+
+  --muted:                 var(--surface-grey-bg);
+  --muted-foreground:      var(--text-body-secondary);
+
+  --primary:               #A663D4;          /* purple-400, lifted for dark */
+  --primary-foreground:    var(--surface-page-bg);
+
+  --secondary:             var(--surface-grey-bg);
+  --secondary-foreground:  var(--text-body-primary);
+
+  --accent:                var(--surface-grey-header);
+  --accent-foreground:     var(--text-body-primary);
+
+  --destructive:           var(--brand-red-500);
+  --destructive-foreground: #FFFFFF;
+
+  --success:               var(--brand-green-500);
+  --success-foreground:    #FFFFFF;
+
+  --warning:               var(--brand-yellow-500);
+  --warning-foreground:    #FFFFFF;
+
+  --info:                  var(--brand-blue-500);
+  --info-foreground:       #FFFFFF;
+
+  --pending:               var(--brand-orange-500);
+  --pending-foreground:    #FFFFFF;
+
+  --border:                var(--surface-border-grey);
+  --border-strong:         var(--surface-border-purple);
+  --input:                 var(--surface-border-grey);
+  --ring:                  #A663D4;
+
+  --radius: 0.5rem;
 }

@@ -5,9 +5,8 @@
  * `dark:` variant — applies inside any element marked as the dark theme,
  * either directly (`<html data-theme="dark">`) or via an ancestor.
  *
- * NOTE: this is intentionally tied to the literal `dark` theme name, not to
- * a "mode" concept. If you later add another dark-mode theme (e.g. a
- * "purple-dark"), update the selector to include it, e.g.:
+ * Tied to the literal `dark` theme name, not a "mode" concept. To add a
+ * second dark-appearance theme (e.g. "purple-dark"), extend the selector:
  *   @custom-variant dark (&:where(
  *     [data-theme="dark"], [data-theme="dark"] *,
  *     [data-theme="purple-dark"], [data-theme="purple-dark"] *
@@ -18,70 +17,209 @@
 /* ---------------------------------------------------------------------------
  * Design tokens exposed to Tailwind as utility classes.
  *
- * These names are theme-agnostic — every theme declares the underlying
- * CSS variables (`--background`, `--primary`, …) in its own file under
- * `./themes/`. This file only bridges them into Tailwind's `@theme` so
- * `bg-background`, `text-primary`, etc. are usable in component class lists.
+ * Three layers feed this block:
+ *   1. `themes/_brand.css`     — shared accent scales (green/red/yellow/
+ *                                orange/blue/grey). Same across all themes.
+ *   2. `themes/<theme>.css`    — theme palette (purple scale, neutral
+ *                                scale) + surface + text + semantic tokens.
+ *   3. This file               — names each CSS variable into the Tailwind
+ *                                `@theme` namespace so utilities like
+ *                                `bg-primary`, `text-heading`, `bg-green-500`
+ *                                resolve.
  *
  * Source of truth: IFMIS Figma design system.
  * ------------------------------------------------------------------------- */
 @theme {
-  /* Surface + control colors (semantic, theme-aware) */
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
+  /* =====================================================================
+   * Semantic tokens — theme-aware
+   * ===================================================================== */
 
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
+  /* Surfaces */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
 
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
 
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
 
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  /* Brand */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
 
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
 
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
 
-  --color-success: hsl(var(--success));
-  --color-success-foreground: hsl(var(--success-foreground));
+  /* Status */
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-pending: var(--pending);
+  --color-pending-foreground: var(--pending-foreground);
 
-  --color-warning: hsl(var(--warning));
-  --color-warning-foreground: hsl(var(--warning-foreground));
+  /* Lines / focus */
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
+  /* =====================================================================
+   * Surface tokens — Figma "Brand/Surface/*" 1:1
+   * ===================================================================== */
+  --color-surface-page: var(--surface-page-bg);
+  --color-surface-grey-bg: var(--surface-grey-bg);
+  --color-surface-grey-header: var(--surface-grey-header);
+  --color-surface-border-grey: var(--surface-border-grey);
+  --color-surface-border-purple: var(--surface-border-purple);
+  --color-surface-card: var(--surface-card-white);
 
-  /* Typography text colors (from Figma "Text/*" tokens) */
+  /* =====================================================================
+   * Typography tokens
+   * ===================================================================== */
   --color-heading: var(--text-heading);
+  --color-subheading: var(--text-subheading);
   --color-body-primary: var(--text-body-primary);
   --color-body-secondary: var(--text-body-secondary);
 
-  /* Neutral accent greys (from Figma "Accent/Grey/*") */
-  --color-grey-25: var(--grey-25);
+  /* =====================================================================
+   * Brand scales — exposed as Tailwind utilities
+   * (e.g. `bg-purple-500`, `text-neutral-700`, `border-green-300`)
+   * ===================================================================== */
 
-  /* Radius scale */
+  /* Primary purple (theme-specific) */
+  --color-purple-25:  var(--brand-primary-purple-25);
+  --color-purple-50:  var(--brand-primary-purple-50);
+  --color-purple-100: var(--brand-primary-purple-100);
+  --color-purple-200: var(--brand-primary-purple-200);
+  --color-purple-300: var(--brand-primary-purple-300);
+  --color-purple-400: var(--brand-primary-purple-400);
+  --color-purple-500: var(--brand-primary-purple-500);
+  --color-purple-600: var(--brand-primary-purple-600);
+  --color-purple-700: var(--brand-primary-purple-700);
+  --color-purple-800: var(--brand-primary-purple-800);
+  --color-purple-900: var(--brand-primary-purple-900);
+  --color-purple-950: var(--brand-primary-purple-950);
+
+  /* Neutral (theme-specific, purple-tinted in this theme) */
+  --color-neutral-25:  var(--brand-neutral-25);
+  --color-neutral-50:  var(--brand-neutral-50);
+  --color-neutral-100: var(--brand-neutral-100);
+  --color-neutral-200: var(--brand-neutral-200);
+  --color-neutral-300: var(--brand-neutral-300);
+  --color-neutral-400: var(--brand-neutral-400);
+  --color-neutral-500: var(--brand-neutral-500);
+  --color-neutral-600: var(--brand-neutral-600);
+  --color-neutral-700: var(--brand-neutral-700);
+  --color-neutral-800: var(--brand-neutral-800);
+  --color-neutral-900: var(--brand-neutral-900);
+  --color-neutral-950: var(--brand-neutral-950);
+
+  /* Grey (shared, untinted) */
+  --color-grey-25:  var(--brand-grey-25);
+  --color-grey-50:  var(--brand-grey-50);
+  --color-grey-100: var(--brand-grey-100);
+  --color-grey-200: var(--brand-grey-200);
+  --color-grey-300: var(--brand-grey-300);
+  --color-grey-400: var(--brand-grey-400);
+  --color-grey-500: var(--brand-grey-500);
+  --color-grey-600: var(--brand-grey-600);
+  --color-grey-700: var(--brand-grey-700);
+  --color-grey-800: var(--brand-grey-800);
+  --color-grey-900: var(--brand-grey-900);
+  --color-grey-950: var(--brand-grey-950);
+
+  /* Green (shared — success) */
+  --color-green-25:  var(--brand-green-25);
+  --color-green-50:  var(--brand-green-50);
+  --color-green-100: var(--brand-green-100);
+  --color-green-200: var(--brand-green-200);
+  --color-green-300: var(--brand-green-300);
+  --color-green-400: var(--brand-green-400);
+  --color-green-500: var(--brand-green-500);
+  --color-green-600: var(--brand-green-600);
+  --color-green-700: var(--brand-green-700);
+  --color-green-800: var(--brand-green-800);
+  --color-green-900: var(--brand-green-900);
+  --color-green-950: var(--brand-green-950);
+
+  /* Red (shared — danger) */
+  --color-red-25:  var(--brand-red-25);
+  --color-red-50:  var(--brand-red-50);
+  --color-red-100: var(--brand-red-100);
+  --color-red-200: var(--brand-red-200);
+  --color-red-300: var(--brand-red-300);
+  --color-red-400: var(--brand-red-400);
+  --color-red-500: var(--brand-red-500);
+  --color-red-600: var(--brand-red-600);
+  --color-red-700: var(--brand-red-700);
+  --color-red-800: var(--brand-red-800);
+  --color-red-900: var(--brand-red-900);
+  --color-red-950: var(--brand-red-950);
+
+  /* Orange (shared — pending / attention) */
+  --color-orange-25:  var(--brand-orange-25);
+  --color-orange-50:  var(--brand-orange-50);
+  --color-orange-100: var(--brand-orange-100);
+  --color-orange-200: var(--brand-orange-200);
+  --color-orange-300: var(--brand-orange-300);
+  --color-orange-400: var(--brand-orange-400);
+  --color-orange-500: var(--brand-orange-500);
+  --color-orange-600: var(--brand-orange-600);
+  --color-orange-700: var(--brand-orange-700);
+  --color-orange-800: var(--brand-orange-800);
+  --color-orange-900: var(--brand-orange-900);
+  --color-orange-950: var(--brand-orange-950);
+
+  /* Yellow (shared — warning) */
+  --color-yellow-25:  var(--brand-yellow-25);
+  --color-yellow-50:  var(--brand-yellow-50);
+  --color-yellow-100: var(--brand-yellow-100);
+  --color-yellow-200: var(--brand-yellow-200);
+  --color-yellow-300: var(--brand-yellow-300);
+  --color-yellow-400: var(--brand-yellow-400);
+  --color-yellow-500: var(--brand-yellow-500);
+  --color-yellow-600: var(--brand-yellow-600);
+  --color-yellow-700: var(--brand-yellow-700);
+  --color-yellow-800: var(--brand-yellow-800);
+  --color-yellow-900: var(--brand-yellow-900);
+  --color-yellow-950: var(--brand-yellow-950);
+
+  /* Blue (shared — info) */
+  --color-blue-25:  var(--brand-blue-25);
+  --color-blue-50:  var(--brand-blue-50);
+  --color-blue-100: var(--brand-blue-100);
+  --color-blue-200: var(--brand-blue-200);
+  --color-blue-300: var(--brand-blue-300);
+  --color-blue-400: var(--brand-blue-400);
+  --color-blue-500: var(--brand-blue-500);
+  --color-blue-600: var(--brand-blue-600);
+  --color-blue-700: var(--brand-blue-700);
+  --color-blue-800: var(--brand-blue-800);
+  --color-blue-900: var(--brand-blue-900);
+  --color-blue-950: var(--brand-blue-950);
+
+  /* =====================================================================
+   * Shape
+   * ===================================================================== */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
 
-  /* Font family */
+  /* =====================================================================
+   * Typography
+   * ===================================================================== */
   --font-sans: "Google Sans Flex", "Google Sans", Inter, system-ui, sans-serif;
 
-  /* ---------------------------------------------------------------
-   * Typography scale — matches Figma 1:1.
-   * Headings: SemiBold (600), line-height 100% (1).
-   * Body:     Regular (400) or Medium (500), line-height 1.5.
-   * These are theme-independent.
-   * ------------------------------------------------------------- */
-
-  /* Headings */
+  /* Headings — SemiBold (600), line-height 100% */
   --text-h1: 2rem;        /* 32px */
   --text-h1--line-height: 1;
   --text-h1--font-weight: 600;
@@ -122,7 +260,7 @@
 
 @layer base {
   * {
-    border-color: hsl(var(--border));
+    border-color: var(--border);
   }
 
   html {
@@ -130,7 +268,7 @@
   }
 
   body {
-    background-color: hsl(var(--background));
+    background-color: var(--background);
     color: var(--text-body-primary);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
