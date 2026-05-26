@@ -1,0 +1,14 @@
+/* ---------------------------------------------------------------------------
+ * Theme palette barrel.
+ *
+ * Every theme is a self-contained CSS file declaring a `[data-theme="..."]`
+ * block. Add new themes by:
+ *   1. Creating `<name>.css` in this folder.
+ *   2. Appending an `@import` line below (order = first-wins for `:root`).
+ *   3. Registering the theme in `src/themes/registry.ts`.
+ *
+ * The default theme (selector also matching `:root`) should be the first
+ * `@import` so it loads before any overrides.
+ * ------------------------------------------------------------------------- */
+@import "./purple.css";
+@import "./dark.css";

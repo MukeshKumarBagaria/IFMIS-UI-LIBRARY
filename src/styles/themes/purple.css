@@ -1,0 +1,67 @@
+/* ---------------------------------------------------------------------------
+ * Purple theme — IFMIS default brand palette (light mode).
+ *
+ * All values below are PLACEHOLDERS. Replace each `TODO` with the exact
+ * value from the IFMIS purple design system before shipping.
+ *
+ * Token format:
+ *   - Surface / control colors are stored as raw HSL triplets
+ *     (e.g. `270 50% 50%`) and consumed by Tailwind via `hsl(var(--token))`
+ *     in `globals.css`. This lets us apply `/<alpha>` modifiers natively.
+ *   - Typography colors and the neutral grey are stored as full color
+ *     values (hex / rgb / hsl()) because they are consumed directly.
+ *
+ * To add a new theme (e.g. blue), copy this file, rename to `blue.css`,
+ * swap the selector to `[data-theme="blue"]`, replace values, then add
+ * the file to `themes/index.css` and register it in `src/themes/registry.ts`.
+ * See `src/themes/README.md` for the full checklist.
+ * ------------------------------------------------------------------------- */
+
+:root,
+[data-theme="purple"] {
+  /* ---- Surfaces -------------------------------------------------------- */
+  --background: 0 0% 100%;            /* TODO: purple theme background */
+  --foreground: 0 0% 10%;             /* TODO: primary on-background text */
+
+  --card: 0 0% 100%;                  /* TODO: card surface */
+  --card-foreground: 0 0% 10%;        /* TODO: card text */
+
+  --muted: 0 0% 96%;                  /* TODO: muted surface (subtle bg) */
+  --muted-foreground: 0 0% 40%;       /* TODO: muted text */
+
+  /* ---- Brand ----------------------------------------------------------- */
+  --primary: 0 0% 50%;                /* TODO: purple/500 — main brand */
+  --primary-foreground: 0 0% 100%;    /* TODO: text on primary */
+
+  --secondary: 0 0% 90%;              /* TODO: secondary surface */
+  --secondary-foreground: 0 0% 10%;   /* TODO: text on secondary */
+
+  --accent: 0 0% 90%;                 /* TODO: accent surface (e.g. purple/50) */
+  --accent-foreground: 0 0% 10%;      /* TODO: text on accent */
+
+  /* ---- Status ---------------------------------------------------------- */
+  --destructive: 0 0% 50%;            /* TODO: destructive / error */
+  --destructive-foreground: 0 0% 100%;/* TODO: text on destructive */
+
+  --success: 0 0% 50%;                /* TODO: success */
+  --success-foreground: 0 0% 100%;    /* TODO: text on success */
+
+  --warning: 0 0% 50%;                /* TODO: warning */
+  --warning-foreground: 0 0% 100%;    /* TODO: text on warning */
+
+  /* ---- Lines / focus --------------------------------------------------- */
+  --border: 0 0% 88%;                 /* TODO: default border */
+  --input: 0 0% 88%;                  /* TODO: input border */
+  --ring: 0 0% 50%;                   /* TODO: focus ring (usually = primary) */
+
+  /* ---- Shape ----------------------------------------------------------- */
+  --radius: 0.5rem;                   /* TODO: confirm radius */
+
+  /* ---- Typography (direct color values, not HSL triplets) -------------- */
+  --text-heading: #000000;            /* TODO: heading color */
+  --text-body-primary: #000000;       /* TODO: primary body text */
+  --text-body-secondary: #555555;     /* TODO: secondary body text */
+
+  /* ---- Neutral accent greys (Figma "Accent/Grey/*") -------------------- */
+  --grey-25: #F7F7F7;                 /* TODO: lightest neutral */
+}

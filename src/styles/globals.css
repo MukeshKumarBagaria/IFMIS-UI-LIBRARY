@@ -1,9 +1,28 @@
 @import "tailwindcss";
+@import "./themes/index.css";
 
+/* ---------------------------------------------------------------------------
+ * `dark:` variant — applies inside any element marked as the dark theme,
+ * either directly (`<html data-theme="dark">`) or via an ancestor.
+ *
+ * NOTE: this is intentionally tied to the literal `dark` theme name, not to
+ * a "mode" concept. If you later add another dark-mode theme (e.g. a
+ * "purple-dark"), update the selector to include it, e.g.:
+ *   @custom-variant dark (&:where(
+ *     [data-theme="dark"], [data-theme="dark"] *,
+ *     [data-theme="purple-dark"], [data-theme="purple-dark"] *
+ *   ));
+ * ------------------------------------------------------------------------- */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 /* ---------------------------------------------------------------------------
  * Design tokens exposed to Tailwind as utility classes.
+ *
+ * These names are theme-agnostic — every theme declares the underlying
+ * CSS variables (`--background`, `--primary`, …) in its own file under
+ * `./themes/`. This file only bridges them into Tailwind's `@theme` so
+ * `bg-background`, `text-primary`, etc. are usable in component class lists.
+ *
  * Source of truth: IFMIS Figma design system.
  * ------------------------------------------------------------------------- */
 @theme {
@@ -59,6 +78,7 @@
    * Typography scale — matches Figma 1:1.
    * Headings: SemiBold (600), line-height 100% (1).
    * Body:     Regular (400) or Medium (500), line-height 1.5.
+   * These are theme-independent.
    * ------------------------------------------------------------- */
 
   /* Headings */
@@ -98,174 +118,6 @@
 
   --text-body-xs: 0.875rem;    /* 14px */
   --text-body-xs--line-height: 1.3125rem; /* 21px */
-}
-
-/* ---------------------------------------------------------------------------
- * Theme palettes — runtime-switchable via [data-theme="..."].
- * Typography colors are intentionally shared across themes (per Figma),
- * but can be overridden in any theme block below.
- * ------------------------------------------------------------------------- */
-:root,
-[data-theme="light"] {
-  --background: 0 0% 100%;
-  --foreground: 222 47% 11%;
-
-  --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
-
-  --primary: 210 100% 36%;
-  --primary-foreground: 0 0% 100%;
-
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222 47% 11%;
-
-  --accent: 210 40% 96%;
-  --accent-foreground: 222 47% 11%;
-
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 100%;
-
-  --success: 142 71% 45%;
-  --success-foreground: 0 0% 100%;
-
-  --warning: 38 92% 50%;
-  --warning-foreground: 0 0% 100%;
-
-  --border: 214 32% 91%;
-  --input: 214 32% 91%;
-  --ring: 210 100% 36%;
-
-  --radius: 0.5rem;
-
-  /* Figma typography colors */
-  --text-heading: #4B3960;
-  --text-body-primary: #2E2E2E;
-  --text-body-secondary: #595959;
-  --grey-25: #F7F7F7;
-}
-
-[data-theme="dark"] {
-  --background: 222 47% 11%;
-  --foreground: 210 40% 98%;
-
-  --card: 222 47% 14%;
-  --card-foreground: 210 40% 98%;
-
-  --muted: 217 33% 17%;
-  --muted-foreground: 215 20% 65%;
-
-  --primary: 210 100% 60%;
-  --primary-foreground: 222 47% 11%;
-
-  --secondary: 217 33% 17%;
-  --secondary-foreground: 210 40% 98%;
-
-  --accent: 217 33% 17%;
-  --accent-foreground: 210 40% 98%;
-
-  --destructive: 0 73% 50%;
-  --destructive-foreground: 210 40% 98%;
-
-  --success: 142 71% 45%;
-  --success-foreground: 0 0% 100%;
-
-  --warning: 38 92% 50%;
-  --warning-foreground: 0 0% 100%;
-
-  --border: 217 33% 17%;
-  --input: 217 33% 17%;
-  --ring: 210 100% 60%;
-
-  --radius: 0.5rem;
-
-  /* Typography in dark theme */
-  --text-heading: #D4C5E8;
-  --text-body-primary: #F1F1F1;
-  --text-body-secondary: #B5B5B5;
-  --grey-25: #1F1F1F;
-}
-
-[data-theme="government"] {
-  --background: 0 0% 100%;
-  --foreground: 222 47% 11%;
-
-  --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
-
-  --primary: 210 100% 25%;
-  --primary-foreground: 0 0% 100%;
-
-  --secondary: 35 90% 50%;
-  --secondary-foreground: 222 47% 11%;
-
-  --accent: 210 100% 95%;
-  --accent-foreground: 210 100% 25%;
-
-  --destructive: 0 84% 45%;
-  --destructive-foreground: 0 0% 100%;
-
-  --success: 142 71% 38%;
-  --success-foreground: 0 0% 100%;
-
-  --warning: 38 92% 45%;
-  --warning-foreground: 0 0% 100%;
-
-  --border: 214 32% 85%;
-  --input: 214 32% 85%;
-  --ring: 210 100% 25%;
-
-  --radius: 0.375rem;
-
-  --text-heading: #4B3960;
-  --text-body-primary: #2E2E2E;
-  --text-body-secondary: #595959;
-  --grey-25: #F7F7F7;
-}
-
-[data-theme="high-contrast"] {
-  --background: 0 0% 100%;
-  --foreground: 0 0% 0%;
-
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 0%;
-
-  --muted: 0 0% 95%;
-  --muted-foreground: 0 0% 20%;
-
-  --primary: 0 0% 0%;
-  --primary-foreground: 0 0% 100%;
-
-  --secondary: 0 0% 90%;
-  --secondary-foreground: 0 0% 0%;
-
-  --accent: 0 0% 90%;
-  --accent-foreground: 0 0% 0%;
-
-  --destructive: 0 100% 30%;
-  --destructive-foreground: 0 0% 100%;
-
-  --success: 142 100% 25%;
-  --success-foreground: 0 0% 100%;
-
-  --warning: 38 100% 35%;
-  --warning-foreground: 0 0% 100%;
-
-  --border: 0 0% 0%;
-  --input: 0 0% 0%;
-  --ring: 0 0% 0%;
-
-  --radius: 0.5rem;
-
-  --text-heading: #000000;
-  --text-body-primary: #000000;
-  --text-body-secondary: #1A1A1A;
-  --grey-25: #F5F5F5;
 }
 
 @layer base {
