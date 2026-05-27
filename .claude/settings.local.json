@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(npm install *)",
-      "Bash(taskkill /F /IM node.exe /T)"
+      "Bash(taskkill /F /IM node.exe /T)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:6006/)",
+      "mcp__Figma__get_screenshot",
+      "mcp__03203bc4-7fa8-4a8a-ad90-9456919aedc2__get_screenshot",
+      "Bash(curl -s -o /tmp/profile-dropdown.png \"https://www.figma.com/api/mcp/asset/7f2ea803-92ed-4b04-b9d3-eb0fd086580d\")",
+      "Read(//tmp/**)",
+      "Bash(lsof -ti:6006)",
+      "Bash(xargs kill -9)"
     ]
   }
 }

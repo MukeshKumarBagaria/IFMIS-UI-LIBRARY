@@ -6,6 +6,40 @@ export type { ButtonProps } from "./components/ui/Button";
 export { Heading, headingVariants, Text, textVariants } from "./components/ui/Typography";
 export type { HeadingProps, TextProps } from "./components/ui/Typography";
 
+export {
+  Header,
+  HeaderActions,
+  HeaderBrand,
+  AccessibilityMenu,
+  LanguageToggle,
+  FontSizeControl,
+  NotificationButton,
+  ProfileMenu,
+  RoleBadge,
+  GlassSurface,
+  GlassButton,
+  GLASS_BG,
+} from "./components/ui/Header";
+export type {
+  HeaderProps,
+  HeaderActionsProps,
+  HeaderBrandProps,
+  AccessibilityMenuProps,
+  LanguageToggleProps,
+  LanguageOption,
+  FontSizeControlProps,
+  FontSizeStep,
+  NotificationButtonProps,
+  ProfileMenuProps,
+  ProfileMenuLabels,
+  ProfileUser,
+  ProfileRole,
+  RoleBadgeProps,
+  RoleVariant,
+  GlassSurfaceProps,
+  GlassButtonProps,
+} from "./components/ui/Header";
+
 export { ThemeProvider, useTheme } from "./providers/ThemeProvider";
 export type { ThemeProviderProps } from "./providers/ThemeProvider";
 

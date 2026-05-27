@@ -1,0 +1,360 @@
+import { Meta, Canvas, Story } from "@storybook/blocks";
+import * as HeaderStories from "./Header.stories";
+
+<Meta of={HeaderStories} title="UI/Header/Guide" />
+
+# Header
+
+The IFMIS application header. One component, several plug-in parts, fully driven by props so every product can localise text, swap the branding, and own the popover/route logic for actions like settings and notifications.
+
+> **Rule of thumb:** never reach into the styles of header parts. If the design changes, this file is the only place the design needs to change.
+
+---
+
+## Anatomy
+
+```
+┌────────────────────────────────────────────────────────────────────────────┐
+│  [logo]  Title                       [♿ Accessibility ▾]  [EN│हि]  [A·A·A] │
+│          Subtitle                                       [🔔] [👤 Profile ▾] │
+└────────────────────────────────────────────────────────────────────────────┘
+```
+
+| Region   | Component           | Notes                                       |
+| -------- | ------------------- | ------------------------------------------- |
+| Frame    | `Header`            | Gradient + bg image + safe-area padding     |
+| Left     | `HeaderBrand`       | Logo + Title + Subtitle                     |
+| Right    | `HeaderActions`     | Layout primitive (flex row, 16px gap)       |
+| Action 1 | `AccessibilityMenu` | Pill button (icon + label + caret)          |
+| Action 2 | `LanguageToggle`    | Segmented EN / हिन्दी                        |
+| Action 3 | `FontSizeControl`   | A · A · A trio                              |
+| Action 4 | `NotificationButton`| Bell + unread badge                         |
+| Action 5 | `ProfileMenu`       | Avatar pill + 400px dropdown card           |
+
+Inside `ProfileMenu` you'll find `RoleBadge` (colour-coded role tags) and the Settings / Logout actions.
+
+---
+
+## Quickstart
+
+```tsx
+import {
+  Header, HeaderActions, HeaderBrand,
+  AccessibilityMenu, LanguageToggle, FontSizeControl,
+  NotificationButton, ProfileMenu,
+} from "@ifmis/ui";
+
+function AppHeader() {
+  const [lang, setLang] = useState("en");
+  const [fontSize, setFontSize] = useState<"sm" | "md" | "lg">("md");
+
+  return (
+    <Header
+      brand={<HeaderBrand title="Department of Finance" subtitle="IFMIS" />}
+      actions={
+        <HeaderActions>
+          <AccessibilityMenu onClick={openA11yPanel} />
+          <LanguageToggle value={lang} onChange={setLang} />
+          <FontSizeControl value={fontSize} onChange={setFontSize} />
+          <NotificationButton count={unread} onClick={openInbox} />
+          <ProfileMenu
+            user={user}
+            onSettings={() => router.push("/settings")}
+            onLogout={signOut}
+          />
+        </HeaderActions>
+      }
+    />
+  );
+}
+```
+
+<Canvas of={HeaderStories.Default} />
+
+---
+
+## Internationalisation (English / Hindi)
+
+The header **never owns translation**. Every visible string is a prop. This keeps the library locale-agnostic so products can use whichever i18n stack they prefer (`react-i18next`, `next-intl`, plain JSON dicts).
+
+The pattern:
+
+```tsx
+const t = useTranslation();
+
+<Header
+  brand={<HeaderBrand title={t("brand.title")} subtitle={t("brand.subtitle")} />}
+  actions={
+    <HeaderActions>
+      <AccessibilityMenu label={t("header.accessibility")} />
+      <LanguageToggle
+        value={lang}
+        onChange={setLang}
+        options={[
+          { value: "en", label: "English" },
+          { value: "hi", label: "हिन्दी" },
+        ]}
+      />
+      <FontSizeControl
+        value={fontSize}
+        onChange={setFontSize}
+        labels={{
+          sm: t("header.font.decrease"),
+          md: t("header.font.normal"),
+          lg: t("header.font.increase"),
+          group: t("header.font.group"),
+        }}
+      />
+      <NotificationButton ariaLabel={t("header.notifications")} />
+      <ProfileMenu
+        user={{
+          ...user,
+          roles: [
+            { variant: "creator", label: t("roles.creator") },
+            { variant: "verifier", label: t("roles.verifier") },
+          ],
+        }}
+        labels={{
+          trigger: t("profile.trigger"),
+          rolesHeading: t("profile.rolesHeading"),
+          settings: t("profile.settings"),
+          logout: t("profile.logout"),
+        }}
+      />
+    </HeaderActions>
+  }
+/>;
+```
+
+A complete Hindi rendering looks like:
+
+<Canvas of={HeaderStories.Hindi} />
+
+---
+
+## Each part — what to pass, what to own
+
+### `HeaderBrand`
+
+| Prop        | Type          | Notes                                                |
+| ----------- | ------------- | ---------------------------------------------------- |
+| `title`     | `string`      | Required. SemiBold 24 / white.                       |
+| `subtitle`  | `string`      | Optional. SemiBold 16 / `--neutral-100`.             |
+| `logo`      | `ReactNode`   | Custom mark. Overrides `logoSrc`.                    |
+| `logoSrc`   | `string`      | Override the default `<img src>`.                    |
+| `logoAlt`   | `string`      | Default `"IFMIS"`. Always pass a translated alt.     |
+| `logoSize`  | `number`      | Default `48`.                                        |
+
+The bundled IFMIS logo lives at `src/components/ui/Header/assets/logo.png` and is the default when neither `logo` nor `logoSrc` is set.
+
+---
+
+### `AccessibilityMenu`
+
+Trigger only — the host owns the popover. Pass `open` and `onClick` to wire your popover library of choice.
+
+```tsx
+<AccessibilityMenu
+  label={t("header.accessibility")}
+  open={open}
+  onClick={() => setOpen((o) => !o)}
+/>;
+```
+
+---
+
+### `LanguageToggle`
+
+Fully controlled. The selected pill flips to white with the Figma "Dept shadow". Options default to English + Hindi; pass `options` to extend.
+
+```tsx
+<LanguageToggle
+  value={lang}
+  onChange={setLang}
+  options={[
+    { value: "en", label: "English" },
+    { value: "hi", label: "हिन्दी" },
+    { value: "ur", label: "اردو" },
+  ]}
+/>;
+```
+
+<Canvas of={HeaderStories.LanguageToggleOnly} />
+
+---
+
+### `FontSizeControl`
+
+Three steps — `sm` / `md` / `lg`. The component **does not apply** the size globally; it only reports the choice. The host wires it however the product needs:
+
+```tsx
+function App() {
+  const [size, setSize] = useState<"sm" | "md" | "lg">("md");
+
+  // Example wiring — adjust the root font scale.
+  useEffect(() => {
+    document.documentElement.style.fontSize =
+      size === "sm" ? "92%" : size === "lg" ? "108%" : "100%";
+  }, [size]);
+
+  return <FontSizeControl value={size} onChange={setSize} />;
+}
+```
+
+<Canvas of={HeaderStories.FontSizeOnly} />
+
+---
+
+### `NotificationButton`
+
+Bell glyph + red badge. The badge auto-hides at `count === 0` and caps at `max` (default `99` → renders `99+`).
+
+```tsx
+<NotificationButton count={unread} max={99} onClick={openInbox} />;
+```
+
+<Canvas of={HeaderStories.NotificationOnly} />
+
+---
+
+### `ProfileMenu`
+
+The most stateful part. Manages its own open/close + outside-click + Escape, but exposes `open` / `onOpenChange` for products that need controlled state (e.g. a global app sidebar that closes on navigation).
+
+```tsx
+<ProfileMenu
+  user={{
+    /* shown on the trigger pill */
+    name: "Mukesh Kumar",
+    designation: "Assistant Internal Audit Officer",
+    avatarUrl: "/me.jpg",            // optional
+    initials: "MK",                  // optional — falls back to computed
+
+    /* shown in the dropdown identity card */
+    employeeId: "0000442105",
+    organisation: "Directorate of Treasuries and Accounts, Bhopal",
+    lastLogin: { date: "19 Jan, 2026", time: "09:59:01" },
+
+    roles: [
+      { variant: "creator" },
+      { variant: "verifier" },
+      { variant: "approver" },
+    ],
+  }}
+  onSettings={() => navigate("/settings")}
+  onLogout={() => signOut()}
+/>;
+```
+
+The dropdown identity card renders:
+
+1. `${designation}-${employeeId}` (or just `designation` / `name`) — heading style.
+2. `organisation` — uppercase, semibold, slightly smaller.
+3. `Last Login: {date} {time}` — the time is highlighted in the destructive/red accent.
+
+The fields are independent — pass only what you have. Anything missing is skipped.
+
+- Hide an action by omitting its handler.
+- Roles are rendered with `<RoleBadge>` colour-coded by variant. In the dropdown they sit in a single horizontal row and stretch to fill the width.
+- Insert custom rows by passing `children` (rendered between the roles section and the action row).
+
+<Canvas of={HeaderStories.RoleBadges} />
+
+---
+
+## Background image
+
+The frame ships **gradient-only by default** — the 90° purple gradient `rgba(143,26,229,0.75) → rgba(56,10,92,0.75)` from the Figma spec. This keeps the library lightweight (no multi-MB PNG bundled in `dist/`) while still being on-brand out of the box.
+
+To add the official IFMIS background photo, host it in your app and pass its URL via `backgroundImage` — the gradient is always painted on top so the design stays consistent:
+
+```tsx
+// In your app:
+import headerBg from "@/assets/header-bg.png";
+
+<Header backgroundImage={headerBg} ... />;
+
+// Or any URL:
+<Header backgroundImage="/static/header-bg.png" ... />;
+```
+
+The official `header-orignal-bg-img.png` from the Figma export lives at the repo root for reference. Copy it into your application bundle to ship the full design.
+
+---
+
+## Glass surface primitives
+
+Need a custom action that matches the header look — say, a "Help" pill? Use the same primitives the built-in parts use:
+
+```tsx
+import { GlassButton } from "@ifmis/ui";
+import { Question } from "@phosphor-icons/react";
+
+<GlassButton shape="rounded" onClick={openHelp} className="h-[50px] px-3 gap-3">
+  <Question size={24} />
+  <span className="font-semibold text-sm">{t("header.help")}</span>
+</GlassButton>;
+```
+
+`GlassSurface` is the non-interactive twin (for status pills, etc.).
+
+---
+
+## Adding a new language
+
+`LanguageToggle` accepts any number of options — no library change needed:
+
+```tsx
+<LanguageToggle
+  value={lang}
+  onChange={setLang}
+  options={[
+    { value: "en", label: "English" },
+    { value: "hi", label: "हिन्दी" },
+    { value: "ta", label: "தமிழ்" }, // ← just add it
+  ]}
+/>;
+```
+
+If a new language requires a different font, register it in `src/styles/globals.css` under `--font-sans` and feed it into the host app's HTML.
+
+---
+
+## Adding a new role
+
+Today: `"creator"`, `"verifier"`, `"approver"`. To add a fourth:
+
+1. Open `src/components/ui/Header/parts/RoleBadge.tsx`.
+2. Extend the `RoleVariant` union.
+3. Add an entry to `ROLE_STYLES` (border + bg + text classes from the brand palette).
+4. Add an entry to `DEFAULT_LABELS` for the English fallback.
+5. Update stories + docs.
+
+A bespoke role for a single product can also be styled inline via `className` — but if you find yourself doing it twice, promote it to a variant.
+
+---
+
+## Accessibility checklist
+
+- All pills are real `<button>` elements with visible focus rings (`focus-visible:ring-white/70`).
+- `LanguageToggle` and `FontSizeControl` use `role="radiogroup"` + `role="radio"` so screen readers announce them as a single segmented control.
+- `ProfileMenu` closes on outside click and `Escape`. Trigger announces `aria-expanded`.
+- Notification badge is `aria-hidden`; the unread count is folded into the button's `aria-label` (`"Notifications, 5 unread"`).
+- Decorative images (logo, avatar) carry empty `alt=""` when they don't add information.
+
+---
+
+## Do / Don't
+
+### Do
+
+✅ Drive every string from your i18n layer.
+✅ Render only the actions the product uses — actions are independent.
+✅ Use `HeaderActions` for the right side so spacing stays consistent.
+✅ Treat `ProfileMenu` as the source of truth for the avatar + roles UX.
+
+### Don't
+
+❌ Don't reach into part internals to restyle colours — propose a new prop or role variant instead.
+❌ Don't recreate the glass pill with custom Tailwind — use `GlassButton` / `GlassSurface`.
+❌ Don't put logic that's specific to a single product (e.g. tenant switcher) inside the library — wrap it in your own component and slot it through `HeaderActions`.
