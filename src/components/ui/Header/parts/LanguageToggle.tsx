@@ -66,7 +66,7 @@ function LanguageToggleInner<T extends string = string>(
       shape="pill"
       role="radiogroup"
       aria-label={ariaLabel}
-      className={cn("h-[50px] px-3 gap-3", className)}
+      className={cn("hidden sm:flex h-[50px] px-3 gap-3", className)}
     >
       {options.map((option) => {
         const selected = option.value === value;

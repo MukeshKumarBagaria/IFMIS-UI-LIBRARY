@@ -16,7 +16,7 @@ export interface HeaderBrandProps extends Omit<HTMLAttributes<HTMLDivElement>, "
   logoSrc?: string;
   /** Accessible label for the default `<img>` logo. */
   logoAlt?: string;
-  /** Diameter of the default logo, in pixels. Default `48`. */
+  /** Diameter of the default logo, in pixels. Default `55`. */
   logoSize?: number;
   /**
    * Primary line of branding (e.g. the ministry / department name).
@@ -42,7 +42,7 @@ export const HeaderBrand = forwardRef<HTMLDivElement, HeaderBrandProps>(
       logo,
       logoSrc = logoDefault,
       logoAlt = "IFMIS",
-      logoSize = 48,
+      logoSize = 55,
       title,
       subtitle,
       className,
@@ -53,7 +53,7 @@ export const HeaderBrand = forwardRef<HTMLDivElement, HeaderBrandProps>(
     return (
       <div
         ref={ref}
-        className={cn("flex items-center gap-3 min-w-0", className)}
+        className={cn("flex items-center gap-2 sm:gap-3 min-w-0", className)}
         {...props}
       >
         {logo ?? (
@@ -67,11 +67,11 @@ export const HeaderBrand = forwardRef<HTMLDivElement, HeaderBrandProps>(
           />
         )}
         <div className="flex flex-col justify-center min-w-0">
-          <span className="font-sans font-semibold text-[24px] leading-none text-white truncate">
+          <span className="font-sans font-semibold text-[16px] sm:text-[20px] lg:text-[24px] leading-tight text-white truncate">
             {title}
           </span>
           {subtitle ? (
-            <span className="font-sans font-semibold text-[16px] leading-none text-neutral-100 truncate mt-1">
+            <span className="hidden sm:block font-sans font-semibold text-[13px] sm:text-[14px] lg:text-[16px] leading-tight text-neutral-100 truncate mt-0.5">
               {subtitle}
             </span>
           ) : null}

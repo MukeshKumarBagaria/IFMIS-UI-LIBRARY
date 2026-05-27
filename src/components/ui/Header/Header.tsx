@@ -84,7 +84,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(
            * site-wide modals (`z-50+`). We deliberately do **not** clip
            * with `overflow-hidden` — popovers must escape downward.
            */
-          "relative isolate z-30 w-full h-20",
+          "relative isolate z-30 w-full h-20 flex items-center",
           "bg-cover bg-center bg-no-repeat",
           className,
         )}
@@ -93,8 +93,8 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(
       >
         <div
           className={cn(
-            "box-border flex h-[57px] items-center justify-between",
-            "mx-6 my-3",
+            "flex w-full items-center justify-between",
+            "px-3 sm:px-4 lg:px-6",
           )}
         >
           <div className="flex items-center min-w-0">{brand}</div>
@@ -119,7 +119,7 @@ export interface HeaderActionsProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export const HeaderActions = forwardRef<HTMLDivElement, HeaderActionsProps>(
-  ({ className, gapClassName = "gap-4", children, ...props }, ref) => (
+  ({ className, gapClassName = "gap-2 sm:gap-3 lg:gap-4", children, ...props }, ref) => (
     <div
       ref={ref}
       className={cn("flex items-center", gapClassName, className)}

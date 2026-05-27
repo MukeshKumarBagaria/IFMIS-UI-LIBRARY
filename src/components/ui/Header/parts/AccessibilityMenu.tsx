@@ -39,10 +39,10 @@ export const AccessibilityMenu = forwardRef<HTMLButtonElement, AccessibilityMenu
         aria-haspopup="menu"
         disabled={disabled}
         onClick={onClick}
-        className={cn("h-[50px] px-3 gap-[18px]", className)}
+        className={cn("hidden md:flex h-[50px] px-3 gap-2 lg:gap-[18px]", className)}
       >
         <PersonArmsSpread size={24} weight="regular" aria-hidden />
-        <span className="font-sans font-semibold text-[14px] leading-none">
+        <span className="hidden lg:inline font-sans font-semibold text-[14px] leading-none">
           {label}
         </span>
         <CaretDown

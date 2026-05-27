@@ -1,0 +1,299 @@
+import { Meta } from "@storybook/blocks";
+import * as SidebarStories from "./Sidebar.stories";
+
+<Meta of={SidebarStories} title="UI/Sidebar/Guide" />
+
+# Sidebar
+
+The IFMIS primary navigation rail. One component composes three regions
+(search + worklist, assigned-modules, sub-modules menu) and stays purely
+presentational — every selection is driven by props you own.
+
+> **Rule of thumb:** the Sidebar never talks to the router, never persists
+> the active module, never owns search state. Wire those to your app's
+> store and pass the values down. This is the only way the same Sidebar
+> can ship inside every product without forking.
+
+---
+
+## Anatomy
+
+```
+┌──────────────────────────────┐
+│  ┌────────────────────────┐  │   ← top card (rounded, purple border)
+│  │  [ search ]  [ ⇆ ]    │  │     search + collapse button
+│  │  [ 💼 Worklist     12▸]│  │     worklist pill
+│  └────────────────────────┘  │
+│                              │
+│  Assigned Modules            │   ← section title
+│  ┌──────┬──┬──┐  ⊙           │     active card + 2×2 inactive grid + overflow
+│  │ HRMS │··│··│              │
+│  └──────┴──┴──┘              │
+│                              │
+│  Sub-Modules                 │   ← section title
+│  ┌──────────────────┐        │
+│  │ Dashboard        │        │
+│  │ HRMS           ▸ │ ─────→ │   ← clicking opens a right-side card
+│  │ Vouchers   12  ▸ │        │
+│  └──────────────────┘        │
+└──────────────────────────────┘
+```
+
+| Region              | Component                | Notes                                              |
+| ------------------- | ------------------------ | -------------------------------------------------- |
+| Frame               | `Sidebar`                | 279px column, gap-6                                |
+| Search              | `SidebarSearch`          | Pill input, controlled                             |
+| Collapse            | `SidebarCollapseButton`  | Circular purple button                             |
+| Worklist            | `WorklistButton`         | Orange pill + optional count badge                 |
+| Modules section     | `AssignedModules`        | Active card + 2×2 inactive grid + overflow popover |
+| Module cards        | `ActiveModuleCard` / `InactiveModuleCard` | Gradients + icons per module        |
+| Menu                | `SidebarMenu`            | Top-level pill rows                                |
+| Submenus            | (internal) `SubmenuCard` | Right-side floating cards, cascading               |
+
+---
+
+## Quickstart
+
+```tsx
+import { Sidebar } from "@ifmis/ui";
+import type { MenuNode, ModuleId } from "@ifmis/ui";
+import { useState } from "react";
+
+const MENU: MenuNode[] = [
+  { id: "dashboard", label: "Dashboard" },
+  {
+    id: "hrms",
+    label: "HRMS",
+    children: [
+      { id: "hrms.exit", label: "Exit Management" },
+      { id: "hrms.leave", label: "Leave Management" },
+    ],
+  },
+];
+
+const ASSIGNED: ModuleId[] = ["hrms", "e-accounts", "deposit"];
+
+function AppShell() {
+  const [activeModule, setActiveModule] = useState<ModuleId>("hrms");
+  const [activeMenu, setActiveMenu]     = useState("dashboard");
+  const [search, setSearch]             = useState("");
+
+  return (
+    <Sidebar
+      search={{ value: search, onChange: setSearch }}
+      worklist={{ count: 12, onClick: openWorklist }}
+      modules={{
+        assigned: ASSIGNED,
+        activeId: activeModule,
+        onChange: setActiveModule,
+      }}
+      menu={{
+        items: MENU,
+        activeId: activeMenu,
+        onSelect: setActiveMenu,
+      }}
+    />
+  );
+}
+```
+
+That's the full integration. Three pieces of state, three slots.
+
+---
+
+## Wiring patterns
+
+### 1. Bind selection to your router
+
+`onSelect` is a leaf-id callback — point it at your router and you're done.
+
+```tsx
+import { useNavigate, useLocation } from "react-router-dom";
+
+const navigate = useNavigate();
+const { pathname } = useLocation();
+
+<Sidebar
+  menu={{
+    items: MENU,
+    activeId: pathname,            // use the path as the menu id
+    onSelect: (id) => navigate(id),
+  }}
+/>
+```
+
+Tip: set each `MenuNode.id` to the **route path** (`"/hrms/exit-management"`)
+and the active highlight tracks the URL for free.
+
+### 2. Switch the menu when the active module changes
+
+Each module gets its own menu tree. Keep them in a record and look up the
+tree at render time:
+
+```ts
+import type { ModuleId, MenuNode } from "@ifmis/ui";
+
+const HRMS_MENU: MenuNode[]       = [/* ... */];
+const E_ACCOUNTS_MENU: MenuNode[] = [/* ... */];
+const BUDGET_MENU: MenuNode[]     = [/* ... */];
+
+export const MENUS: Partial<Record<ModuleId, MenuNode[]>> = {
+  hrms:         HRMS_MENU,
+  "e-accounts": E_ACCOUNTS_MENU,
+  budget:       BUDGET_MENU,
+  /* ... */
+};
+```
+
+```tsx
+<Sidebar
+  modules={{ assigned, activeId: activeModule, onChange: setActiveModule }}
+  menu={{
+    items: MENUS[activeModule] ?? [],
+    activeId,
+    onSelect,
+  }}
+/>
+```
+
+This is the recommended layout for products that host several modules
+under one shell.
+
+### 3. Server-driven module assignment
+
+`assigned: ModuleId[]` is just an array — fetch the list at sign-in and
+hand it to the Sidebar. The 2×2 grid + overflow popover handle any length
+gracefully (0, 4, 10, anything).
+
+```tsx
+const { data: user } = useCurrentUser();
+
+<Sidebar
+  modules={{
+    assigned: user.assignedModules,   // ModuleId[]
+    activeId: user.lastActiveModule,
+    onChange: persistActiveModule,
+  }}
+/>
+```
+
+### 4. Collapsing the rail
+
+`Sidebar` is collapsible. By default it owns the state — click the circle
+to toggle. To control it externally (e.g. persist across reloads), pass
+both `collapsed` and `onCollapseToggle`:
+
+```tsx
+const [collapsed, setCollapsed] = useLocalStorageState("sidebar.collapsed", false);
+
+<Sidebar
+  collapsed={collapsed}
+  onCollapseToggle={() => setCollapsed((v) => !v)}
+  /* ...rest */
+/>
+```
+
+---
+
+## The module catalogue
+
+`MODULES` and `MODULE_LIST` are the canonical source of truth for the ten
+IFMIS modules (icon + gradient + label). Read from it directly when you
+need the metadata outside the Sidebar — e.g. for breadcrumbs, page
+headers, or a module picker on the landing screen.
+
+```ts
+import { MODULES, MODULE_LIST } from "@ifmis/ui";
+import type { ModuleId } from "@ifmis/ui";
+
+const { Icon, label, gradient } = MODULES["hrms"];
+
+// Or iterate them all:
+MODULE_LIST.map((m) => <li key={m.id}>{m.label}</li>);
+```
+
+> **Do not** redefine module gradients or icons in product code. If the
+> brand changes, this catalogue is the only place to update.
+
+---
+
+## Menu authoring guide
+
+### Shape
+
+```ts
+interface MenuNode {
+  id: string;                  // stable, used by activeId + onSelect
+  label: string;
+  badge?: string | number;     // optional counter shown on the right
+  children?: MenuNode[];       // presence ⇒ row opens a right-side card
+}
+```
+
+### Depth
+
+Children can be nested **without depth limits**. Top-level rows live
+inside the rail; everything else opens as a right-side card. Cards
+cascade: a row inside a card that itself has children opens *another*
+card to its right.
+
+```ts
+{ id: "hrms", label: "HRMS", children: [
+  { id: "hrms.pay", label: "Pay Related", children: [
+    { id: "hrms.pay.salary", label: "Salary" },
+    { id: "hrms.pay.bonus",  label: "Bonus"  },
+  ]},
+]}
+```
+
+### Active state
+
+The top-level row is highlighted when its `id` matches `activeId` **or**
+its submenu card is currently open. Deep leaves highlight inside their
+card when their `id` matches `activeId`.
+
+You typically set `activeId` to the **leaf** the user navigated to —
+nothing else needs to be tracked.
+
+### Badges
+
+Pass a `string` or `number` to `MenuNode.badge` for a counter. The
+component picks the right colour for active vs. inactive automatically.
+
+---
+
+## Accessibility
+
+- The Sidebar is wrapped in `<aside aria-label="Primary navigation">`.
+- Submenu rows declare `role="menuitem"` and the cards declare
+  `role="menu"`.
+- Submenu triggers expose `aria-expanded` and `aria-haspopup="menu"`.
+- All interactive elements are reachable via Tab and operable via
+  Enter / Space.
+- `Escape` closes the currently open submenu card.
+- The active leaf carries `aria-current="page"`.
+
+---
+
+## What lives where
+
+| File                                      | Owns                                              |
+| ----------------------------------------- | ------------------------------------------------- |
+| `Sidebar.tsx`                             | Frame, SidebarSearch, CollapseButton, Worklist    |
+| `parts/AssignedModules.tsx`               | Active card, inactive grid, overflow popover      |
+| `parts/SidebarMenu.tsx`                   | Top-level pill rows + cascading submenu cards     |
+| `modules.ts`                              | The ten-module catalogue (icon + gradient)        |
+
+---
+
+## When **not** to use Sidebar
+
+- For a single-module product with no sub-navigation, render your own
+  top tabs instead — the rail will feel disproportionate.
+- For a dashboard with no concept of "modules", use just `<SidebarMenu/>`
+  on its own without the `modules` slot.
+
+---
+
+See the `Default` story for a fully working integration with realistic
+data, then strip back to only the slots you need.

@@ -189,7 +189,7 @@ const ProfileDropdown = forwardRef<HTMLDivElement, ProfileDropdownProps>(
         aria-label={labels.trigger}
         className={cn(
           "z-[1000]",
-          "flex w-[400px] flex-col items-start gap-4 p-3",
+          "flex w-[calc(100vw-1rem)] max-w-[400px] flex-col items-start gap-4 p-3",
           "rounded-3xl border border-surface-border-purple",
           "backdrop-blur-[6px] shadow-[0_8px_24px_-8px_rgba(36,4,61,0.35)]",
         )}
@@ -421,15 +421,15 @@ export const ProfileMenu = forwardRef<HTMLDivElement, ProfileMenuProps>(
           aria-expanded={open}
           aria-controls={open ? dropdownId : undefined}
           onClick={() => setOpen(!open)}
-          className="h-[50px] gap-3 px-3"
+          className="h-[50px] gap-2 sm:gap-3 px-2 sm:px-3"
         >
           <Avatar user={user} size={32} variant="glass" />
-          <div className="flex min-w-0 flex-col items-start">
-            <span className="font-sans font-semibold text-[14px] leading-none text-white truncate max-w-[160px]">
+          <div className="hidden sm:flex min-w-0 flex-col items-start">
+            <span className="font-sans font-semibold text-[14px] leading-none text-white truncate max-w-[120px] lg:max-w-[160px]">
               {user.name}
             </span>
             {user.designation ? (
-              <span className="font-sans text-[12px] leading-none text-neutral-100 truncate max-w-[160px] mt-1">
+              <span className="hidden lg:block font-sans text-[12px] leading-none text-neutral-100 truncate max-w-[160px] mt-1">
                 {user.designation}
               </span>
             ) : null}
@@ -438,7 +438,7 @@ export const ProfileMenu = forwardRef<HTMLDivElement, ProfileMenuProps>(
             size={16}
             weight="bold"
             aria-hidden
-            className={cn("transition-transform", open && "rotate-180")}
+            className={cn("hidden sm:block transition-transform", open && "rotate-180")}
           />
         </GlassButton>
 

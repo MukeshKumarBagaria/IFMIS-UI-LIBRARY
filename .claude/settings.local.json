@@ -9,7 +9,12 @@
       "Bash(curl -s -o /tmp/profile-dropdown.png \"https://www.figma.com/api/mcp/asset/7f2ea803-92ed-4b04-b9d3-eb0fd086580d\")",
       "Read(//tmp/**)",
       "Bash(lsof -ti:6006)",
-      "Bash(xargs kill -9)"
+      "Bash(xargs kill -9)",
+      "Bash(node -e \"const p=require\\('@phosphor-icons/react'\\); ['ShieldCheck','UserList','UserCircle','HandArrowDown','HandDeposit','Coins','Dresser','Receipt','Storefront','UserSound','MagnifyingGlass','CaretRight','CaretDown','CaretLeft','SidebarSimple','List','ListMagnifyingGlass','Briefcase'].forEach\\(n=>console.log\\(n, !!p[n]\\)\\)\")",
+      "Bash(npx tsc *)",
+      "mcp__plugin_marketing_figma__get_screenshot",
+      "Bash(curl -s -o assigned.png \"https://www.figma.com/api/mcp/asset/9ea56090-6eea-4114-8c1a-fcbc73acccef\")",
+      "Bash(curl -s -o inactive.png \"https://www.figma.com/api/mcp/asset/d29bd7bc-9fd1-45ae-b0a0-6729175f8517\")"
     ]
   }
 }

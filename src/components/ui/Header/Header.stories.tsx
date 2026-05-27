@@ -12,7 +12,7 @@ import {
   RoleBadge,
 } from ".";
 import type { FontSizeStep, ProfileUser } from ".";
-import headerBg from "../../../../.storybook/assets/header-bg.png";
+import headerBg from "./assets/header-bg.webp";
 
 const meta: Meta<typeof Header> = {
   title: "UI/Header",

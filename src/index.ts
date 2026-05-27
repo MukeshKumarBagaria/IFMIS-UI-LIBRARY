@@ -40,6 +40,32 @@ export type {
   GlassButtonProps,
 } from "./components/ui/Header";
 
+export {
+  Sidebar,
+  SidebarSearch,
+  SidebarCollapseButton,
+  WorklistButton,
+  AssignedModules,
+  ActiveModuleCard,
+  InactiveModuleCard,
+  SidebarMenu,
+  searchMenuTree,
+  MODULES,
+  MODULE_LIST,
+} from "./components/ui/Sidebar";
+export type {
+  SidebarProps,
+  SidebarSearchProps,
+  SidebarCollapseButtonProps,
+  WorklistButtonProps,
+  AssignedModulesProps,
+  SidebarMenuProps,
+  MenuNode,
+  MenuSearchResult,
+  ModuleId,
+  ModuleDef,
+} from "./components/ui/Sidebar";
+
 export { ThemeProvider, useTheme } from "./providers/ThemeProvider";
 export type { ThemeProviderProps } from "./providers/ThemeProvider";
 

@@ -61,7 +61,7 @@ export const FontSizeControl = forwardRef<HTMLDivElement, FontSizeControlProps>(
         ref={ref}
         role="radiogroup"
         aria-label={resolved.group}
-        className={cn("flex items-center gap-4 self-stretch", className)}
+        className={cn("hidden lg:flex items-center gap-4 self-stretch", className)}
       >
         {ORDER.map((step) => {
           const selected = step === value;
