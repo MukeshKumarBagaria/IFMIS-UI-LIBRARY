@@ -6,6 +6,40 @@ export type { ButtonProps } from "./components/ui/Button";
 export { Heading, headingVariants, Text, textVariants } from "./components/ui/Typography";
 export type { HeadingProps, TextProps } from "./components/ui/Typography";
 
+export { Upload } from "./components/ui/Upload";
+export type { UploadProps, UploadState, UploadFile } from "./components/ui/Upload";
+
+export {
+  FormButton,
+  formButtonVariants,
+  ForwardButton,
+  SubmitButton,
+  ApproveButton,
+  SaveButton,
+  ReturnButton,
+  ResetButton,
+  RejectButton,
+} from "./components/ui/FormButton";
+export type {
+  FormButtonProps,
+  FormButtonTone,
+  PresetButtonProps,
+  PresetButton,
+} from "./components/ui/FormButton";
+
+export { CtaTray } from "./components/ui/CtaTray";
+export type {
+  CtaTrayProps,
+  CtaTrayTone,
+  CtaTrayAlign,
+} from "./components/ui/CtaTray";
+
+export { Breadcrumb } from "./components/ui/Breadcrumb";
+export type {
+  BreadcrumbProps,
+  BreadcrumbItem,
+} from "./components/ui/Breadcrumb";
+
 export {
   Banner,
   BannerTitle,

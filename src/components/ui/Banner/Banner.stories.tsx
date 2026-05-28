@@ -10,10 +10,39 @@ const meta: Meta<typeof Banner> = {
   parameters: {
     docs: {
       description: {
-        component:
-          "Inline notification banner with `danger`, `success`, and `info` variants. " +
-          "Use for persistent, in-flow status messages tied to a page section. " +
-          "For transient floating feedback, prefer a toast.",
+        component: [
+          "Inline notification surface with `danger`, `success`, and `info`",
+          "variants. Use for **persistent, in-flow** status tied to a page",
+          "section; for transient floating feedback, prefer a toast.",
+          "",
+          "### How to use it",
+          "Works in plain JavaScript / JSX — no TypeScript needed.",
+          "",
+          "```jsx",
+          'import { Banner, BannerTitle, BannerDescription } from "@ifmis/ui";',
+          "",
+          "// Single line",
+          '<Banner variant="danger">Unable to save your changes.</Banner>',
+          "",
+          "// Title + description",
+          '<Banner variant="success">',
+          "  <BannerTitle>Payment recorded</BannerTitle>",
+          "  <BannerDescription>Receipt #PAY-0042 sent.</BannerDescription>",
+          "</Banner>",
+          "",
+          "// Dismissible — the close button appears only when onDismiss is set",
+          '<Banner variant="info" onDismiss={() => setShown(false)}>',
+          "  New approval workflow is live.",
+          "</Banner>",
+          "```",
+          "",
+          "### Notes",
+          "- `icon`: omit for the variant default, pass `null` to hide, or pass",
+          "  any node to override.",
+          "- Accessibility is automatic: `danger` → `role=\"alert\"`, others →",
+          "  `role=\"status\"`. Override via `role` if needed.",
+          "- Full width by default — constrain with `className=\"max-w-md\"`.",
+        ].join("\n"),
       },
     },
   },
@@ -21,9 +50,22 @@ const meta: Meta<typeof Banner> = {
     variant: {
       control: "select",
       options: ["danger", "success", "info"],
+      description: "Semantic colour + default icon + ARIA role.",
+      table: { defaultValue: { summary: "info" } },
     },
-    children: { control: "text" },
-    dismissLabel: { control: "text" },
+    children: { control: "text", description: "Message body (string or sub-parts)." },
+    icon: {
+      control: false,
+      description: "Leading icon. Omit = default, `null` = none, node = custom.",
+    },
+    onDismiss: {
+      action: "dismiss",
+      description: "When set, renders a trailing close button.",
+    },
+    dismissLabel: {
+      control: "text",
+      description: "Accessible label for the dismiss button (default 'Dismiss').",
+    },
   },
   args: {
     variant: "info",

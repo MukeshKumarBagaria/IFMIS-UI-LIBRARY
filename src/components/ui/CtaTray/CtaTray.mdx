@@ -1,0 +1,173 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as CtaTrayStories from "./CtaTray.stories";
+
+<Meta of={CtaTrayStories} title="UI/CtaTray/Guide" />
+
+# CTA Tray
+
+The action bar that sits at the **bottom of a form** (the "CTA Tray"). A white
+rounded card wraps a rounded **pill** of action buttons. The pill's background
+tints to match the **last button the user clicked** — so the bar gives a
+gentle visual echo of the action in progress.
+
+> All examples are plain JavaScript / JSX — your modules don't need
+> TypeScript. Drop the buttons in; the tray does the rest.
+
+---
+
+## Anatomy
+
+```
+┌──────────────────────────────────────────────── card (white, r-24, shadow) ┐
+│                              ┌──────────────────── pill (r-20, tinted) ──┐  │
+│                              │ Reset  Reject  Return  Save  Forward →     │  │
+│                              └────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+- **Card** — `width:100%`, `padding:20px`, `border-radius:24px`, white,
+  `box-shadow: 0 0 50px rgba(0,0,0,.10)`, content right-aligned by default.
+- **Pill** — `padding:8px 12px`, `gap:24px`, `border-radius:20px`. Its
+  background is driven by the active tone.
+
+---
+
+## Quickstart
+
+Put `FormButton` presets inside, in the order you want. The tray intercepts
+each click to recolour the pill **and** still calls your `onClick`.
+
+```jsx
+import {
+  CtaTray, ResetButton, RejectButton,
+  ReturnButton, SaveButton, ForwardButton,
+} from "@ifmis/ui";
+
+function FormFooter({ onReject, onReturn, onSave, onNext }) {
+  return (
+    <CtaTray>
+      <ResetButton type="reset" />
+      <RejectButton onClick={onReject} />
+      <ReturnButton onClick={onReturn} />
+      <SaveButton onClick={onSave} />
+      <ForwardButton onClick={onNext} />
+    </CtaTray>
+  );
+}
+```
+
+<Canvas of={CtaTrayStories.Default} />
+
+---
+
+## Highlight states
+
+The pill background maps to the clicked button's tone:
+
+| Clicked    | Tone      | Pill background      |
+| ---------- | --------- | -------------------- |
+| Reset      | `neutral` | `#F7F7F7` (grey)     |
+| Forward    | `primary` | `#F4E9FB` (purple)   |
+| Save       | `success` | `#E8FCF2` (green-50) |
+| Return     | `warning` | `#FCF0E8` (orange-50)|
+| Reject     | `danger`  | `#FCE8E8` (red-50)   |
+
+<Canvas of={CtaTrayStories.HighlightStates} />
+
+---
+
+## Customise
+
+### Alignment
+
+`align` controls where the pill sits in the card: `end` (default), `start`,
+`center`, or `between`.
+
+```jsx
+<CtaTray align="between">
+  <ResetButton type="reset" />
+  <ForwardButton onClick={next} />
+</CtaTray>
+```
+
+<Canvas of={CtaTrayStories.Variations} />
+
+### Any subset / order / custom buttons
+
+Render only the buttons you need, reorder freely, or add your own — the tray
+detects each button's tone automatically. A bare `FormButton` works too:
+
+```jsx
+import { CtaTray, FormButton, SaveButton } from "@ifmis/ui";
+import { Printer } from "@phosphor-icons/react";
+
+<CtaTray>
+  <FormButton tone="neutral" leftIcon={<Printer />} onClick={print}>
+    Print
+  </FormButton>
+  <SaveButton onClick={save} />
+</CtaTray>
+```
+
+### Controlled highlight
+
+Drive the tint yourself (e.g. to reflect server state) with `tone` +
+`onToneChange`:
+
+```jsx
+const [tone, setTone] = useState("neutral");
+
+<CtaTray tone={tone} onToneChange={setTone}>
+  ...buttons
+</CtaTray>
+```
+
+### Turn the highlight off
+
+```jsx
+<CtaTray highlight={false}>...buttons</CtaTray>
+```
+
+<Canvas of={CtaTrayStories.NoHighlight} />
+
+### Sticky footer
+
+The tray is a normal block — make it stick with your own layout classes:
+
+```jsx
+<div className="sticky bottom-0">
+  <CtaTray>...buttons</CtaTray>
+</div>
+```
+
+---
+
+## Props
+
+| Prop           | Type                                                | Default         | Notes                                            |
+| -------------- | --------------------------------------------------- | --------------- | ------------------------------------------------ |
+| `children`     | node                                                | —               | The action buttons, in order.                    |
+| `tone`         | `neutral \| primary \| success \| warning \| danger`| —               | Controlled pill tint. Omit for auto-tracking.    |
+| `defaultTone`  | tone                                                | `neutral`       | Initial tint when uncontrolled.                  |
+| `onToneChange` | `(tone) => void`                                    | —               | Fires on each button click with its tone.        |
+| `highlight`    | boolean                                             | `true`          | `false` keeps the pill grey.                     |
+| `align`        | `start \| center \| end \| between`                 | `end`           | Pill placement in the card.                      |
+| `ariaLabel`    | string                                              | `"Form actions"`| Accessible label for the button group.           |
+| `className`    | string                                              | —               | Merged onto the outer card.                      |
+
+---
+
+## Notes & Do/Don't
+
+- The auto-highlight works because each preset (`SaveButton`, …) carries a
+  static `tone`. A bare `FormButton` is detected via its `tone` prop.
+- Non-button children pass through untouched (the tray only wraps elements
+  that expose a tone), so a custom `<FormButton tone>` is fine, a random
+  `<div>` is ignored.
+
+✅ Use the presets so the tints map correctly.
+✅ Set `type="submit"` / `type="reset"` so buttons work inside a `<form>`.
+✅ Push the primary action (Forward/Submit) to the far right.
+
+❌ Don't rebuild the card/pill with raw Tailwind — compose `CtaTray`.
+❌ Don't manage the tint manually unless you need controlled mode.

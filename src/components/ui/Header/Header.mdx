@@ -37,7 +37,11 @@ Inside `ProfileMenu` you'll find `RoleBadge` (colour-coded role tags) and the Se
 
 ## Quickstart
 
-```tsx
+> All examples are plain JavaScript / JSX — your modules don't need
+> TypeScript. Import the components and wire plain props.
+
+```jsx
+import { useState } from "react";
 import {
   Header, HeaderActions, HeaderBrand,
   AccessibilityMenu, LanguageToggle, FontSizeControl,
@@ -46,7 +50,7 @@ import {
 
 function AppHeader() {
   const [lang, setLang] = useState("en");
-  const [fontSize, setFontSize] = useState<"sm" | "md" | "lg">("md");
+  const [fontSize, setFontSize] = useState("md");
 
   return (
     <Header
@@ -79,7 +83,7 @@ The header **never owns translation**. Every visible string is a prop. This keep
 
 The pattern:
 
-```tsx
+```jsx
 const t = useTranslation();
 
 <Header
@@ -153,7 +157,7 @@ The bundled IFMIS logo lives at `src/components/ui/Header/assets/logo.png` and i
 
 Trigger only — the host owns the popover. Pass `open` and `onClick` to wire your popover library of choice.
 
-```tsx
+```jsx
 <AccessibilityMenu
   label={t("header.accessibility")}
   open={open}
@@ -167,7 +171,7 @@ Trigger only — the host owns the popover. Pass `open` and `onClick` to wire yo
 
 Fully controlled. The selected pill flips to white with the Figma "Dept shadow". Options default to English + Hindi; pass `options` to extend.
 
-```tsx
+```jsx
 <LanguageToggle
   value={lang}
   onChange={setLang}
@@ -187,9 +191,9 @@ Fully controlled. The selected pill flips to white with the Figma "Dept shadow".
 
 Three steps — `sm` / `md` / `lg`. The component **does not apply** the size globally; it only reports the choice. The host wires it however the product needs:
 
-```tsx
+```jsx
 function App() {
-  const [size, setSize] = useState<"sm" | "md" | "lg">("md");
+  const [size, setSize] = useState("md");
 
   // Example wiring — adjust the root font scale.
   useEffect(() => {
@@ -209,7 +213,7 @@ function App() {
 
 Bell glyph + red badge. The badge auto-hides at `count === 0` and caps at `max` (default `99` → renders `99+`).
 
-```tsx
+```jsx
 <NotificationButton count={unread} max={99} onClick={openInbox} />;
 ```
 
@@ -221,7 +225,7 @@ Bell glyph + red badge. The badge auto-hides at `count === 0` and caps at `max` 
 
 The most stateful part. Manages its own open/close + outside-click + Escape, but exposes `open` / `onOpenChange` for products that need controlled state (e.g. a global app sidebar that closes on navigation).
 
-```tsx
+```jsx
 <ProfileMenu
   user={{
     /* shown on the trigger pill */
@@ -268,7 +272,7 @@ The frame ships **gradient-only by default** — the 90° purple gradient `rgba(
 
 To add the official IFMIS background photo, host it in your app and pass its URL via `backgroundImage` — the gradient is always painted on top so the design stays consistent:
 
-```tsx
+```jsx
 // In your app:
 import headerBg from "@/assets/header-bg.png";
 
@@ -286,7 +290,7 @@ The official `header-orignal-bg-img.png` from the Figma export lives at the repo
 
 Need a custom action that matches the header look — say, a "Help" pill? Use the same primitives the built-in parts use:
 
-```tsx
+```jsx
 import { GlassButton } from "@ifmis/ui";
 import { Question } from "@phosphor-icons/react";
 
@@ -304,7 +308,7 @@ import { Question } from "@phosphor-icons/react";
 
 `LanguageToggle` accepts any number of options — no library change needed:
 
-```tsx
+```jsx
 <LanguageToggle
   value={lang}
   onChange={setLang}

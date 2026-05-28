@@ -54,12 +54,14 @@ presentational — every selection is driven by props you own.
 
 ## Quickstart
 
-```tsx
-import { Sidebar } from "@ifmis/ui";
-import type { MenuNode, ModuleId } from "@ifmis/ui";
-import { useState } from "react";
+> Written in plain JavaScript / JSX — your modules don't need TypeScript.
+> Import the `Sidebar` component and pass plain objects and arrays.
 
-const MENU: MenuNode[] = [
+```jsx
+import { useState } from "react";
+import { Sidebar } from "@ifmis/ui";
+
+const MENU = [
   { id: "dashboard", label: "Dashboard" },
   {
     id: "hrms",
@@ -71,10 +73,10 @@ const MENU: MenuNode[] = [
   },
 ];
 
-const ASSIGNED: ModuleId[] = ["hrms", "e-accounts", "deposit"];
+const ASSIGNED = ["hrms", "e-accounts", "deposit"];
 
 function AppShell() {
-  const [activeModule, setActiveModule] = useState<ModuleId>("hrms");
+  const [activeModule, setActiveModule] = useState("hrms");
   const [activeMenu, setActiveMenu]     = useState("dashboard");
   const [search, setSearch]             = useState("");
 
@@ -107,7 +109,7 @@ That's the full integration. Three pieces of state, three slots.
 
 `onSelect` is a leaf-id callback — point it at your router and you're done.
 
-```tsx
+```jsx
 import { useNavigate, useLocation } from "react-router-dom";
 
 const navigate = useNavigate();
@@ -130,14 +132,13 @@ and the active highlight tracks the URL for free.
 Each module gets its own menu tree. Keep them in a record and look up the
 tree at render time:
 
-```ts
-import type { ModuleId, MenuNode } from "@ifmis/ui";
+```js
+const HRMS_MENU       = [/* ... */];
+const E_ACCOUNTS_MENU = [/* ... */];
+const BUDGET_MENU     = [/* ... */];
 
-const HRMS_MENU: MenuNode[]       = [/* ... */];
-const E_ACCOUNTS_MENU: MenuNode[] = [/* ... */];
-const BUDGET_MENU: MenuNode[]     = [/* ... */];
-
-export const MENUS: Partial<Record<ModuleId, MenuNode[]>> = {
+// A plain object keyed by module id.
+export const MENUS = {
   hrms:         HRMS_MENU,
   "e-accounts": E_ACCOUNTS_MENU,
   budget:       BUDGET_MENU,
@@ -145,7 +146,7 @@ export const MENUS: Partial<Record<ModuleId, MenuNode[]>> = {
 };
 ```
 
-```tsx
+```jsx
 <Sidebar
   modules={{ assigned, activeId: activeModule, onChange: setActiveModule }}
   menu={{
@@ -161,16 +162,16 @@ under one shell.
 
 ### 3. Server-driven module assignment
 
-`assigned: ModuleId[]` is just an array — fetch the list at sign-in and
-hand it to the Sidebar. The 2×2 grid + overflow popover handle any length
-gracefully (0, 4, 10, anything).
+`assigned` is just an array of module-id strings — fetch the list at
+sign-in and hand it to the Sidebar. The 2×2 grid + overflow popover handle
+any length gracefully (0, 4, 10, anything).
 
-```tsx
+```jsx
 const { data: user } = useCurrentUser();
 
 <Sidebar
   modules={{
-    assigned: user.assignedModules,   // ModuleId[]
+    assigned: user.assignedModules,   // e.g. ["hrms", "budget", ...]
     activeId: user.lastActiveModule,
     onChange: persistActiveModule,
   }}
@@ -183,7 +184,7 @@ const { data: user } = useCurrentUser();
 to toggle. To control it externally (e.g. persist across reloads), pass
 both `collapsed` and `onCollapseToggle`:
 
-```tsx
+```jsx
 const [collapsed, setCollapsed] = useLocalStorageState("sidebar.collapsed", false);
 
 <Sidebar
@@ -197,14 +198,13 @@ const [collapsed, setCollapsed] = useLocalStorageState("sidebar.collapsed", fals
 
 ## The module catalogue
 
-`MODULES` and `MODULE_LIST` are the canonical source of truth for the ten
-IFMIS modules (icon + gradient + label). Read from it directly when you
+`MODULES` and `MODULE_LIST` are the canonical source of truth for the
+IFMIS modules (icon + gradient + label). Read from them directly when you
 need the metadata outside the Sidebar — e.g. for breadcrumbs, page
 headers, or a module picker on the landing screen.
 
-```ts
+```jsx
 import { MODULES, MODULE_LIST } from "@ifmis/ui";
-import type { ModuleId } from "@ifmis/ui";
 
 const { Icon, label, gradient } = MODULES["hrms"];
 
@@ -221,12 +221,14 @@ MODULE_LIST.map((m) => <li key={m.id}>{m.label}</li>);
 
 ### Shape
 
-```ts
-interface MenuNode {
-  id: string;                  // stable, used by activeId + onSelect
-  label: string;
-  badge?: string | number;     // optional counter shown on the right
-  children?: MenuNode[];       // presence ⇒ row opens a right-side card
+Each menu item is a plain object — no class or type needed:
+
+```js
+{
+  id: "dashboard",        // required — stable, used by activeId + onSelect
+  label: "Dashboard",     // required — visible text
+  badge: 8,               // optional — counter (string or number)
+  children: [ /* nested items; presence ⇒ row opens a right-side card */ ],
 }
 ```
 
@@ -237,7 +239,7 @@ inside the rail; everything else opens as a right-side card. Cards
 cascade: a row inside a card that itself has children opens *another*
 card to its right.
 
-```ts
+```js
 { id: "hrms", label: "HRMS", children: [
   { id: "hrms.pay", label: "Pay Related", children: [
     { id: "hrms.pay.salary", label: "Salary" },

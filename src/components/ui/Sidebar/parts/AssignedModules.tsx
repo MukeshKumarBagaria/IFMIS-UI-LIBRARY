@@ -40,18 +40,18 @@ function ModuleIconBadge({
 }
 
 export function ActiveModuleCard({ module, onClick }: ModuleCardProps) {
-  const { Icon, label, gradient } = module;
+  const { Icon, label, gradient, textColor = "#4B3960" } = module;
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
         "flex w-[8.125rem] h-[5.75rem] p-4 flex-col justify-center items-center gap-1",
-        "rounded-xl text-[#4B3960] shadow-sm",
+        "rounded-xl shadow-sm",
         "transition-transform hover:scale-[1.02] focus:outline-none",
         "focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2",
       )}
-      style={{ background: gradient }}
+      style={{ background: gradient, color: textColor }}
       aria-pressed="true"
       aria-label={`${label} (active module)`}
     >
@@ -66,18 +66,18 @@ export function ActiveModuleCard({ module, onClick }: ModuleCardProps) {
 /* -------------------------------------------------------------------------- */
 
 export function InactiveModuleCard({ module, onClick }: ModuleCardProps) {
-  const { Icon, label, gradient } = module;
+  const { Icon, label, gradient, textColor = "#4B3960" } = module;
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
         "flex w-10 h-10 p-2 flex-col items-center justify-center shrink-0",
-        "rounded-xl text-[#4B3960]",
+        "rounded-xl",
         "transition-transform hover:scale-110 focus:outline-none",
         "focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2",
       )}
-      style={{ background: gradient }}
+      style={{ background: gradient, color: textColor }}
       title={label}
       aria-label={label}
     >
@@ -175,11 +175,11 @@ function OverflowPopover({
               }}
               className={cn(
                 "flex flex-col items-center justify-center gap-2 p-3 rounded-xl h-[5.75rem]",
-                "text-[#4B3960] transition-transform hover:scale-[1.02]",
+                "transition-transform hover:scale-[1.02]",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500",
                 isActive && "ring-2 ring-purple-700 ring-offset-2",
               )}
-              style={{ background: m.gradient }}
+              style={{ background: m.gradient, color: m.textColor ?? "#4B3960" }}
             >
               <ModuleIconBadge Icon={m.Icon} />
               <span className="text-sm font-semibold leading-none">

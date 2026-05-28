@@ -9,6 +9,13 @@ import {
   Receipt,
   Storefront,
   UserSound,
+  FileMagnifyingGlass,
+  ClipboardText,
+  Notebook,
+  ChartBar,
+  Wallet,
+  Package,
+  Video,
 } from "@phosphor-icons/react";
 import type { Icon } from "@phosphor-icons/react";
 
@@ -39,13 +46,25 @@ export type ModuleId =
   | "pension"
   | "receipt"
   | "vendor"
-  | "bsg";
+  | "bsg"
+  | "internal-audit"
+  | "lfa"
+  | "bookkeeping"
+  | "dig"
+  | "cash-management"
+  | "purchase-inventory"
+  | "lms-ats";
 
 export interface ModuleDef {
   id: ModuleId;
   label: string;
   Icon: Icon;
   gradient: string;
+  /**
+   * Label + icon colour for the card. Defaults to `#4B3960` (the legacy
+   * modules) when omitted; newer modules carry their own per-Figma tint.
+   */
+  textColor?: string;
 }
 
 /**
@@ -120,6 +139,55 @@ export const MODULES: Record<ModuleId, ModuleDef> = {
     label: "BSG",
     Icon: UserSound,
     gradient: "linear-gradient(90deg, #F4BEBE 0%, #B4A8F0 100%)",
+  },
+  "internal-audit": {
+    id: "internal-audit",
+    label: "Internal Audit",
+    Icon: FileMagnifyingGlass,
+    gradient: "linear-gradient(90deg, #D1F6FA 0%, #7DA7E8 100%)",
+    textColor: "#263B59",
+  },
+  lfa: {
+    id: "lfa",
+    label: "LFA",
+    Icon: ClipboardText,
+    gradient: "linear-gradient(90deg, #FAD1D1 0%, #E88F7D 100%)",
+    textColor: "#800000",
+  },
+  bookkeeping: {
+    id: "bookkeeping",
+    label: "Book Keeping",
+    Icon: Notebook,
+    gradient: "linear-gradient(90deg, #D1FADC 0%, #7DBBE8 100%)",
+    textColor: "#0C4A74",
+  },
+  dig: {
+    id: "dig",
+    label: "DIG",
+    Icon: ChartBar,
+    gradient: "linear-gradient(90deg, #F2D1FA 0%, #7DC9E8 100%)",
+    textColor: "#13536C",
+  },
+  "cash-management": {
+    id: "cash-management",
+    label: "Cash Management",
+    Icon: Wallet,
+    gradient: "linear-gradient(90deg, #E4FAD1 0%, #E8D67D 100%)",
+    textColor: "#6C5E13",
+  },
+  "purchase-inventory": {
+    id: "purchase-inventory",
+    label: "Purchase & Inventory",
+    Icon: Package,
+    gradient: "linear-gradient(90deg, #FAF3D1 0%, #E87D7D 100%)",
+    textColor: "#6C1513",
+  },
+  "lms-ats": {
+    id: "lms-ats",
+    label: "LMS | ATS",
+    Icon: Video,
+    gradient: "linear-gradient(90deg, #FAD1EC 0%, #E87DB2 100%)",
+    textColor: "#6C1340",
   },
 };
 

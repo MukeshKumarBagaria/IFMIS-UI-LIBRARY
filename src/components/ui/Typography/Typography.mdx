@@ -9,6 +9,8 @@ The IFMIS typography system is the single source of visual truth for all text in
 
 > **Rule of thumb:** never set `font-size`, `font-weight`, `line-height`, or `color` on text manually. Always use `<Heading>` or `<Text>`. If you find yourself wanting a size that doesn't exist, talk to the design team — don't invent one.
 
+> All examples below are plain JavaScript / JSX — no TypeScript required.
+
 ---
 
 ## Font family
@@ -39,7 +41,7 @@ To self-host the font, drop the woff2 files in your app's `public/fonts/` and ad
 
 Six levels. SemiBold (600). Line-height `100%` (no extra leading — headings sit tight).
 
-```tsx
+```jsx
 import { Heading } from "@ifmis/ui";
 
 <Heading level={1}>Dashboard</Heading>
@@ -51,7 +53,7 @@ import { Heading } from "@ifmis/ui";
 
 Sometimes you need an `<h2>` that looks like an H4 (e.g. inside an accordion). Use `as`:
 
-```tsx
+```jsx
 <Heading level={4} as="h2">Section title</Heading>
 ```
 
@@ -67,7 +69,7 @@ The DOM gets `<h2>` (correct for screen readers and SEO), the styling gets H4.
 
 Body text has **3 axes** you can vary: `size`, `weight`, `color`. Everything else (font family, line height, letter spacing) is locked.
 
-```tsx
+```jsx
 <Text>Default — size sm, weight regular, color primary</Text>
 <Text size="md" weight="medium">Larger label</Text>
 <Text size="xs" color="secondary">Helper text under a field</Text>
@@ -111,7 +113,7 @@ Body text has **3 axes** you can vary: `size`, `weight`, `color`. Everything els
 
 Both components accept `as` to control the rendered tag without changing visuals.
 
-```tsx
+```jsx
 <Text as="span">inline</Text>
 <Text as="label" htmlFor="email">Email address</Text>
 <Heading level={3} as="h1">Looks H3, is semantically H1</Heading>

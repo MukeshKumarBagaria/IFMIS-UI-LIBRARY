@@ -1,0 +1,164 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as FormButtonStories from "./FormButton.stories";
+
+<Meta of={FormButtonStories} title="UI/FormButton/Guide" />
+
+# Form Buttons
+
+The call-to-action buttons that sit in the **action bar** at the bottom of a
+form (or the top of a record). Seven presets cover the standard government
+workflow verbs, all built on one `FormButton` base so colour, size, and
+behaviour stay consistent.
+
+> All examples are plain JavaScript / JSX — your modules don't need
+> TypeScript. Import the buttons and wire plain props.
+
+---
+
+## The seven presets
+
+| Component        | Tone      | Icon            | Default label | Use for                          |
+| ---------------- | --------- | --------------- | ------------- | -------------------------------- |
+| `ForwardButton`  | primary   | CaretRight (→)  | Forward       | Advance a multi-step flow        |
+| `SubmitButton`   | primary   | CheckCircle (←) | Submit        | Submit the form                  |
+| `ApproveButton`  | primary   | CheckCircle (←) | Approve       | Approve a record                 |
+| `SaveButton`     | success   | FloppyDiskBack  | Save          | Save a draft / changes           |
+| `ReturnButton`   | warning   | KeyReturn       | Return        | Send back / go to previous       |
+| `ResetButton`    | neutral   | — (none)        | Reset         | Clear the form                   |
+| `RejectButton`   | danger    | XCircle (←)     | Reject        | Reject a record                  |
+
+<Canvas of={FormButtonStories.AllButtons} />
+
+---
+
+## Quickstart
+
+Use a preset and wire `onClick` (or a native `type`). That's it.
+
+```jsx
+import {
+  SubmitButton, SaveButton, ResetButton, RejectButton,
+} from "@ifmis/ui";
+
+function ActionBar({ onSave, onReject }) {
+  return (
+    <div className="flex items-center justify-end gap-3">
+      <ResetButton type="reset" />
+      <SaveButton onClick={onSave} />
+      <RejectButton onClick={onReject} />
+      <SubmitButton type="submit" />
+    </div>
+  );
+}
+```
+
+<Canvas of={FormButtonStories.ActionBar} />
+
+---
+
+## Everything is overridable
+
+The presets only set sensible defaults — every prop is still yours.
+
+### Change the label
+
+```jsx
+<ForwardButton>Next step</ForwardButton>
+<SubmitButton>Send for approval</SubmitButton>
+<ResetButton>Clear all</ResetButton>
+```
+
+### Swap or add an icon
+
+Pass any node to `leftIcon` / `rightIcon`. It's auto-sized to 20px.
+
+```jsx
+import { PaperPlaneTilt } from "@phosphor-icons/react";
+
+<SubmitButton leftIcon={<PaperPlaneTilt />}>Send</SubmitButton>
+```
+
+### Loading & disabled
+
+`loading` shows a spinner and disables the button (great for async submit).
+
+```jsx
+<SubmitButton loading={isSaving}>Submitting…</SubmitButton>
+<RejectButton disabled />
+```
+
+<Canvas of={FormButtonStories.States} />
+
+### Resize / restyle
+
+Width is `150px` by default. Override with `className` (tailwind-merge keeps
+your class winning):
+
+```jsx
+<SubmitButton className="w-full" />
+```
+
+<Canvas of={FormButtonStories.Customised} />
+
+---
+
+## One-off actions — the `FormButton` base
+
+Need an action that isn't one of the seven (Print, Export, Duplicate…)?
+Use the base and pick a `tone`:
+
+```jsx
+import { FormButton } from "@ifmis/ui";
+import { Printer } from "@phosphor-icons/react";
+
+<FormButton tone="neutral" leftIcon={<Printer />} onClick={print}>
+  Print
+</FormButton>
+```
+
+### Tones
+
+| Tone      | Rest → Hover                    | Label      |
+| --------- | ------------------------------- | ---------- |
+| `primary` | Purple-600 → Purple-700         | white      |
+| `success` | Green-200 → Green-300           | Green-800  |
+| `warning` | Orange-200 → Orange-300         | Orange-800 |
+| `neutral` | white, grey border → darker grey | Grey-700   |
+| `danger`  | Red-200 → Red-300               | Red-800    |
+
+Hover, focus, and disabled are **native pseudo-class states** — you never
+pass them as props; the styling is handled for you.
+
+---
+
+## Props
+
+`FormButton` (and therefore every preset) spreads all native `<button>`
+attributes — `onClick`, `type`, `disabled`, `form`, `name`, `value`, `aria-*`,
+etc.
+
+| Prop        | Type                         | Default     | Notes                                  |
+| ----------- | ---------------------------- | ----------- | -------------------------------------- |
+| `tone`      | `primary \| success \| warning \| neutral \| danger` | `primary` | Base only — presets set this for you. |
+| `children`  | node                         | preset label | The button label.                     |
+| `leftIcon`  | node                         | preset icon | Icon before the label (auto-sized).   |
+| `rightIcon` | node                         | preset icon | Icon after the label.                  |
+| `loading`   | boolean                      | `false`     | Spinner + disabled.                    |
+| `disabled`  | boolean                      | `false`     | Standard disabled state.               |
+| `type`      | `button \| submit \| reset`  | `button`    | Defaults to `button` (safe in forms).  |
+| `className` | string                       | —           | Merged onto the base via `cn`.         |
+
+---
+
+## Do / Don't
+
+### Do
+✅ Use a preset whenever the action matches one of the seven verbs.
+✅ Set `type="submit"` / `type="reset"` so the button works inside a `<form>`.
+✅ Use `loading` for async submit/approve so users can't double-submit.
+✅ Group the bar with `flex gap-3` and push primary actions to the right.
+
+### Don't
+❌ Don't hand-roll a coloured button with raw Tailwind — use a `tone`.
+❌ Don't pass hover/pressed as props — they're automatic.
+❌ Don't hardcode the hex values; the tones already map to the brand tokens.
