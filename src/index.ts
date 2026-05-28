@@ -7,6 +7,19 @@ export { Heading, headingVariants, Text, textVariants } from "./components/ui/Ty
 export type { HeadingProps, TextProps } from "./components/ui/Typography";
 
 export {
+  Banner,
+  BannerTitle,
+  BannerDescription,
+  bannerVariants,
+} from "./components/ui/Banner";
+export type {
+  BannerProps,
+  BannerTitleProps,
+  BannerDescriptionProps,
+  BannerVariant,
+} from "./components/ui/Banner";
+
+export {
   Header,
   HeaderActions,
   HeaderBrand,
