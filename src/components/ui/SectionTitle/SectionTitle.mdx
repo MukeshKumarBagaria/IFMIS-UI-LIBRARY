@@ -1,0 +1,122 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as SectionTitleStories from "./SectionTitle.stories";
+
+<Meta of={SectionTitleStories} title="UI/SectionTitle/Guide" />
+
+# SectionTitle
+
+The labelled bar that heads a **section within a page** — one notch below
+[`PageTitle`](?path=/docs/ui-pagetitle-guide--docs). A neutral strip with a
+purple accent rail on the left, the section heading, and an optional action
+area on the right.
+
+It composes the shared `<Heading>` (visual size locked to 18px / Header-18), so
+typography and colour stay consistent everywhere it's used.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## Quickstart
+
+Only `title` is required.
+
+```jsx
+import { SectionTitle } from "@ifmis/ui";
+
+<SectionTitle title="Beneficiary details" />;
+```
+
+<Canvas of={SectionTitleStories.Plain} />
+
+The Figma default pairs the heading with a "more" overflow button — supply
+`onMore` to render it:
+
+```jsx
+<SectionTitle title="Sub Section Title" onMore={() => openMenu()} />
+```
+
+<Canvas of={SectionTitleStories.Default} />
+
+---
+
+## Actions
+
+`onMore` is a shortcut for the common overflow-menu case. For anything else,
+pass your own node to `action` — it takes precedence over `onMore`.
+
+```jsx
+import { Button } from "@ifmis/ui";
+import { Plus } from "@phosphor-icons/react";
+
+<SectionTitle
+  title="Attachments"
+  action={
+    <Button size="small" variant="tertiary" leftIcon={<Plus />}>
+      Add file
+    </Button>
+  }
+/>;
+```
+
+<Canvas of={SectionTitleStories.WithCustomAction} />
+
+---
+
+## Heading level
+
+The bar's look is fixed at 18px, but its **semantic** tag is up to you. A
+section sitting under a `PageTitle` (`<h1>`) is usually an `<h2>` (the default);
+nest deeper with `as="h3"` etc. so the document outline stays correct.
+
+```jsx
+<SectionTitle title="Deductions" as="h3" />
+```
+
+---
+
+## Long titles
+
+Titles wrap and grow the bar rather than overflowing.
+
+<Canvas of={SectionTitleStories.LongTitle} />
+
+---
+
+## Props
+
+| Prop        | Type           | Default          | Notes                                              |
+| ----------- | -------------- | ---------------- | -------------------------------------------------- |
+| `title`     | node           | —                | The section heading (18px / Header-18).            |
+| `as`        | element type   | `"h2"`           | Heading tag, decoupled from visual size.           |
+| `action`    | node           | —                | Right-aligned content; overrides `onMore`.         |
+| `onMore`    | `() => void`   | —                | Renders the default "more" button when set.        |
+| `moreLabel` | string         | `"More options"` | Accessible label for the default "more" button.    |
+| `className` | string         | —                | Merged onto the bar (layout/spacing overrides).    |
+
+Any other `<div>` attributes (`id`, `data-*`, `style`, `ref`…) are forwarded to
+the bar element.
+
+---
+
+## Tokens
+
+| Part        | Token                  | Value (purple theme) |
+| ----------- | ---------------------- | -------------------- |
+| Background  | `neutral-100`          | `#F1EDF5`            |
+| Accent rail | `purple-500` (4px left)| `#8B39C2`            |
+| Title       | `text-heading`         | `#4B3960`            |
+| More icon   | `body-secondary`       | `#595959`            |
+
+Padding `8px 12px`; radius `4px` top / `2px` bottom.
+
+---
+
+## Accessibility
+
+- The title is a real heading; set `as` so it lands at the right outline level.
+- The default "more" button is a native `<button>` with an `aria-label` and a
+  visible keyboard focus ring.
+
+✅ Use one `SectionTitle` per section, with a level that nests under the page's `<h1>`.
+❌ Don't use it as the page's main title — that's `PageTitle`.

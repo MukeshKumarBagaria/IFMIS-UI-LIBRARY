@@ -1,0 +1,85 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as BadgeStories from "./Badge.stories";
+
+<Meta of={BadgeStories} title="UI/Badge/Guide" />
+
+# Badge
+
+A small, pill-shaped **status indicator** — an icon plus a short label. Four
+semantic variants mapped to the IFMIS brand scales. Use it for list flags,
+counts, and section status (the `Accordion` header uses it for completion
+state).
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## Variants
+
+```jsx
+import { Badge } from "@ifmis/ui";
+
+<Badge variant="success">Complete</Badge>
+<Badge variant="danger">Danger</Badge>
+<Badge variant="pending">Pending</Badge>
+<Badge variant="info">Info</Badge>
+```
+
+<Canvas of={BadgeStories.AllVariants} />
+
+Each variant ships a default icon: `success` → check, `danger` → warning,
+`pending` → spinner, `info` → info.
+
+---
+
+## Icons are dynamic
+
+The icon is a slot:
+
+- **omit** `icon` → the variant default.
+- **`icon={null}`** → text-only.
+- **`icon={<YourGlyph />}`** → custom; it inherits the variant's icon colour
+  and is auto-sized to 16px.
+
+```jsx
+import { Clock } from "@phosphor-icons/react";
+
+<Badge variant="info" icon={null}>Draft</Badge>
+<Badge variant="pending" icon={<Clock weight="fill" />}>Awaiting review</Badge>
+```
+
+<Canvas of={BadgeStories.IconOptions} />
+
+---
+
+## Props
+
+| Prop        | Type                               | Default  | Notes                                  |
+| ----------- | ---------------------------------- | -------- | -------------------------------------- |
+| `variant`   | `success \| danger \| pending \| info` | `info` | Colour + default icon.                 |
+| `icon`      | node \| `null`                     | default  | Override the glyph, or hide with `null`. |
+| `children`  | node                               | —        | The label.                            |
+| `className` | string                             | —        | Merged onto the pill.                  |
+
+Other `<span>` attributes (`id`, `data-*`, `title`, `ref`…) are forwarded.
+
+---
+
+## Tokens
+
+| Variant   | Surface     | Border      | Label       | Icon          |
+| --------- | ----------- | ----------- | ----------- | ------------- |
+| `success` | green-100   | green-400   | green-800   | green-600     |
+| `danger`  | red-100     | red-400     | red-800     | red-600       |
+| `pending` | yellow-100  | yellow-400  | yellow-800  | **orange-600** |
+| `info`    | grey-100    | grey-400    | grey-800    | grey-600      |
+
+Pill: `padding 4px 12px`, `radius 16px`, `gap 6px`, label 14px / 600.
+
+---
+
+## Accessibility
+
+The label carries the meaning, so the default icons are `aria-hidden`. If you
+render a badge with **no text**, add an accessible name yourself (e.g.
+`aria-label`) so the status isn't lost to screen readers.

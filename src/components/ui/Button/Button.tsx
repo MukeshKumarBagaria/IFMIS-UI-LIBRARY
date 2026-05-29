@@ -58,6 +58,17 @@ const buttonVariants = cva(
           "focus-visible:text-purple-700 focus-visible:border-blue-400 focus-visible:rounded-none",
           "disabled:text-[#CCCCCC]",
         ].join(" "),
+        // Neutral — outlined in the muted grey body colour. Same geometry as
+        // secondary, but the palette is neutral rather than brand purple, for
+        // low-emphasis controls like "Back" that shouldn't compete with the
+        // page's primary purple actions.
+        neutral: [
+          "bg-transparent text-body-secondary border-body-secondary",
+          "hover:bg-surface-grey-bg",
+          "active:bg-grey-100",
+          "focus-visible:bg-transparent focus-visible:border-blue-400",
+          "disabled:bg-[#CCCCCC] disabled:text-grey-100 disabled:border-transparent",
+        ].join(" "),
       },
       size: {
         standard: "h-11 px-3 text-base [&_svg]:size-6",
@@ -74,6 +85,17 @@ const buttonVariants = cva(
       },
       {
         variant: "secondary",
+        size: "small",
+        class: "border disabled:border-grey-100",
+      },
+      // Neutral matches secondary's border widths (1.5px standard, 1px small).
+      {
+        variant: "neutral",
+        size: "standard",
+        class: "border-[1.5px] focus-visible:border-2",
+      },
+      {
+        variant: "neutral",
         size: "small",
         class: "border disabled:border-grey-100",
       },

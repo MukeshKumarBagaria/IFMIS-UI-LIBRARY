@@ -1,0 +1,160 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as PageTitleStories from "./PageTitle.stories";
+
+<Meta of={PageTitleStories} title="UI/PageTitle/Guide" />
+
+# PageTitle
+
+The heading band that tops **every** screen in an IFMIS module: a white card
+with a purple border holding the page **title**, an optional **breadcrumb**
+trail, and an optional **Back** button — with the brand diamond motif bleeding
+off the right edge.
+
+It's a thin composition over primitives you already use — `<Heading>`,
+`<Breadcrumb>`, and `<Button variant="neutral">` — so typography, colour and
+accessibility stay identical across every module, and a future restyle of those
+primitives flows through automatically.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## Quickstart
+
+Only `title` is required.
+
+```jsx
+import { PageTitle } from "@ifmis/ui";
+
+<PageTitle title="Dashboard" />;
+```
+
+<Canvas of={PageTitleStories.TitleOnly} />
+
+The full band — title, trail, and a back action — matches the Figma 1:1:
+
+```jsx
+<PageTitle
+  title="This is a page title"
+  breadcrumbs={[
+    { label: "Breadcrumb 1", href: "/" },
+    { label: "Breadcrumb 2" }, // last item = current page
+  ]}
+  onBack={() => navigate(-1)}
+/>
+```
+
+<Canvas of={PageTitleStories.Default} />
+
+---
+
+## Breadcrumbs
+
+Pass a `breadcrumbs` array — it's handed straight to [`<Breadcrumb>`](?path=/docs/ui-breadcrumb-guide--docs),
+so the last item becomes the current page and every item infers whether it's a
+link (`href`), a button (`onClick`), or plain text.
+
+```jsx
+<PageTitle
+  title="Salary Statement"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "HRMS", href: "/hrms" },
+    { label: "Pay Related", href: "/hrms/pay" },
+    { label: "FY 2025-26" },
+  ]}
+/>
+```
+
+<Canvas of={PageTitleStories.WithBreadcrumbs} />
+
+Need a custom separator or `aria-label`? Forward them with `breadcrumbProps`:
+
+```jsx
+<PageTitle
+  title="Reports"
+  breadcrumbs={items}
+  breadcrumbProps={{ separator: <span className="text-grey-500">/</span> }}
+/>
+```
+
+---
+
+## Back button
+
+Provide `onBack` to render a neutral (grey) outlined **Back** button. It's the
+shared `<Button variant="neutral">`, so it inherits the library's focus ring,
+hover/press states and disabled handling. Customise the label with `backLabel`.
+
+```jsx
+<PageTitle title="Create Voucher" onBack={() => navigate(-1)} backLabel="Back" />
+```
+
+<Canvas of={PageTitleStories.WithBack} />
+
+---
+
+## Decoration
+
+The diamond motif is purely cosmetic — `aria-hidden`, non-interactive, and
+clipped by the card. Hide it with `hideDecoration` (handy in tight columns or
+when an adjacent element already carries the brand flourish).
+
+```jsx
+<PageTitle title="This is a page title" hideDecoration />
+```
+
+<Canvas of={PageTitleStories.NoDecoration} />
+
+---
+
+## Props
+
+| Prop              | Type                            | Default       | Notes                                              |
+| ----------------- | ------------------------------- | ------------- | -------------------------------------------------- |
+| `title`           | node                            | —             | The page heading. Rendered as an `<h1>` (24px).    |
+| `breadcrumbs`     | `BreadcrumbItem[]`              | —             | Trail, root → current. Omit to hide.               |
+| `breadcrumbProps` | `Omit<BreadcrumbProps,"items">` | —             | Extra props for the underlying `<Breadcrumb>`.     |
+| `onBack`          | `() => void`                    | —             | Renders the Back button. Omit to hide.             |
+| `backLabel`       | node                            | `"Back"`      | Back button label.                                 |
+| `hideDecoration`  | boolean                         | `false`       | Drop the diamond motif.                            |
+| `className`       | string                          | —             | Merged onto the card (layout/spacing overrides).   |
+
+Any other `<div>` attributes (`id`, `data-*`, `style`, `ref`…) are forwarded to
+the card element.
+
+---
+
+## Layout & tokens
+
+The band is **fluid width** (`w-full`) and **≥132px tall** (`min-h`), so it
+fills whatever column a module places it in and grows — rather than overflows —
+when a title wraps or a breadcrumb trail runs long. Title, breadcrumbs and back
+button stack in a left-aligned column with an 8px gap.
+
+Every colour is a design token, so theming "just works":
+
+| Part         | Token                          | Value (purple theme) |
+| ------------ | ------------------------------ | -------------------- |
+| Card surface | `surface-card`                 | `#FFFFFF`            |
+| Card border  | `surface-border-purple`        | `#A58FBC`            |
+| Title        | `purple-700`                   | `#56108A`            |
+| Back button  | `body-secondary` (text/border) | `#595959`            |
+
+Radius `24px` (card) / `12px` (back button). Title is `Header-24` —
+Google Sans Flex, 24px, weight 600.
+
+---
+
+## Accessibility
+
+- The title is a real `<h1>` — one page heading per screen, as expected by
+  screen-reader landmarks and document outline.
+- Breadcrumbs render inside a `<nav aria-label="Breadcrumb">` with the current
+  crumb marked `aria-current="page"`.
+- The Back button is a native `<button>` with a visible keyboard focus ring.
+- The diamond motif is `aria-hidden` and never announced.
+
+✅ Put exactly one `<PageTitle>` at the top of each screen.
+✅ Make the last breadcrumb the page you're on (no `href`).
+❌ Don't wrap the title in another heading — it's already an `<h1>`.

@@ -40,6 +40,31 @@ export type {
   BreadcrumbItem,
 } from "./components/ui/Breadcrumb";
 
+export { PageTitle } from "./components/ui/PageTitle";
+export type { PageTitleProps } from "./components/ui/PageTitle";
+
+export { SectionTitle } from "./components/ui/SectionTitle";
+export type { SectionTitleProps } from "./components/ui/SectionTitle";
+
+export { Badge, badgeVariants } from "./components/ui/Badge";
+export type { BadgeProps, BadgeVariant } from "./components/ui/Badge";
+
+export {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionPanel,
+  AccordionSection,
+} from "./components/ui/Accordion";
+export type {
+  AccordionProps,
+  AccordionType,
+  AccordionItemProps,
+  AccordionTriggerProps,
+  AccordionPanelProps,
+  AccordionSectionProps,
+} from "./components/ui/Accordion";
+
 export {
   Banner,
   BannerTitle,

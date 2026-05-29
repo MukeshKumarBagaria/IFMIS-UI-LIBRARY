@@ -1,0 +1,209 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as AccordionStories from "./Accordion.stories";
+
+<Meta of={AccordionStories} title="UI/Accordion/Guide" />
+
+# Accordion
+
+The **core sectioning container** for IFMIS module screens. Long forms are
+broken into collapsible sections; this is the component that renders them
+consistently across all 18 modules.
+
+It's a **compound component**:
+
+- `Accordion` — owns open/close state and the layout of the stack.
+- `AccordionSection` — the one-call convenience: a full section (header + body).
+- `AccordionItem` / `AccordionTrigger` / `AccordionPanel` — the underlying
+  primitives, for when you need a non-standard header.
+
+The header is standardized (number chip, title, status `Badge`s, arrow); the
+**panel body is yours** — drop in subsections, forms, tables, banners.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## Quickstart
+
+Use `AccordionSection` and give each a unique `value`:
+
+```jsx
+import { Accordion, AccordionSection, Badge } from "@ifmis/ui";
+
+<Accordion defaultValue="s1">
+  <AccordionSection
+    value="s1"
+    number="01"
+    title="Account closure decision"
+    badges={<Badge variant="success">Complete</Badge>}
+  >
+    {/* anything: forms, tables, SectionTitle, … */}
+  </AccordionSection>
+
+  <AccordionSection value="s2" number="02" title="Head of account mappings">
+    …
+  </AccordionSection>
+</Accordion>;
+```
+
+<Canvas of={AccordionStories.Default} />
+
+The header matches the design 1:1 — a white number chip, the title, a purple
+pill of status badges, and the open/close arrow:
+
+<Canvas of={AccordionStories.FigmaHeader} />
+
+---
+
+## Open behaviour
+
+Single-open by default — opening one section closes the others. Switch to
+`type="multiple"` to allow many open at once.
+
+```jsx
+<Accordion type="multiple" defaultValue={["s1", "s2"]}>…</Accordion>
+```
+
+<Canvas of={AccordionStories.Multiple} />
+
+| Prop          | Effect                                                            |
+| ------------- | ----------------------------------------------------------------- |
+| `type`        | `"single"` (default) or `"multiple"`.                             |
+| `collapsible` | `single` only — allow closing the open one. Default `true`. Set `false` to keep one always open. |
+
+---
+
+## Controlled vs uncontrolled
+
+**Uncontrolled** (the component remembers): pass `defaultValue`.
+
+**Controlled** (you own it): pass `value` + `onValueChange`. This is how you
+orchestrate flows — e.g. auto-open the next section when the current one is
+marked complete, or deep-link to a section.
+
+```jsx
+const [open, setOpen] = useState("s1");
+
+<Accordion value={open} onValueChange={setOpen}>…</Accordion>;
+```
+
+`onValueChange` receives a **string** in `single` mode and a **string[]** in
+`multiple` mode.
+
+<Canvas of={AccordionStories.Controlled} />
+
+> **Status is reflected, not enforced.** The badge shows completion; the
+> Accordion never runs your validation. Compute status in your form layer and
+> feed it in (and use controlled mode to gate progression).
+
+---
+
+## Forms keep their state
+
+Collapsed panels stay **mounted** (just hidden + made `inert`), so input values
+and validation survive a collapse — essential for the long forms these
+sections wrap. Opt into `unmountOnCollapse` only for non-form content where a
+lighter DOM matters.
+
+---
+
+## Status badges
+
+Compose `<Badge>` elements into the `badges` slot — one for a single status, or
+several. They're wrapped in the standard purple pill automatically.
+
+```jsx
+badges={
+  <>
+    <Badge variant="success">Complete</Badge>
+    <Badge variant="danger">2 errors</Badge>
+  </>
+}
+```
+
+Keep badge content **non-interactive** — the whole header is a single button.
+
+---
+
+## Disabled sections
+
+```jsx
+<AccordionSection value="s2" title="Locked" disabled badges={<Badge variant="info">Locked</Badge>}>
+  …
+</AccordionSection>
+```
+
+<Canvas of={AccordionStories.WithDisabledSection} />
+
+---
+
+## Primitives (custom headers)
+
+When `AccordionSection` isn't flexible enough, compose the parts yourself:
+
+```jsx
+<Accordion type="multiple">
+  <AccordionItem value="a">
+    <AccordionTrigger title="Custom" number="01" />
+    <AccordionPanel>…</AccordionPanel>
+  </AccordionItem>
+</Accordion>
+```
+
+<Canvas of={AccordionStories.UsingPrimitives} />
+
+---
+
+## Props
+
+### `Accordion`
+
+| Prop                | Type                                  | Default    | Notes                                  |
+| ------------------- | ------------------------------------- | ---------- | -------------------------------------- |
+| `type`              | `"single" \| "multiple"`              | `"single"` | Open behaviour.                        |
+| `value`             | `string \| string[]`                  | —          | Controlled open value(s).              |
+| `defaultValue`      | `string \| string[]`                  | —          | Uncontrolled initial open value(s).    |
+| `onValueChange`     | `(v: string \| string[]) => void`     | —          | Fires on open/close.                   |
+| `collapsible`       | boolean                               | `true`     | `single` only — allow closing.         |
+| `unmountOnCollapse` | boolean                               | `false`    | Remove collapsed panels from the DOM.  |
+| `disabled`          | boolean                               | `false`    | Disable every section.                 |
+
+### `AccordionSection` (and `AccordionTrigger`)
+
+| Prop          | Type                          | Default | Notes                                       |
+| ------------- | ----------------------------- | ------- | ------------------------------------------- |
+| `value`       | string                        | —       | Unique id within the Accordion.             |
+| `title`       | node                          | —       | Section title (20px / Header-20).           |
+| `number`      | node                          | —       | Ordinal in the leading white chip.          |
+| `badges`      | node                          | —       | `<Badge>`s for status.                      |
+| `as`          | `h2 … h6`                     | `"h3"`  | Heading tag — match your page outline.      |
+| `hideChevron` | boolean                       | `false` | Hide the open/close arrow.                  |
+| `disabled`    | boolean                       | `false` | Disable this section.                       |
+
+`AccordionSection` also takes `triggerClassName` / `panelClassName` for targeted
+style overrides; the panel body padding can be overridden via `panelClassName`.
+
+---
+
+## Heading hierarchy
+
+Set `as` so sections land at the right outline level. Typical IFMIS screen:
+
+```
+PageTitle      → h1
+  Accordion    → h2 / h3   (set via `as`)
+    SectionTitle (in panel) → one level deeper
+```
+
+---
+
+## Accessibility
+
+- WAI-ARIA Accordion pattern: a heading wraps a single button with
+  `aria-expanded` + `aria-controls`; the panel is a `role="region"` labelled by
+  its trigger.
+- **Keyboard:** `Enter`/`Space` toggle; `↑`/`↓` move between headers; `Home`/`End`
+  jump to first/last.
+- Collapsed panels are `inert` (not focusable, hidden from screen readers).
+- The number chip and arrow are decorative (`aria-hidden`); badge text is read.
+- Animation respects `prefers-reduced-motion`.
