@@ -116,7 +116,7 @@ export const AccordionTrigger = forwardRef<HTMLButtonElement, AccordionTriggerPr
                 {number}
               </span>
             )}
-            <span className="truncate font-sans text-h3 text-heading">{title}</span>
+            <span className="truncate font-sans text-h3 leading-normal text-heading">{title}</span>
           </span>
 
           {/* Trailing — badges + arrow. */}
