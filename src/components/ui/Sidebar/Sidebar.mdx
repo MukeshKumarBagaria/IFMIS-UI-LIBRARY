@@ -299,3 +299,27 @@ component picks the right colour for active vs. inactive automatically.
 
 See the `Default` story for a fully working integration with realistic
 data, then strip back to only the slots you need.
+
+---
+
+## Responsive behaviour
+
+The rail has two widths built in — the **full** rail and the **collapsed**
+icon rail. Drive `collapsed` from a media query (and/or a user toggle) so the
+rail steps out of the way on smaller viewports, and persist the choice:
+
+```jsx
+const [collapsed, setCollapsed] = useState(
+  () => window.matchMedia("(max-width: 1024px)").matches,
+);
+
+<Sidebar
+  collapsed={collapsed}
+  onCollapseToggle={() => setCollapsed((v) => !v)}
+  …
+/>
+```
+
+On phones, prefer hiding the rail behind a drawer (your app owns the drawer
+shell) and rendering the **full** Sidebar inside it, rather than showing the
+collapsed rail permanently.

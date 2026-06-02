@@ -1,0 +1,164 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as CheckboxStories from "./Checkbox.stories";
+
+<Meta of={CheckboxStories} title="UI/Checkbox/Guide" />
+
+# Checkbox
+
+An icon + label form control built on a real, visually-hidden
+`<input type="checkbox">`. You get full form participation, keyboard support
+and screen-reader semantics for free; the coloured box is just paint driven by
+the input's state.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## States
+
+```jsx
+import { Checkbox } from "@ifmis/ui";
+
+<Checkbox>This is unchecked</Checkbox>
+<Checkbox defaultChecked>This is checked</Checkbox>
+<Checkbox disabled>This is disabled</Checkbox>
+```
+
+<Canvas of={CheckboxStories.States} />
+
+A fourth state — **indeterminate** — represents "some selected", e.g. a
+"select all" row when only a few children are checked:
+
+<Canvas of={CheckboxStories.Indeterminate} />
+
+---
+
+## Controlled vs uncontrolled
+
+**Uncontrolled** — the checkbox tracks its own value:
+
+```jsx
+<Checkbox defaultChecked onCheckedChange={(next) => save(next)}>
+  I accept the terms
+</Checkbox>
+```
+
+**Controlled** — you own the value (typical for lists, forms, "select all"):
+
+```jsx
+const [on, setOn] = useState(false);
+
+<Checkbox checked={on} onCheckedChange={setOn}>Subscribe</Checkbox>;
+```
+
+---
+
+## A "select all" list
+
+A single state object drives both the parent and the children. The parent goes
+`indeterminate` whenever only some items are checked.
+
+<Canvas of={CheckboxStories.SelectAllList} />
+
+```jsx
+const items = ["Roads", "Health", "Education"];
+const [checked, setChecked] = useState({ Roads: true, Health: false, Education: false });
+
+const values = Object.values(checked);
+const allChecked = values.every(Boolean);
+const someChecked = values.some(Boolean);
+
+<Checkbox
+  checked={allChecked}
+  indeterminate={someChecked && !allChecked}
+  onCheckedChange={(next) =>
+    setChecked(Object.fromEntries(items.map((i) => [i, next])))
+  }
+>
+  Select all
+</Checkbox>;
+
+{items.map((item) => (
+  <Checkbox
+    key={item}
+    checked={checked[item]}
+    onCheckedChange={(next) => setChecked((p) => ({ ...p, [item]: next }))}
+  >
+    {item}
+  </Checkbox>
+))}
+```
+
+---
+
+## Sizes
+
+Three sizes — the box scales together with the label.
+
+```jsx
+<Checkbox size="sm" defaultChecked>Small (20px)</Checkbox>
+<Checkbox size="md" defaultChecked>Medium (24px)</Checkbox>
+<Checkbox size="lg" defaultChecked>Large (28px)</Checkbox>
+```
+
+<Canvas of={CheckboxStories.Sizes} />
+
+---
+
+## Use in a form
+
+Because the underlying control is a real input, the standard form attributes
+just work — `name`, `value`, `required`, `form`, etc. are forwarded:
+
+```jsx
+<form onSubmit={…}>
+  <Checkbox name="terms" value="yes" required>I accept the terms</Checkbox>
+  <button type="submit">Continue</button>
+</form>
+```
+
+---
+
+## Props
+
+| Prop              | Type                         | Default | Notes                                            |
+| ----------------- | ---------------------------- | ------- | ------------------------------------------------ |
+| `checked`         | `boolean`                    | —       | Controlled value. Pair with `onCheckedChange`.   |
+| `defaultChecked`  | `boolean`                    | `false` | Uncontrolled initial value.                      |
+| `onCheckedChange` | `(checked: boolean) => void` | —       | Fires with the next value on change.             |
+| `indeterminate`   | `boolean`                    | `false` | Renders a dash; sets the native flag + ARIA.     |
+| `size`            | `sm \| md \| lg`             | `md`    | Box + label size.                                |
+| `disabled`        | `boolean`                    | `false` | Greys the box + label and blocks interaction.    |
+| `children`        | node                         | —       | The label. Omit for a bare box (+ `aria-label`). |
+| `className`       | string                       | —       | Merged onto the outer `<label>`.                 |
+| `boxClassName`    | string                       | —       | Merged onto the coloured box.                    |
+
+All other native `<input>` props (`name`, `value`, `required`, `id`, `ref`,
+`aria-*`, `data-*`, …) are forwarded to the underlying checkbox.
+
+---
+
+## Tokens
+
+| State          | Box border / fill                | Glyph | Label              |
+| -------------- | -------------------------------- | ----- | ------------------ |
+| unchecked      | border `heading` (#4B3960)       | —     | `heading`          |
+| checked        | fill `purple-500` (#8B39C2)      | white | `heading`          |
+| indeterminate  | fill `purple-500`                | white | `heading`          |
+| disabled       | border `body-disabled` (#CCC)    | —     | `body-disabled`    |
+| disabled + on  | fill `body-disabled`             | white | `body-disabled`    |
+
+Body text: `Body/Regular-16` (`text-body-sm`, weight 400) at the `md` size.
+
+---
+
+## Accessibility
+
+- Backed by a real `<input type="checkbox">`, so it's natively focusable,
+  keyboard-driven (<kbd>Space</kbd>) and announced as a checkbox to AT.
+- A `<label>` wraps the input and the box, so clicking either toggles it and
+  the visible label is the accessible name.
+- For a **bare** box (no `children`), pass an `aria-label`.
+- Indeterminate state sets both the DOM `input.indeterminate` flag *and*
+  `aria-checked="mixed"`.
+- A visible focus ring (`ring-ring`) is shown around the box on keyboard focus.

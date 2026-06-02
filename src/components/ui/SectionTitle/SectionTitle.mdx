@@ -120,3 +120,18 @@ Padding `8px 12px`; radius `4px` top / `2px` bottom.
 
 ✅ Use one `SectionTitle` per section, with a level that nests under the page's `<h1>`.
 ❌ Don't use it as the page's main title — that's `PageTitle`.
+
+---
+
+## Responsive behaviour
+
+The bar is **full-width**; the title sits left and the optional action sits
+right. On narrow screens the action wraps below the title automatically. Keep
+the right-side action to a single button or a compact menu so the bar stays one
+or two lines.
+
+```jsx
+<div className="w-full">
+  <SectionTitle title="Attached documents" onMore={openManager} />
+</div>
+```

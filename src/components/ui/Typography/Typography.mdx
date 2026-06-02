@@ -175,3 +175,26 @@ These tokens come directly from the Figma design system. If Figma changes, this 
 | `Text/Body/Regular-18` / `Medium-18` | `--text-body-md` | `text-body-md` |
 | `Text/Body/Regular-16` / `Medium-16` | `--text-body-sm` | `text-body-sm` |
 | `Text/Body/Regular-14` / `Medium-14` | `--text-body-xs` | `text-body-xs` |
+
+---
+
+## Responsive behaviour
+
+The type scale is fixed by design tokens, so text is consistent across the
+product. When you need a heading to step down on small screens, switch the
+`level`/size by breakpoint rather than overriding `font-size`:
+
+```jsx
+{/* Visual size only — keep the semantic heading level correct via `as` */}
+<Heading as="h1" className="text-h3 md:text-h1">Dashboard</Heading>
+```
+
+For body copy, constrain the **measure** (line length) for readability instead
+of changing the size:
+
+```jsx
+<Text className="max-w-prose">Long-form explanatory copy…</Text>
+```
+
+Avoid inventing sizes — if a breakpoint needs a step that isn't in the scale,
+raise it with the design team.

@@ -1,0 +1,230 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as ActionCardStories from "./ActionCard.stories";
+
+<Meta of={ActionCardStories} title="UI/ActionCard/Guide" />
+
+# ActionCard
+
+A status-tinted card with a **gradient header**, a **white body** and a
+**grey footer of small actions**. Three tones map 1:1 to the IFMIS Figma:
+
+- `pending` → Brand/OrangeGradient + Orange-600 actions
+- `success` → Brand/GreenGradient  + Green-600 actions
+- `danger`  → Brand/RedGradient    + Red-600 actions
+
+The card stretches to fill its container and the inner rows wrap on narrow
+widths.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## Tones
+
+```jsx
+import { ActionCard } from "@ifmis/ui";
+
+<ActionCard
+  tone="pending"
+  title="Pending"
+  heading="Header"
+  description="This is a description for this card, feel free to replace the content."
+  badge
+  counter="20 of 30"
+  onCancel={() => console.log("cancel")}
+  onOpen={() => console.log("open")}
+/>
+```
+
+<Canvas of={ActionCardStories.AllTones} />
+
+The same card shape with three colour treatments — pick whichever matches the
+status you're showing.
+
+---
+
+## Two usage shapes
+
+### 1. Prop-driven (the common case)
+
+```jsx
+<ActionCard
+  tone="pending"
+  title="Pending"
+  heading="Quarterly report"
+  description="Awaiting two reviewer approvals."
+  badge
+  counter="20 of 30"
+  onCancel={() => discard()}
+  onOpen={() => open(id)}
+/>
+```
+
+Everything is configured through props. Hide pieces by leaving the prop out:
+omit `badge` for no badge, omit `onCancel` / `onOpen` to hide buttons, omit
+`counter` to drop the stat. When all of `counter`, `onCancel` and `onOpen`
+are absent, the footer disappears entirely (or pass `hideFooter`).
+
+### 2. Compound (full control)
+
+When the standard layout doesn't fit, drop into the sub-parts. They read the
+**tone from context**, so colours stay in sync:
+
+<Canvas of={ActionCardStories.Compound} />
+
+```jsx
+<ActionCard tone="success">
+  <ActionCard.Header icon={<MyGlyph />}>Submitted</ActionCard.Header>
+
+  <ActionCard.Body
+    heading="Quarterly report"
+    description="All reviewers approved on 24 May 2026."
+    badge={<ActionCard.Badge>3 approvers</ActionCard.Badge>}
+  />
+
+  <ActionCard.Footer counter="20 of 30">
+    <ActionCard.Button kind="outline">Cancel</ActionCard.Button>
+    <ActionCard.Button>Open</ActionCard.Button>
+  </ActionCard.Footer>
+</ActionCard>
+```
+
+You can also mix: use the body's `children` slot to render anything between
+the description and the footer.
+
+---
+
+## Hiding parts
+
+```jsx
+{/* Just title + heading + description (no badge, no footer) */}
+<ActionCard tone="danger" title="Rejected" heading="…" description="…" hideFooter />
+
+{/* No badge */}
+<ActionCard {...props} badge={false} />
+
+{/* No counter */}
+<ActionCard {...props} counter={undefined} />
+
+{/* Hide a specific button — just omit its handler */}
+<ActionCard {...props} onCancel={undefined} onOpen={onOpen} />
+```
+
+<Canvas of={ActionCardStories.Minimal} />
+<Canvas of={ActionCardStories.PrimaryActionOnly} />
+
+---
+
+## Custom labels and icons
+
+```jsx
+<ActionCard
+  tone="pending"
+  title="Awaiting review"
+  icon={<Clock weight="fill" className="size-10 text-orange-900" />}
+  heading="Quarterly report"
+  description="…"
+  badge
+  badgeLabel="3 reviewers"
+  badgeIcon={<Users weight="fill" className="size-5" />}
+  counter="20 of 30"
+  cancelLabel="Discard"
+  openLabel="Continue"
+  onCancel={onCancel}
+  onOpen={onOpen}
+/>
+```
+
+Pass `icon={null}` or `badgeIcon={null}` to hide a glyph completely.
+
+---
+
+## Responsive behaviour
+
+The card is always `width: 100%` of its container and never enforces a width
+of its own — wrap it in your layout (grid, flex column, max-width container)
+to size it.
+
+On narrow widths (≈≤ 300 px) the heading + badge row wraps onto two lines and
+the footer counter + buttons wrap independently:
+
+<Canvas of={ActionCardStories.Narrow} />
+
+```jsx
+{/* Three-up on desktop, single column on mobile */}
+<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+  {items.map((item) => (
+    <ActionCard key={item.id} {...item} />
+  ))}
+</div>
+```
+
+---
+
+## Props
+
+### `<ActionCard>` (root)
+
+| Prop           | Type                                  | Default     | Notes                                                  |
+| -------------- | ------------------------------------- | ----------- | ------------------------------------------------------ |
+| `tone`         | `pending \| success \| danger`        | `pending`   | Drives header gradient, counter colour, button colours. |
+| `title`        | node                                  | —           | Header title (prop-driven mode).                       |
+| `icon`         | node \| `null`                        | tone Info   | Header leading icon; `null` hides.                     |
+| `heading`      | node                                  | —           | Bold body heading.                                     |
+| `description`  | node                                  | —           | Body description (multi-line).                         |
+| `badge`        | `boolean \| node`                     | —           | `true` for default; node for custom; absent for none.  |
+| `badgeLabel`   | node                                  | `"Badge"`   | Label on the default badge.                            |
+| `badgeIcon`    | node \| `null`                        | CheckCircle | Icon on the default badge.                             |
+| `counter`      | node                                  | —           | Left-side stat in the footer.                          |
+| `onCancel`     | `MouseEventHandler`                   | —           | Cancel handler; omit to hide cancel button.            |
+| `onOpen`      | `MouseEventHandler`                   | —           | Open handler; omit to hide open button.                |
+| `cancelLabel`  | node                                  | `"Cancel"`  | —                                                      |
+| `openLabel`    | node                                  | `"Open"`    | —                                                      |
+| `hideFooter`   | `boolean`                             | `false`     | Force-hide the footer.                                 |
+| `children`     | node                                  | —           | Compound mode — replaces the prop-driven layout.       |
+| `className`    | string                                | —           | Merged on the root.                                    |
+
+All other native `<div>` props (`id`, `data-*`, `aria-*`, `ref`, …) are forwarded.
+
+### Sub-parts
+
+- `<ActionCard.Header icon>` — gradient strip; reads tone from context.
+- `<ActionCard.Body heading description badge>` — white block; flex column.
+- `<ActionCard.Footer counter>` — grey tray; children render to the right.
+- `<ActionCard.Badge icon>` — neutral grey pill (also usable outside the card).
+- `<ActionCard.Button kind="primary" | "outline" tone rightIcon>` — 32 px
+  tone-aware button; `tone` falls back to the surrounding card.
+
+`useActionCardTone()` returns the tone of the nearest `<ActionCard>` ancestor
+— useful if you're rendering bespoke content that needs to follow the tone.
+
+---
+
+## Tokens
+
+| Tone      | Header gradient                | Title         | Counter        | Primary button     | Outline button       |
+| --------- | ------------------------------ | ------------- | -------------- | ------------------ | -------------------- |
+| `pending` | `--brand-gradient-orange`      | `orange-900`  | `orange-800`   | `orange-600` / white | `orange-600` border  |
+| `success` | `--brand-gradient-green`       | `green-900`   | `green-800`    | `green-600` / `green-950` | `green-950` border |
+| `danger`  | `--brand-gradient-red`         | `red-900`     | `red-800`      | `red-600` / white    | `red-600` border     |
+
+Card box: `radius 24px`, `shadow-card` (`0 0 25px rgba(0,0,0,0.1)`),
+`overflow-hidden` so the corners clip the gradient + footer.
+
+The three gradients live in `src/styles/themes/_brand.css` as
+`--brand-gradient-orange | green | red` — change them once to repaint every
+ActionCard.
+
+---
+
+## Accessibility
+
+- The header title is just text — give it an `id` and link it from a
+  surrounding `<section aria-labelledby={id}>` if the card stands alone in a
+  landmark.
+- The default icons are `aria-hidden` — the title and the button labels carry
+  the meaning.
+- Buttons render as real `<button type="button">` elements and get a visible
+  focus ring (`ring-ring`).
+- Disable a button with the native `disabled` prop on the sub-part; the
+  outline / primary styling fades correctly.

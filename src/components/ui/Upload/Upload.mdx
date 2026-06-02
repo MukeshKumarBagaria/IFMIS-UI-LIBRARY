@@ -1,0 +1,192 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as UploadStories from "./Upload.stories";
+
+<Meta of={UploadStories} title="UI/Upload/Guide" />
+
+# Upload
+
+A file-upload field that walks through four visual states:
+`default → uploading → error → uploaded`.
+
+`Upload` is **presentational and controlled** — it never uploads anything
+itself. You own the upload logic and drive `state`, `progress` and `files`;
+the component renders the matching visuals and calls back on every action.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## States
+
+<Canvas of={UploadStories.Showcase} />
+
+```jsx
+<Upload state="default" />
+<Upload state="uploading" progress={25} />
+<Upload state="error" />
+<Upload state="uploaded" files={files} />
+```
+
+You decide which state to show based on your upload lifecycle — the component
+doesn't transition on its own.
+
+---
+
+## Wiring it to a real upload
+
+```jsx
+import { useState } from "react";
+import { Upload } from "@ifmis/ui";
+
+function AttachmentField() {
+  const [state, setState] = useState("default");
+  const [progress, setProgress] = useState(0);
+  const [files, setFiles] = useState([]);
+
+  async function start() {
+    setState("uploading");
+    try {
+      const file = await uploadWithProgress({ onProgress: setProgress });
+      setFiles((cur) => [...cur, file]);
+      setState("uploaded");
+    } catch {
+      setState("error");
+    }
+  }
+
+  return (
+    <Upload
+      label="Supporting documents"
+      hint="PDF up to 5 MB"
+      state={state}
+      progress={progress}
+      files={files}
+      onUpload={start}
+      onCancel={() => setState("default")}
+      onRetry={start}
+      onAddMore={start}
+      onPreviewFile={(f) => window.open(urlFor(f.id))}
+      onDeleteFile={(f) => setFiles((cur) => cur.filter((x) => x.id !== f.id))}
+    />
+  );
+}
+```
+
+<Canvas of={UploadStories.Interactive} />
+
+---
+
+## The `uploaded` state and the file dropdown
+
+In the `uploaded` state the chip caret toggles a dropdown listing every file,
+each with **preview** (eye) and **delete** (trash) actions.
+
+```jsx
+<Upload state="uploaded" files={files} defaultExpanded />
+```
+
+Leave `expanded` unset to let the component manage the dropdown, or control it:
+
+```jsx
+const [open, setOpen] = useState(false);
+
+<Upload
+  state="uploaded"
+  files={files}
+  expanded={open}
+  onToggleExpand={setOpen}
+/>
+```
+
+<Canvas of={UploadStories.MultipleFiles} />
+
+---
+
+## Everything is dynamic
+
+Every label and icon is a prop — pass any node (Phosphor, lucide, your own
+SVG) and the component sizes it for you:
+
+```jsx
+import { Receipt, Paperclip } from "@phosphor-icons/react";
+
+<Upload
+  label="Attach invoice"
+  labelIcon={<Receipt />}
+  uploadLabel="Choose file"
+  uploadIcon={<Paperclip />}
+  addMoreLabel="Attach another"
+  hint="XLSX or PDF"
+/>
+```
+
+<Canvas of={UploadStories.CustomLabelsAndIcons} />
+
+Pass `labelIcon={null}` to hide the label glyph. Customise the uploading text
+with a function: `uploadingLabel={(p) => \`\${p}% done\`}`.
+
+---
+
+## Usage best practices
+
+- **Own the lifecycle.** The component is a pure view of `state` — wire your
+  XHR/fetch progress to `progress` and flip `state` yourself.
+- **Give per-file ids that are stable.** `onPreviewFile` / `onDeleteFile`
+  hand back the `UploadFile`; key your data off `file.id`, not the index.
+- **Set a real `hint`.** Tell users the accepted types and size limit up front
+  — it's cheaper than an error state.
+- **Keep `files` in sync with the server.** On delete, remove from your state
+  only after the server confirms, or optimistically and roll back on failure.
+
+---
+
+## Responsive behaviour
+
+The control is a **fixed 300px-wide field** (matching the Figma spec) so it
+sits predictably in a form column. Override the width via `className` if your
+layout needs it:
+
+```jsx
+<Upload className="w-full" state="default" />        {/* fill the column */}
+<Upload className="max-w-sm" state="default" />      {/* cap the width  */}
+```
+
+In a responsive form grid:
+
+```jsx
+<div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+  <Upload className="w-full" label="ID proof" state="default" />
+  <Upload className="w-full" label="Address proof" state="default" />
+</div>
+```
+
+---
+
+## Props
+
+| Prop                                   | Type                              | Default        | Notes                                          |
+| -------------------------------------- | --------------------------------- | -------------- | ---------------------------------------------- |
+| `state`                                | `default \| uploading \| error \| uploaded` | `default` | Which visual to render.                  |
+| `label` / `labelIcon` / `hint`         | node                              | sensible       | Field header. `labelIcon={null}` hides glyph.  |
+| `progress`                             | `number`                          | `25`           | 0–100, shown in the uploading label.           |
+| `uploadingLabel`                       | `(p:number) => node`              | `Uploading - p%` | Build the uploading text.                    |
+| `files`                                | `UploadFile[]`                    | `[]`           | Listed in `uploaded`. First drives the chip.   |
+| `expanded` / `defaultExpanded`         | `boolean`                         | `false`        | Control / seed the dropdown.                   |
+| `onUpload` / `onCancel` / `onRetry` / `onAddMore` | `() => void`           | —              | Button handlers.                               |
+| `onToggleExpand`                       | `(expanded:boolean) => void`      | —              | Caret toggle.                                  |
+| `onPreviewFile` / `onDeleteFile`       | `(file: UploadFile) => void`      | —              | Per-file row actions.                          |
+| `*Label` / `*Icon`                     | node                              | sensible       | Every label/icon is overridable.               |
+| `className`                            | string                            | —              | Merged onto the field wrapper.                 |
+
+`UploadFile` = `{ id: string; name: string; icon?: ReactNode }`.
+
+---
+
+## Accessibility
+
+- The field is labelled — the visible `label` is wired to the control via
+  `aria-labelledby`.
+- The dropdown caret exposes `aria-expanded`; preview/delete buttons have
+  descriptive `aria-label`s (`Preview <name>`, `Delete <name>`).
+- Every interactive element is a real `<button>` with a visible focus ring.
+- Colours are fixed design tokens (the states carry semantic meaning).

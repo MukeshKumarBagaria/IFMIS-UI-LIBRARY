@@ -1,0 +1,100 @@
+# =============================================================================
+# @ifmis/ui — CI/CD pipeline   (pipeline v1)
+#
+# Three concerns:
+#   • verify  — typecheck + lint + test on every MR and on main.
+#   • build   — produce dist/ (kept as an artifact) on main and on release tags.
+#   • publish — push to the GitLab Package Registry, ONLY on a vX.Y.Z tag.
+#   • pages   — deploy Storybook to GitLab Pages on a release tag.
+#
+# See PUBLISHING.md for the full release process. When you change this file,
+# bump the "pipeline vN" comment above and call it out in the MR.
+# =============================================================================
+
+default:
+  image: node:20-alpine
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - .npm/
+
+stages:
+  - verify
+  - build
+  - publish
+
+# Reusable install step (npm ci with an on-disk cache).
+.npm_install: &npm_install
+  - npm ci --cache .npm --prefer-offline
+
+# -----------------------------------------------------------------------------
+# VERIFY — runs on every merge request and on the default branch.
+# -----------------------------------------------------------------------------
+verify:
+  stage: verify
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - *npm_install
+    - npm run typecheck
+    - npm run lint
+    - npm test
+
+# -----------------------------------------------------------------------------
+# BUILD — produce the publishable dist/ on main and on release tags.
+# -----------------------------------------------------------------------------
+build:
+  stage: build
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - *npm_install
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 7 days
+
+# -----------------------------------------------------------------------------
+# PUBLISH — only on a vX.Y.Z tag. Reuses the verified build artifact.
+# -----------------------------------------------------------------------------
+publish:
+  stage: publish
+  needs:
+    - build
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+  before_script:
+    # Guard: the Git tag MUST match the version in package.json.
+    - PKG_VERSION=$(node -p "require('./package.json').version")
+    - |
+      if [ "v$PKG_VERSION" != "$CI_COMMIT_TAG" ]; then
+        echo "✗ Tag $CI_COMMIT_TAG does not match package.json v$PKG_VERSION"
+        exit 1
+      fi
+    # Auth to the GitLab Package Registry (token is a protected CI variable).
+    - echo "@ifmis:registry=${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/npm/" > .npmrc
+    - echo "${CI_API_V4_URL#https:}/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=${NPM_PUBLISH_TOKEN}" >> .npmrc
+  script:
+    - npm publish
+  environment:
+    name: registry
+    url: ${CI_PROJECT_URL}/-/packages
+
+# -----------------------------------------------------------------------------
+# PAGES — deploy Storybook to GitLab Pages on a release tag.
+# -----------------------------------------------------------------------------
+pages:
+  stage: publish
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+  script:
+    - *npm_install
+    - npm run build-storybook -- -o public
+  artifacts:
+    paths:
+      - public

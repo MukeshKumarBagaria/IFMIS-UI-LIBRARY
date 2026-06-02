@@ -1,0 +1,135 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as CardStories from "./Card.stories";
+
+<Meta of={CardStories} title="UI/Card/Guide" />
+
+# Card
+
+A **bordered surface** for grouping related content. It's a compound set of
+parts you mix and match — nothing is required except `Card` itself.
+
+| Part              | Element | Purpose                                  |
+| ----------------- | ------- | ---------------------------------------- |
+| `Card`            | `div`   | The bordered, rounded surface.           |
+| `CardHeader`      | `div`   | Top block; stacks title + description.   |
+| `CardTitle`       | `h3`    | Heading-coloured title.                  |
+| `CardDescription` | `p`     | Muted sub-text.                          |
+| `CardContent`     | `div`   | Main body region.                        |
+| `CardFooter`      | `div`   | Bottom action row (flex, gap).           |
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+> **Card vs ActionCard** — use `Card` for neutral content grouping. For a
+> status-tinted card with a gradient header and built-in actions, use
+> [`ActionCard`](?path=/docs/ui-actioncard-guide--docs).
+
+---
+
+## Anatomy
+
+```jsx
+import {
+  Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter,
+  Button,
+} from "@ifmis/ui";
+
+<Card>
+  <CardHeader>
+    <CardTitle>Beneficiary details</CardTitle>
+    <CardDescription>Last updated 2 hours ago</CardDescription>
+  </CardHeader>
+  <CardContent>…</CardContent>
+  <CardFooter className="justify-end">
+    <Button variant="secondary" size="small">Edit</Button>
+    <Button size="small">Save</Button>
+  </CardFooter>
+</Card>
+```
+
+<Canvas of={CardStories.Complete} />
+
+---
+
+## Use only the parts you need
+
+Every part is optional. A card can be just a header, or a bare padded surface:
+
+```jsx
+{/* Header + content, no footer */}
+<Card>
+  <CardHeader><CardTitle>Notes</CardTitle></CardHeader>
+  <CardContent>…</CardContent>
+</Card>
+
+{/* Bare surface — add your own padding */}
+<Card className="p-6">…</Card>
+```
+
+<Canvas of={CardStories.NoFooter} />
+<Canvas of={CardStories.Bare} />
+
+---
+
+## Usage best practices
+
+- **Don't nest cards.** A card inside a card muddies the hierarchy — use a
+  divider or a section heading instead.
+- **Keep the footer for actions.** Put buttons in `CardFooter` and align them
+  with `justify-end` so they read as the card's primary actions.
+- **Use `CardTitle` (an `<h3>`) for the heading** so the document outline stays
+  correct — override the level with `className` only, not by swapping the tag.
+- **Reach for `ActionCard`** when you need status colour, a gradient header, or
+  a built-in counter + cancel/open actions.
+
+---
+
+## Responsive behaviour
+
+`Card` is **`width: 100%`** of its container — size it by constraining the
+parent, and lay cards out in a responsive grid:
+
+```jsx
+<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  {items.map((item) => (
+    <Card key={item.id}>
+      <CardHeader>
+        <CardTitle>{item.title}</CardTitle>
+        <CardDescription>{item.subtitle}</CardDescription>
+      </CardHeader>
+    </Card>
+  ))}
+</div>
+```
+
+<Canvas of={CardStories.Grid} />
+
+---
+
+## Props
+
+Every part forwards all native attributes for its element (`className`, `id`,
+`data-*`, `onClick`, `ref`, …). There are no custom props — composition is the
+API. Default styling:
+
+| Part              | Default classes (abridged)                            |
+| ----------------- | ----------------------------------------------------- |
+| `Card`            | `rounded-lg border bg-card shadow-sm`                 |
+| `CardHeader`      | `flex flex-col gap-1.5 p-6`                            |
+| `CardTitle`       | `text-h5 font-semibold text-heading`                  |
+| `CardDescription` | `text-body-xs text-body-secondary`                    |
+| `CardContent`     | `p-6 pt-0`                                             |
+| `CardFooter`      | `flex items-center gap-2 p-6 pt-0`                     |
+
+Override or extend any of them via `className` (merged with `cn`, so later
+utility classes win).
+
+---
+
+## Accessibility
+
+- `CardTitle` renders an `<h3>` — make sure it fits your page's heading order
+  (don't jump from `h1` straight to a card's `h3` if there's no `h2` between).
+- If a whole card is clickable, wrap it in a single `<a>`/`<button>` rather
+  than attaching `onClick` to the `div`, so it's keyboard-reachable.
+- The surface itself is decorative; meaning comes from the content you place
+  inside.

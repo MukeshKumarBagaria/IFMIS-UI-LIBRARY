@@ -362,3 +362,30 @@ A bespoke role for a single product can also be styled inline via `className` �
 ❌ Don't reach into part internals to restyle colours — propose a new prop or role variant instead.
 ❌ Don't recreate the glass pill with custom Tailwind — use `GlassButton` / `GlassSurface`.
 ❌ Don't put logic that's specific to a single product (e.g. tenant switcher) inside the library — wrap it in your own component and slot it through `HeaderActions`.
+
+---
+
+## Responsive behaviour
+
+The Header is a horizontal bar built for desktop-first IFMIS screens. The
+right-side `HeaderActions` cluster keeps consistent spacing; on smaller
+viewports:
+
+- Collapse low-priority actions (language, font-size) into the
+  `AccessibilityMenu` popover rather than showing them inline.
+- The `ProfileMenu` can hide the name/role text and show just the avatar below
+  a breakpoint — pass a compact variant from your app via its props.
+- Keep the brand + primary nav trigger always visible.
+
+```jsx
+<Header>
+  <HeaderActions>
+    <span className="hidden md:inline-flex"><LanguageToggle …/></span>
+    <NotificationButton …/>
+    <ProfileMenu …/>
+  </HeaderActions>
+</Header>
+```
+
+Wrap product-specific or breakpoint-specific controls in your own component and
+slot them through `HeaderActions` — don't fork the Header.

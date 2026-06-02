@@ -1,0 +1,174 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as StatCardStories from "./StatCard.stories";
+
+<Meta of={StatCardStories} title="UI/StatCard/Guide" />
+
+# StatCard
+
+A **tonal dashboard metric card** — a title, a `value / total` counter, a
+ringed icon, and a gradient progress bar. Five tones (`purple`, `green`,
+`red`, `yellow`, `blue`) repaint the surface, the text, the icon ring and the
+progress bar together.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## Tones
+
+```jsx
+import { StatCard } from "@ifmis/ui";
+
+<StatCard tone="purple" title="All Grievance" value={13} total={13} />
+<StatCard tone="green"  title="Resolved"      value={9}  total={13} />
+<StatCard tone="red"    title="Rejected"      value={2}  total={13} />
+<StatCard tone="yellow" title="Pending"       value={5}  total={13} />
+<StatCard tone="blue"   title="Reopened"      value={1}  total={13} />
+```
+
+<Canvas of={StatCardStories.AllTones} />
+
+---
+
+## Progress
+
+By default the bar is **derived from `value / total`** (when both are numbers).
+Override it with an explicit `progress` (0–100) when the bar represents
+something other than the literal ratio:
+
+```jsx
+{/* Derived: 8 / 20 → 40% */}
+<StatCard tone="green" title="Resolved" value={8} total={20} />
+
+{/* Explicit */}
+<StatCard tone="green" title="Resolved" value={8} total={20} progress={65} />
+
+{/* No bar at all */}
+<StatCard tone="red" title="Overdue" value={5} total={12} hideProgress />
+```
+
+<Canvas of={StatCardStories.DerivedProgress} />
+
+The bar exposes `role="progressbar"` with `aria-valuenow/min/max` and an
+`aria-label` (defaults to `"{value} of {total}"`; override with
+`progressLabel`).
+
+---
+
+## Icon
+
+```jsx
+import { CheckCircle } from "@phosphor-icons/react";
+
+<StatCard tone="green" title="Approved" value={9} total={13} icon={<CheckCircle weight="fill" />} />
+<StatCard tone="blue"  title="Open"     value={42}            icon={null} />
+```
+
+- **omit** `icon` → the default Files glyph in the tone colour
+- **`icon={null}`** → no icon (and no ring)
+- **`icon={<Glyph />}`** → custom; inherits the tone colour and is sized to 24px
+
+<Canvas of={StatCardStories.CustomIcon} />
+
+---
+
+## Value without a total
+
+Drop `total` to show a single headline number:
+
+```jsx
+<StatCard tone="blue" title="Open tickets" value={42} icon={null} />
+```
+
+<Canvas of={StatCardStories.Minimal} />
+
+---
+
+## Usage best practices
+
+- **Pick the tone by meaning**, not decoration — e.g. green for resolved, red
+  for rejected/overdue, yellow for pending, blue for neutral, purple for totals.
+- **Keep titles short** ("All Grievance", "Resolved") — long titles truncate
+  with an ellipsis so the card height stays uniform across a grid.
+- **Use `progress` for non-ratio bars.** If the bar tracks something other than
+  `value / total` (e.g. SLA time elapsed), pass `progress` explicitly.
+- **Lay them out in a grid**, not a fixed-width row, so they reflow on smaller
+  screens.
+
+---
+
+## Responsive behaviour
+
+`StatCard` is **`width: 100%`** of its container (the Figma reference width is
+358px). Size it by placing cards in a responsive grid:
+
+```jsx
+<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+  {stats.map((s) => (
+    <StatCard key={s.id} tone={s.tone} title={s.title} value={s.value} total={s.total} />
+  ))}
+</div>
+```
+
+<Canvas of={StatCardStories.DashboardGrid} />
+
+The header row keeps the title + counter on the left and the icon on the right
+(the icon never shrinks); the progress bar always spans the full width.
+
+---
+
+## Props
+
+| Prop                | Type                                          | Default  | Notes                                              |
+| ------------------- | --------------------------------------------- | -------- | -------------------------------------------------- |
+| `tone`              | `purple \| green \| red \| yellow \| blue`    | `purple` | Surface, text, icon ring, progress colours.        |
+| `title`             | node                                          | —        | Card heading (Header-20). Truncates if long.       |
+| `value`             | node                                          | —        | The large primary number.                          |
+| `total`             | node                                          | —        | Rendered as `/ {total}`. Omit for value-only.      |
+| `icon`              | node \| `null`                                | Files    | Override the glyph, or hide with `null`.           |
+| `progress`          | `number` (0–100)                              | derived  | Explicit fill %. Defaults to `value / total`.      |
+| `hideProgress`      | `boolean`                                     | `false`  | Hide the bar.                                       |
+| `progressLabel`     | string                                        | auto     | Accessible label for the bar.                      |
+| `progressClassName` | string                                        | —        | Extra classes for the progress track.              |
+| `className`         | string                                        | —        | Merged onto the card.                              |
+
+All other native `<div>` props (`id`, `data-*`, `aria-*`, `ref`, …) are
+forwarded. `data-tone` is set on the root for downstream styling/testing.
+
+---
+
+## Tokens
+
+The text and icon colours reuse the regular palette steps:
+
+| Tone     | Text + icon glyph | Icon ring (border / fill)     |
+| -------- | ----------------- | ----------------------------- |
+| `purple` | `purple-800`      | `purple-100` / `purple-200`   |
+| `green`  | `green-800`       | `green-100` / `green-200`     |
+| `red`    | `red-800`         | `red-100` / `red-200`         |
+| `yellow` | `yellow-800`      | `yellow-100` / **`yellow-300`** |
+| `blue`   | `blue-800`        | `blue-100` / `blue-200`       |
+
+The pale **surface**, **border**, **progress track**, and **progress fill
+gradient** are bespoke tints, stored as shared tokens in
+`src/styles/themes/_brand.css`:
+
+```css
+--statcard-purple-surface | -border | -track | -fill
+--statcard-green-*  --statcard-red-*  --statcard-yellow-*  --statcard-blue-*
+```
+
+Change a tone's tints in one place to repaint every card of that tone.
+
+Card box: `width 100%`, `padding 24px`, `gap 16px`, `radius 24px`, `border 1px`.
+Icon: `60×60`, `radius 28px`, `6px` ring. Progress: `16px` tall, `radius 16px`.
+
+---
+
+## Accessibility
+
+- The title is a real `<h3>` — make sure it nests correctly under the page
+  heading order (StatCards usually sit under an `<h2>` section heading).
+- The progress bar is a `role="progressbar"` with `aria-valuenow/min/max` and
+  an `aria-label`; set `progressLabel` for a clearer sentence if needed.
+- The default icon is `aria-hidden` — the title + value carry the meaning.

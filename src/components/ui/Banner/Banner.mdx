@@ -1,0 +1,162 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as BannerStories from "./Banner.stories";
+
+<Meta of={BannerStories} title="UI/Banner/Guide" />
+
+# Banner
+
+An **inline notification surface** for in-page status messages. Three semantic
+variants (`danger`, `success`, `info`), each with a default icon and the
+correct ARIA role wired in.
+
+Banners are **persistent and in-flow** — tied to a page section. For transient
+feedback that floats over the UI, use a toast instead.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## Variants
+
+```jsx
+import { Banner } from "@ifmis/ui";
+
+<Banner variant="danger">Unable to save your changes.</Banner>
+<Banner variant="success">All changes synced.</Banner>
+<Banner variant="info">Scheduled maintenance tonight.</Banner>
+```
+
+<Canvas of={BannerStories.AllVariants} />
+
+---
+
+## Title + description
+
+For multi-line messages, compose with the `BannerTitle` and
+`BannerDescription` sub-parts — they inherit the variant colour and give you
+the right typographic hierarchy:
+
+```jsx
+import { Banner, BannerTitle, BannerDescription } from "@ifmis/ui";
+
+<Banner variant="danger">
+  <BannerTitle>Validation failed</BannerTitle>
+  <BannerDescription>
+    Two required fields are missing. Review the highlighted rows and try again.
+  </BannerDescription>
+</Banner>
+```
+
+<Canvas of={BannerStories.WithTitleAndDescription} />
+
+---
+
+## Dismissible
+
+Pass `onDismiss` and a trailing close button appears. Omit it for a
+non-dismissible banner. You own the visibility state:
+
+```jsx
+const [shown, setShown] = useState(true);
+
+{shown && (
+  <Banner variant="info" onDismiss={() => setShown(false)}>
+    New approval workflow is live.
+  </Banner>
+)}
+```
+
+<Canvas of={BannerStories.Dismissible} />
+
+Localise the close button's accessible name with `dismissLabel`.
+
+---
+
+## Icons
+
+```jsx
+import { Trophy } from "@phosphor-icons/react";
+
+<Banner variant="info" icon={null}>Text-only banner.</Banner>
+<Banner variant="success" icon={<Trophy weight="fill" />}>You did it!</Banner>
+```
+
+- **omit** `icon` → the variant default (warning / check / info)
+- **`icon={null}`** → no icon
+- **`icon={<Glyph />}`** → custom; it inherits the variant text colour
+
+<Canvas of={BannerStories.CustomIcon} />
+
+---
+
+## Usage best practices
+
+- **One banner per concern.** Don't stack three info banners — combine into one
+  with a title + description.
+- **Match the variant to severity.** `danger` interrupts screen readers
+  (`role="alert"`); reserve it for blocking problems. Use `info` for neutral
+  notices, `success` for confirmations.
+- **Keep it actionable.** If the user must do something, say what — and put any
+  action inside the description as a link/button.
+- **Don't use a banner for transient feedback** ("Saved!" that vanishes) — that's
+  a toast. Banners persist until the condition clears or the user dismisses.
+
+---
+
+## Responsive behaviour
+
+Banner is **`width: 100%`** of its container by default — the right default for
+the varied layouts teams drop it into (forms, flex rows, grids). Constrain from
+the outside when needed:
+
+```jsx
+<div className="max-w-2xl">
+  <Banner variant="info">Constrained to a readable measure.</Banner>
+</div>
+```
+
+Long copy wraps correctly and the icon stays top-aligned:
+
+<Canvas of={BannerStories.LongCopy} />
+
+---
+
+## Props
+
+### `<Banner>`
+
+| Prop           | Type                          | Default  | Notes                                              |
+| -------------- | ----------------------------- | -------- | -------------------------------------------------- |
+| `variant`      | `danger \| success \| info`   | `info`   | Colour, default icon, and ARIA role.               |
+| `icon`         | node \| `null`                | default  | Override the glyph, or hide with `null`.           |
+| `onDismiss`    | `() => void`                  | —        | When set, renders a trailing close button.         |
+| `dismissLabel` | string                        | `Dismiss`| Accessible label for the close button.             |
+| `role`         | string                        | auto     | Overrides the auto `alert`/`status` role.          |
+| `children`     | node                          | —        | Message — a string, or `BannerTitle`/`Description`.|
+| `className`    | string                        | —        | Merged onto the banner.                            |
+
+`BannerTitle` and `BannerDescription` are plain `<p>` wrappers that take any
+`<p>` attributes. All other native `<div>` attributes flow through to `Banner`.
+
+---
+
+## Tokens
+
+| Variant   | Surface     | Border      | Text + icon |
+| --------- | ----------- | ----------- | ----------- |
+| `danger`  | `red-100`   | `red-200`   | `red-800`   |
+| `success` | `green-100` | `green-200` | `green-800` |
+| `info`    | `blue-100`  | `blue-200`  | `blue-800`  |
+
+Box: `padding 8px`, `radius 12px`, `gap 6px`, body `Text/Body/Medium-14`.
+
+---
+
+## Accessibility
+
+- `danger` → `role="alert"` (assistive tech interrupts immediately).
+- `success` / `info` → `role="status"` (polite live region).
+- Override with the `role` prop for special cases.
+- Default icons are `aria-hidden` — the text carries the meaning.
+- The dismiss button has an accessible name (`dismissLabel`) and a visible
+  focus ring.

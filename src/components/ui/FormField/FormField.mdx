@@ -1,0 +1,100 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as FormFieldStories from "./FormField.stories";
+
+<Meta of={FormFieldStories} title="UI/FormField/Guide" />
+
+# FormField
+
+The **shared shell** behind every IFMIS form control: an optional label (with
+icon + required marker), the control, and an optional subtext (a neutral helper
+line, or a red error banner). It owns the **id + ARIA wiring** so the label,
+error and control are correctly associated.
+
+[`TextField`](?path=/docs/ui-textfield-guide--docs) and
+[`Textarea`](?path=/docs/ui-textarea-guide--docs) are built on it. Use it
+directly to give a **custom** control the same chrome.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## Wrapping a custom control
+
+Pass a **render function** as children — it hands you the wiring to spread onto
+your control:
+
+<Canvas of={FormFieldStories.Basic} />
+
+```jsx
+import { FormField } from "@ifmis/ui";
+
+<FormField label="Country" required helperText="Pick your country.">
+  {({ id, describedBy, invalid }) => (
+    <MySelect id={id} aria-describedby={describedBy} aria-invalid={invalid} />
+  )}
+</FormField>
+```
+
+- `id` → put on the control (ties it to the `<label htmlFor>`).
+- `describedBy` → the subtext id, for the control's `aria-describedby`.
+- `invalid` → `true` when `error` is set, for `aria-invalid`.
+
+You can also pass a plain node as children if you don't need the wiring.
+
+---
+
+## Error vs helper
+
+<Canvas of={FormFieldStories.WithError} />
+
+```jsx
+<FormField label="Account" error="Account not found"> … </FormField>
+<FormField label="Account" helperText="11-digit number"> … </FormField>
+```
+
+`error` renders the red banner (an `role="alert"`) and flips `invalid`; it
+takes precedence over `helperText`.
+
+---
+
+## Shared field styling
+
+For consistent control borders, `FormField` exports `fieldStateClasses` and the
+`FieldIconBox` affix used by the text fields:
+
+```jsx
+import { FormField, fieldStateClasses, FieldIconBox } from "@ifmis/ui";
+
+<div className={cn("h-11 rounded-2xl border px-3", fieldStateClasses.default)}>…</div>
+```
+
+| `fieldStateClasses` key | Look                                   |
+| ----------------------- | -------------------------------------- |
+| `default`               | grey border; hover neutral-100; focus 1.5px purple |
+| `error`                 | red-600 border                         |
+| `disabled`              | grey-200 border, grey-bg               |
+| `fetched`               | grey border, neutral-200 fill          |
+
+---
+
+## Props
+
+| Prop         | Type                                              | Notes                                  |
+| ------------ | ------------------------------------------------- | -------------------------------------- |
+| `label`      | node                                              | Field label.                           |
+| `labelIcon`  | node                                              | 20px icon before the label.            |
+| `required`   | `boolean`                                         | Red asterisk.                          |
+| `error`      | node                                              | Red banner + `invalid`.                |
+| `helperText` | node                                              | Neutral subtext (hidden when `error`). |
+| `htmlFor`    | string                                            | Explicit control id (else generated).  |
+| `children`   | node \| `(field) => node`                         | The control, or a render function.     |
+
+---
+
+## Accessibility
+
+- Generates a stable id for the control and points the `<label>` at it.
+- Wires the subtext to the control via `aria-describedby`; errors render as
+  `role="alert"`.
+- The required asterisk is decorative (`aria-hidden`); convey requirement on
+  the control via `aria-required` / the native `required` attribute.

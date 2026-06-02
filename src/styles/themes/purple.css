@@ -75,6 +75,11 @@
   --surface-border-purple:  #A58FBC;  /* Brand/Surface/Borders/purple     */
   --surface-card-white:     #FFFFFF;  /* Brand/Surface/Cards/White-text   */
 
+  /* ---- Decorative gradients ------------------------------------------- */
+  /* CheckboxCard "checked" surfaces, 105deg purple sweep.                  */
+  --gradient-card-checked:       linear-gradient(105deg, #48146C 0.35%, #A461D1 100%);
+  --gradient-card-checked-hover: linear-gradient(105deg, #3A1056 0.35%, #8D3AC5 100%);
+
   /* =====================================================================
    * 3. TEXT TOKENS
    * Typography colors used directly (no alpha modifiers required).
@@ -83,6 +88,7 @@
   --text-subheading:     #371452;  /* Sub-header text                      */
   --text-body-primary:   #2E2E2E;  /* Primary body text                    */
   --text-body-secondary: #595959;  /* Secondary / muted body text          */
+  --text-body-disabled:  #CCCCCC;  /* Brand/Text/Body/Disabled             */
 
   /* =====================================================================
    * 4. SEMANTIC TOKENS

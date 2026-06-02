@@ -1,0 +1,122 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as ToggleStories from "./Toggle.stories";
+
+<Meta of={ToggleStories} title="UI/Toggle/Guide" />
+
+# Toggle
+
+An accessible, labelled **on/off switch** rendered as a tinted pill. The whole
+pill is the control — click anywhere, or focus it and press <kbd>Space</kbd> /
+<kbd>Enter</kbd>, to flip it. The on/off value repaints the pill surface, the
+track and the label together.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## States
+
+```jsx
+import { Toggle } from "@ifmis/ui";
+
+<Toggle defaultChecked>Toggle on</Toggle>   {/* on  → purple pill   */}
+<Toggle>Toggle on</Toggle>                   {/* off → grey pill     */}
+```
+
+<Canvas of={ToggleStories.States} />
+
+---
+
+## Controlled vs uncontrolled
+
+**Uncontrolled** — let the component track its own value, read changes via
+`onCheckedChange`:
+
+```jsx
+<Toggle defaultChecked onCheckedChange={(next) => save(next)}>
+  Email alerts
+</Toggle>
+```
+
+**Controlled** — you own the value (e.g. it comes from form state):
+
+```jsx
+const [on, setOn] = useState(false);
+
+<Toggle checked={on} onCheckedChange={setOn}>Auto-save</Toggle>;
+```
+
+<Canvas of={ToggleStories.Controlled} />
+
+---
+
+## Sizes
+
+Two sizes; `md` is the default and matches the Figma frame.
+
+```jsx
+<Toggle size="sm" defaultChecked>Small</Toggle>
+<Toggle size="md" defaultChecked>Medium</Toggle>
+```
+
+<Canvas of={ToggleStories.Sizes} />
+
+---
+
+## Label position
+
+```jsx
+<Toggle labelPosition="end" defaultChecked>Label after</Toggle>
+<Toggle labelPosition="start" defaultChecked>Label before</Toggle>
+```
+
+<Canvas of={ToggleStories.LabelPosition} />
+
+---
+
+## Disabled
+
+```jsx
+<Toggle disabled defaultChecked>Toggle on</Toggle>
+```
+
+<Canvas of={ToggleStories.Disabled} />
+
+---
+
+## Props
+
+| Prop              | Type                         | Default | Notes                                          |
+| ----------------- | ---------------------------- | ------- | ---------------------------------------------- |
+| `checked`         | `boolean`                    | —       | Controlled value. Pair with `onCheckedChange`. |
+| `defaultChecked`  | `boolean`                    | `false` | Uncontrolled initial value.                    |
+| `onCheckedChange` | `(checked: boolean) => void` | —       | Fires with the next value on every flip.       |
+| `size`            | `sm \| md`                   | `md`    | Switch + label size.                           |
+| `labelPosition`   | `start \| end`               | `end`   | Label before or after the switch.              |
+| `disabled`        | `boolean`                    | `false` | Greys out and blocks interaction.              |
+| `children`        | node                         | —       | The label. Omit for a bare switch.             |
+| `className`       | string                       | —       | Merged onto the pill.                          |
+
+Other `<button>` attributes (`id`, `name`, `aria-*`, `data-*`, `ref`…) are
+forwarded.
+
+---
+
+## Tokens
+
+| State | Pill surface              | Track       | Thumb | Label            |
+| ----- | ------------------------- | ----------- | ----- | ---------------- |
+| on    | `purple-50` (#F3ECFA)     | `purple-600`| white | `heading`        |
+| off   | `surface-grey-bg` (#F7F7F7)| `grey-300`  | white | `body-secondary` |
+
+Pill: `padding 8px 12px` (md), `radius 16px`, `gap 6px`.
+
+---
+
+## Accessibility
+
+- Renders as `role="switch"` with `aria-checked`, so assistive tech announces
+  it as an on/off control and toggles with <kbd>Space</kbd> / <kbd>Enter</kbd>.
+- The visible label is the accessible name. For a **bare** switch (no
+  `children`), pass an `aria-label` so the control isn't anonymous.
+- A visible focus ring (`ring-ring`) is shown on keyboard focus.

@@ -40,7 +40,7 @@ const buttonVariants = cva(
           "hover:bg-purple-700",
           "active:bg-purple-800",
           "focus-visible:bg-purple-700 focus-visible:border-blue-400",
-          "disabled:bg-[#CCCCCC] disabled:text-grey-100 disabled:border-transparent",
+          "disabled:bg-body-disabled disabled:text-grey-100 disabled:border-transparent",
         ].join(" "),
         // Secondary — outlined, purple label, tinted fills on hover/press.
         secondary: [
@@ -48,7 +48,7 @@ const buttonVariants = cva(
           "hover:bg-purple-50 hover:border-purple-700 hover:text-purple-700",
           "active:bg-purple-100 active:border-purple-800 active:text-purple-800",
           "focus-visible:bg-transparent focus-visible:border-blue-400",
-          "disabled:bg-[#CCCCCC] disabled:text-grey-100 disabled:border-transparent",
+          "disabled:bg-body-disabled disabled:text-grey-100 disabled:border-transparent",
         ].join(" "),
         // Tertiary — text-only, no fill; focus shows a 2px underline.
         tertiary: [
@@ -56,7 +56,7 @@ const buttonVariants = cva(
           "hover:text-purple-700",
           "active:text-purple-800",
           "focus-visible:text-purple-700 focus-visible:border-blue-400 focus-visible:rounded-none",
-          "disabled:text-[#CCCCCC]",
+          "disabled:text-body-disabled",
         ].join(" "),
         // Neutral — outlined in the muted grey body colour. Same geometry as
         // secondary, but the palette is neutral rather than brand purple, for
@@ -67,7 +67,7 @@ const buttonVariants = cva(
           "hover:bg-surface-grey-bg",
           "active:bg-grey-100",
           "focus-visible:bg-transparent focus-visible:border-blue-400",
-          "disabled:bg-[#CCCCCC] disabled:text-grey-100 disabled:border-transparent",
+          "disabled:bg-body-disabled disabled:text-grey-100 disabled:border-transparent",
         ].join(" "),
       },
       size: {

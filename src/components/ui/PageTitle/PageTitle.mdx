@@ -158,3 +158,25 @@ Google Sans Flex, 24px, weight 600.
 ✅ Put exactly one `<PageTitle>` at the top of each screen.
 ✅ Make the last breadcrumb the page you're on (no `href`).
 ❌ Don't wrap the title in another heading — it's already an `<h1>`.
+
+---
+
+## Responsive behaviour
+
+`PageTitle` is **full-width** and adapts on its own: the title sits left, the
+diamond motif bleeds off the right, and the breadcrumb wraps above the title on
+narrow screens. The title uses the responsive `<Heading>` scale, so it stays
+legible down to mobile.
+
+```jsx
+<div className="w-full">
+  <PageTitle
+    title="Voucher verification"
+    breadcrumb={[{ label: "Home", href: "/" }, { label: "Vouchers" }]}
+    onBack={() => history.back()}
+  />
+</div>
+```
+
+Keep the title to a single line where possible; very long titles wrap but push
+the diamond motif — prefer a concise title plus a `SectionTitle` below.

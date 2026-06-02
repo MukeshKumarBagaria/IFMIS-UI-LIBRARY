@@ -149,3 +149,22 @@ Chip: `padding 4px 8px`, `border-radius 16px`, `gap 10px`, text 14px / 600.
 ✅ Keep the current page as the last item (or mark it `current`).
 ✅ Use `href` for real navigation so links are crawlable and openable in a new tab.
 ❌ Don't make the current crumb a link — it's the page you're already on.
+
+---
+
+## Responsive behaviour
+
+Breadcrumb chips **wrap onto multiple lines** on narrow screens (they sit in a
+flex row with a gap). For deep trails on mobile, collapse the middle crumbs and
+keep the first + last:
+
+```jsx
+{/* Show all on desktop; first + current on mobile */}
+const trail = isMobile
+  ? [items[0], { label: "…", current: false }, items[items.length - 1]]
+  : items;
+
+<Breadcrumb items={trail} />
+```
+
+Keep labels short — long crumb labels are the main cause of awkward wrapping.

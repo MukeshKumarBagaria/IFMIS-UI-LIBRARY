@@ -1,0 +1,171 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as ButtonStories from "./Button.stories";
+
+<Meta of={ButtonStories} title="UI/Button/Guide" />
+
+# Button
+
+The design-system **base button**. Use it directly for any interaction;
+specific call-to-action shapes (Submit, Save, Reject…) live in
+[`FormButton`](?path=/docs/ui-formbutton-guide--docs) and consume the same
+tokens.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## Variants
+
+```jsx
+import { Button } from "@ifmis/ui";
+
+<Button variant="primary">Continue</Button>     {/* solid purple */}
+<Button variant="secondary">Cancel</Button>      {/* outlined purple */}
+<Button variant="tertiary">Skip</Button>         {/* text-only */}
+<Button variant="neutral">Back</Button>          {/* outlined grey */}
+```
+
+Each variant ships with hover, active, focus and disabled treatments — you
+never wire those up by hand. The focus ring is **keyboard-only** (the spec's
+`:focus-visible`), so mouse clicks don't pollute the UI with a ring.
+
+---
+
+## Sizes
+
+```jsx
+<Button size="standard">Continue</Button>   {/* 44px tall, default */}
+<Button size="small">Continue</Button>      {/* 32px tall */}
+```
+
+Icons scale with the size automatically — pass any node and the button sizes
+it for you.
+
+---
+
+## Icons
+
+```jsx
+import { CaretRight, FloppyDisk } from "@phosphor-icons/react";
+
+<Button leftIcon={<FloppyDisk />}>Save</Button>
+<Button rightIcon={<CaretRight />}>Continue</Button>
+<Button leftIcon={<FloppyDisk />} rightIcon={<CaretRight />}>Save and continue</Button>
+```
+
+Icons inherit `currentColor`, so they always match the button's label.
+
+---
+
+## Loading state
+
+```jsx
+const [saving, setSaving] = useState(false);
+
+<Button loading={saving} onClick={save}>Save</Button>
+```
+
+`loading` swaps the left icon for a spinner **and** disables the button (no
+need to also set `disabled`).
+
+---
+
+## Disabled
+
+```jsx
+<Button disabled>Continue</Button>
+<Button variant="secondary" disabled>Cancel</Button>
+```
+
+Disabled state uses the design-system disabled tokens and blocks pointer
+events. Pair with the native `disabled` HTML attribute.
+
+---
+
+## `asChild` — wrap a link or any other element
+
+Render the button styles around a custom element (typically a link) without
+nesting `<button>` inside `<a>`. Backed by Radix's `<Slot>`:
+
+```jsx
+import { Button } from "@ifmis/ui";
+import { Link } from "react-router-dom";
+
+<Button asChild>
+  <Link to="/dashboard">Open dashboard</Link>
+</Button>
+```
+
+When `asChild` is on:
+- The child element receives the button styles via prop forwarding.
+- Icon props (`leftIcon` / `rightIcon` / `loading`) are **ignored** — render
+  whatever you want inside the link yourself.
+
+---
+
+## When to use which variant
+
+| Situation                                            | Variant     |
+| ---------------------------------------------------- | ----------- |
+| Single primary action on a screen / dialog          | `primary`   |
+| Cancel/back action next to a primary                 | `secondary` |
+| In-line link-like action ("Forgot password?")        | `tertiary`  |
+| Low-emphasis action that shouldn't compete (e.g.   "Back") | `neutral`   |
+
+Pair primary + secondary, not two primaries — keep the visual hierarchy
+clear.
+
+---
+
+## Responsive behaviour
+
+`Button` is **content-sized** by default (`inline-flex`). For full-width
+buttons on mobile, stretch with a utility:
+
+```jsx
+<Button className="w-full sm:w-auto">Continue</Button>
+```
+
+In a responsive button row, stack vertically on small screens:
+
+```jsx
+<div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+  <Button variant="secondary" className="w-full sm:w-auto">Cancel</Button>
+  <Button className="w-full sm:w-auto">Continue</Button>
+</div>
+```
+
+---
+
+## Props
+
+| Prop        | Type                                                 | Default     | Notes                                                |
+| ----------- | ---------------------------------------------------- | ----------- | ---------------------------------------------------- |
+| `variant`   | `primary \| secondary \| tertiary \| neutral`        | `primary`   | Colour treatment.                                    |
+| `size`      | `standard \| small`                                  | `standard`  | 44 px / 32 px tall.                                  |
+| `leftIcon`  | node                                                 | —           | Icon before the label.                               |
+| `rightIcon` | node                                                 | —           | Icon after the label.                                |
+| `loading`   | `boolean`                                            | `false`     | Spinner + disable.                                   |
+| `disabled`  | `boolean`                                            | `false`     | Standard HTML disabled.                              |
+| `asChild`   | `boolean`                                            | `false`     | Render as the child element (Radix `<Slot>`).        |
+| `className` | string                                               | —           | Merged onto the button.                              |
+
+All other native `<button>` attributes (`type`, `name`, `form`, `onClick`,
+`aria-*`, `ref`, …) are forwarded. **Default `type` is `"button"`** — call
+`type="submit"` when you want the form to submit.
+
+---
+
+## Accessibility
+
+- Renders a real `<button>` (or, with `asChild`, your chosen element) — full
+  keyboard and AT support for free.
+- Focus ring is `:focus-visible` only, so it appears for keyboard users and
+  not for mouse clicks.
+- `loading` automatically disables the button so it can't be clicked twice
+  in flight.
+- For icon-only buttons, always pass an `aria-label`:
+
+```jsx
+<Button aria-label="Open menu" leftIcon={<List />} />
+```

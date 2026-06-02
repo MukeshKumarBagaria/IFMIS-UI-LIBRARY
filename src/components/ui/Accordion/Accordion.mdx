@@ -207,3 +207,30 @@ PageTitle      → h1
 - Collapsed panels are `inert` (not focusable, hidden from screen readers).
 - The number chip and arrow are decorative (`aria-hidden`); badge text is read.
 - Animation respects `prefers-reduced-motion`.
+
+---
+
+## Usage best practices
+
+- **One `Accordion` per form** — don't nest accordions; use sections within a
+  single stack so only one open/close model governs the screen.
+- **Keep panels mounted** (the default) for form sections so field state and
+  validation survive a collapse. Only set `unmountOnCollapse` for heavy,
+  non-form content.
+- **Drive completion with the `Badge`** in the header so users can scan which
+  sections are done at a glance.
+- **Use `type="single"`** for wizards (one step at a time) and
+  `type="multiple"` for reference content the user may want open at once.
+
+## Responsive behaviour
+
+The accordion is **full-width** and stacks vertically, so it adapts to any
+container without configuration. On narrow screens the header row keeps the
+number chip, title and badge on one line and wraps the title if needed.
+
+```jsx
+{/* Constrain the reading width on large screens, full-bleed on mobile */}
+<div className="mx-auto w-full max-w-3xl">
+  <Accordion defaultValue="s1">…</Accordion>
+</div>
+```

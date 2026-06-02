@@ -1,0 +1,126 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as SelectionPillStories from "./SelectionPill.stories";
+
+<Meta of={SelectionPillStories} title="UI/SelectionPill/Guide" />
+
+# SelectionPill
+
+A toggleable **selection chip** — use it for filters, tags, categories and any
+single- or multi-select set. Selected pills fill with Purple-600; unselected
+pills sit quietly on the grey surface. A leading check icon ships by default.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## States
+
+```jsx
+import { SelectionPill } from "@ifmis/ui";
+
+<SelectionPill defaultSelected>Selected</SelectionPill>
+<SelectionPill>Un-selected</SelectionPill>
+```
+
+<Canvas of={SelectionPillStories.States} />
+
+---
+
+## Controlled vs uncontrolled
+
+**Uncontrolled** — the pill tracks its own value:
+
+```jsx
+<SelectionPill defaultSelected onSelectedChange={(on) => console.log(on)}>
+  Roads
+</SelectionPill>
+```
+
+**Controlled** — you own the value. This is the usual choice for a group,
+where one parent holds the whole selection:
+
+<Canvas of={SelectionPillStories.MultiSelectGroup} />
+
+```jsx
+const [picked, setPicked] = useState(new Set(["Health"]));
+
+const toggle = (id) => (on) =>
+  setPicked((prev) => {
+    const next = new Set(prev);
+    on ? next.add(id) : next.delete(id);
+    return next;
+  });
+
+{options.map((o) => (
+  <SelectionPill key={o} selected={picked.has(o)} onSelectedChange={toggle(o)}>
+    {o}
+  </SelectionPill>
+))}
+```
+
+---
+
+## Sizes
+
+```jsx
+<SelectionPill size="sm" defaultSelected>Small</SelectionPill>
+<SelectionPill size="md" defaultSelected>Medium</SelectionPill>
+```
+
+<Canvas of={SelectionPillStories.Sizes} />
+
+---
+
+## Icons are dynamic
+
+- **omit** `icon` → a check (shown in both states).
+- **`icon={null}`** → label only.
+- **`icon={<YourGlyph />}`** → custom; inherits the label colour + size.
+
+```jsx
+import { Plus } from "@phosphor-icons/react";
+
+<SelectionPill icon={<Plus weight="bold" />} defaultSelected>Add filter</SelectionPill>
+<SelectionPill icon={null} defaultSelected>No icon</SelectionPill>
+```
+
+<Canvas of={SelectionPillStories.IconOptions} />
+
+---
+
+## Props
+
+| Prop               | Type                          | Default | Notes                                            |
+| ------------------ | ----------------------------- | ------- | ------------------------------------------------ |
+| `selected`         | `boolean`                     | —       | Controlled value. Pair with `onSelectedChange`.  |
+| `defaultSelected`  | `boolean`                     | `false` | Uncontrolled initial value.                      |
+| `onSelectedChange` | `(selected: boolean) => void` | —       | Fires with the next value on every toggle.       |
+| `size`             | `sm \| md`                    | `md`    | Chip size.                                        |
+| `icon`             | node \| `null`                | check   | Leading glyph; `null` hides it.                  |
+| `disabled`         | `boolean`                     | `false` | Dims and blocks interaction.                     |
+| `children`         | node                          | —       | The label.                                       |
+| `className`        | string                        | —       | Merged onto the pill.                            |
+
+Other `<button>` attributes (`id`, `name`, `aria-*`, `data-*`, `ref`…) are
+forwarded.
+
+---
+
+## Tokens
+
+| State      | Surface                     | Label / icon | Hover        |
+| ---------- | --------------------------- | ------------ | ------------ |
+| selected   | `purple-600` (#701FA7)      | white        | `purple-700` |
+| unselected | `surface-grey-bg` (#F7F7F7) | `grey-400`   | `grey-100`   |
+
+Pill: `padding 6px 12px` (md), `radius 16px`, `gap 6px`, label 14px / 600.
+
+---
+
+## Accessibility
+
+- Renders as a toggle button with `aria-pressed`, so assistive tech announces
+  the pressed/selected state and it toggles with <kbd>Space</kbd> /
+  <kbd>Enter</kbd>.
+- The label is the accessible name; the default check icon is `aria-hidden`.
+- A visible focus ring (`ring-ring`) is shown on keyboard focus.

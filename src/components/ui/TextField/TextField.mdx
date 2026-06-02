@@ -1,0 +1,174 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as TextFieldStories from "./TextField.stories";
+
+<Meta of={TextFieldStories} title="UI/TextField/Guide" />
+
+# TextField
+
+The IFMIS **labelled text input**. A label (with an optional icon and a
+required marker), a bordered control that can hold a leading icon, the input,
+and trailing content (e.g. a boxed calendar/caret affix), and a helper or
+error subtext below.
+
+Built on [`FormField`](?path=/docs/ui-formfield-guide--docs), so labels,
+errors and the input are correctly wired for assistive tech.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+> **TextField vs Input** — `TextField` is the full design-system field (label +
+> states + subtext, 44px / radius-16). [`Input`](?path=/docs/ui-input-guide--docs)
+> is the low-level bare input. Reach for `TextField` in forms.
+
+---
+
+## Basics
+
+```jsx
+import { TextField } from "@ifmis/ui";
+
+<TextField label="Full name" placeholder="Enter name" />
+<TextField label="PAN number" required />
+```
+
+<Canvas of={TextFieldStories.Default} />
+
+---
+
+## States
+
+```jsx
+<TextField label="Default" placeholder="Placeholder" />
+<TextField label="Fetched" value="Read-only value" state="fetched" readOnly />
+<TextField label="Disabled" disabled />
+<TextField label="Error" error="Something is wrong" />
+```
+
+<Canvas of={TextFieldStories.States} />
+
+| State     | Look                                                        | How to trigger              |
+| --------- | ----------------------------------------------------------- | --------------------------- |
+| default   | grey border, white; hover → neutral-100; focus → 1.5px purple | —                           |
+| `fetched` | grey border, neutral-200 fill (read-only backend value)     | `state="fetched"`           |
+| disabled  | grey-200 border, grey-bg                                     | `disabled`                  |
+| error     | red-600 border + red subtext banner                         | `error="…"`                 |
+
+Hover and focus (active) are native pseudo-states — you never set them.
+
+---
+
+## Error & helper subtext
+
+```jsx
+<TextField label="Email" error="Enter a valid email address" />
+<TextField label="Username" helperText="3–20 characters, letters and digits." />
+```
+
+<Canvas of={TextFieldStories.ErrorState} />
+<Canvas of={TextFieldStories.HelperText} />
+
+`error` reddens the field, shows the red banner (an `role="alert"`), and sets
+`aria-invalid`. `helperText` shows a neutral line and is hidden when an `error`
+is present.
+
+---
+
+## Icons & affixes
+
+```jsx
+import { User, CalendarDots, CaretDown, MagnifyingGlass } from "@phosphor-icons/react";
+import { TextField, FieldIconBox } from "@ifmis/ui";
+
+{/* Icon before the label */}
+<TextField label="Full name" labelIcon={<User />} />
+
+{/* Leading icon inside the field */}
+<TextField label="Search" startIcon={<MagnifyingGlass />} />
+
+{/* Boxed trailing affix — date field */}
+<TextField
+  label="Date of birth"
+  placeholder="DD/MM/YYYY"
+  endContent={<FieldIconBox><CalendarDots /><CaretDown /></FieldIconBox>}
+/>
+```
+
+<Canvas of={TextFieldStories.WithTrailingAffix} />
+<Canvas of={TextFieldStories.WithStartIcon} />
+
+`FieldIconBox` is the grey boxed affix from the design (auto-sizes icons to
+16px). `endContent` accepts any node — use it for a clear button, a unit, a
+"verify" link, etc.
+
+---
+
+## Controlled vs uncontrolled
+
+It's a thin layer over a native `<input>`, so everything flows through:
+
+```jsx
+{/* Uncontrolled */}
+<TextField label="Name" defaultValue="Amit" />
+
+{/* Controlled */}
+const [v, setV] = useState("");
+<TextField label="Name" value={v} onChange={(e) => setV(e.target.value)} />
+```
+
+<Canvas of={TextFieldStories.Controlled} />
+
+---
+
+## Usage best practices
+
+- **Always pass a `label`.** It's wired to the input via `htmlFor`/`id`.
+- **Clear the error as the user fixes it** — set `error` only while the value
+  is invalid, so the red state doesn't linger.
+- **Use `fetched` for server-filled, read-only values**, not `disabled` —
+  disabled implies "you can't act here," fetched implies "this came from data."
+- **Set the right `type`** (`email`, `tel`, `number`, …) and `inputMode` so
+  mobile keyboards and validation behave.
+
+---
+
+## Responsive behaviour
+
+`TextField` is **`width: 100%`** of its container — size it by constraining the
+parent, and lay fields out in a responsive grid:
+
+```jsx
+<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+  <TextField label="First name" />
+  <TextField label="Last name" />
+</div>
+```
+
+---
+
+## Props
+
+| Prop            | Type                                         | Default   | Notes                                            |
+| --------------- | -------------------------------------------- | --------- | ------------------------------------------------ |
+| `label`         | node                                         | —         | Field label (wired to the input).                |
+| `labelIcon`     | node                                         | —         | 20px icon before the label.                      |
+| `required`      | `boolean`                                    | `false`   | Red asterisk + `aria-required`.                  |
+| `error`         | node                                         | —         | Reddens field + red banner + `aria-invalid`.     |
+| `helperText`    | node                                         | —         | Neutral subtext (hidden when `error`).           |
+| `state`         | `default \| error \| disabled \| fetched`    | `default` | `error`/`disabled` are usually inferred.         |
+| `startIcon`     | node                                         | —         | Inline leading icon (20px).                      |
+| `endContent`    | node                                         | —         | Trailing content (e.g. `FieldIconBox`).          |
+| `boxClassName` / `inputClassName` / `className` | string                   | —         | Box / input / wrapper class hooks.               |
+
+All native `<input>` attributes (`type`, `value`, `defaultValue`, `onChange`,
+`name`, `placeholder`, `disabled`, `readOnly`, `inputMode`, `ref`, …) are
+forwarded to the input.
+
+---
+
+## Accessibility
+
+- Label ↔ input linked via `htmlFor`/`id`; clicking the label focuses the field.
+- `error` sets `aria-invalid` and the banner is an `role="alert"`, tied to the
+  input via `aria-describedby`. Helper text is described the same way.
+- `required` sets `aria-required`; pair with the native `required` attribute
+  for real validation.
+- Focus shows the purple active border + ring (`:focus-within`).

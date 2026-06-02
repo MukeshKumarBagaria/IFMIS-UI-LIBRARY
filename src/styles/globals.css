@@ -89,6 +89,7 @@
   --color-subheading: var(--text-subheading);
   --color-body-primary: var(--text-body-primary);
   --color-body-secondary: var(--text-body-secondary);
+  --color-body-disabled: var(--text-body-disabled);
 
   /* =====================================================================
    * Brand scales — exposed as Tailwind utilities
@@ -213,6 +214,11 @@
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
+
+  /* =====================================================================
+   * Shadows — Figma "Card shadows" (0 0 25px rgba(0,0,0,0.1))
+   * ===================================================================== */
+  --shadow-card: 0 0 25px rgba(0, 0, 0, 0.1);
 
   /* =====================================================================
    * Typography

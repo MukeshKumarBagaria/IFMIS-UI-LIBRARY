@@ -1,0 +1,213 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as OtpDialogStories from "./OtpDialog.stories";
+
+<Meta of={OtpDialogStories} title="UI/OtpDialog/Guide" />
+
+# OtpDialog
+
+The **E-Sign OTP** dialog panel: a purple header (info + title + close), a body
+(prompt, the masked **contacts** the code was sent to, a 6-box code input, and
+an error/success banner), and a footer with a **resend countdown**, a **Back**
+button, and **Resend OTP**.
+
+It's the richer sibling of [`AadhaarESign`](?path=/docs/ui-aadhaaresign-guide--docs)
+— both share the [`OtpInput`](?path=/docs/ui-otpinput-guide--docs) primitive.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+> This is the dialog **panel** — render it inside your app's modal/overlay; it
+> exposes `role="dialog"` and is labelled by its header.
+
+---
+
+## States
+
+```jsx
+import { OtpDialog } from "@ifmis/ui";
+
+<OtpDialog contacts={["*******789", "ad******@gmail.com"]} onComplete={verify} />
+<OtpDialog state="error" defaultValue="245143" />
+<OtpDialog state="success" defaultValue="245143" />
+```
+
+<Canvas of={OtpDialogStories.Default} />
+<Canvas of={OtpDialogStories.Error} />
+<Canvas of={OtpDialogStories.Success} />
+
+---
+
+## The resend countdown
+
+The footer timer is **managed internally** from `resendDelay` (default 30s).
+**Resend OTP** is disabled while it counts down and enables at 0; clicking it
+fires `onResend` and **restarts** the timer.
+
+```jsx
+<OtpDialog
+  resendDelay={30}
+  onResend={() => api.resendOtp()}   // timer restarts automatically
+/>
+```
+
+<Canvas of={OtpDialogStories.ResendReady} />
+
+Need full control (e.g. the server dictates the remaining time)? Pass
+`secondsRemaining` and tick it yourself:
+
+```jsx
+const [left, setLeft] = useState(30);
+useEffect(() => {
+  const t = setInterval(() => setLeft((s) => Math.max(0, s - 1)), 1000);
+  return () => clearInterval(t);
+}, []);
+
+<OtpDialog secondsRemaining={left} onResend={() => { resend(); setLeft(30); }} />
+```
+
+Customise the footer text with `formatResendText`:
+
+```jsx
+<OtpDialog formatResendText={(s) => (s > 0 ? `Resend available in ${s}s` : "Didn't get it?")} />
+```
+
+---
+
+## Wiring the actions
+
+Everything is a callback — easy to integrate:
+
+<Canvas of={OtpDialogStories.Interactive} />
+
+```jsx
+const [code, setCode] = useState("");
+const [state, setState] = useState("default");
+
+<OtpDialog
+  contacts={["*******789", "ad******@gmail.com"]}
+  value={code}
+  onChange={(v) => { setCode(v); setState("default"); }}   // clear error as they fix it
+  state={state}
+  onComplete={async (c) => setState((await verify(c)) ? "success" : "error")}
+  onResend={() => { setCode(""); api.resendOtp(); }}
+  onBack={() => router.back()}
+  onClose={() => modal.close()}
+/>;
+```
+
+- `onComplete` fires once all digits are entered — ideal for auto-verifying.
+- `onChange` lets you clear the `error` state as the user edits.
+- `onBack` / `onClose` / `onResend` are plain handlers.
+
+---
+
+## Contacts list
+
+Pass the masked destinations the code was sent to. Hide the box with `[]` /
+`null`:
+
+```jsx
+<OtpDialog contacts={["*******789", "ad******@gmail.com"]} />
+<OtpDialog contacts={["ad******@gmail.com"]} />   {/* email only */}
+<OtpDialog contacts={null} />                      {/* no contact box */}
+```
+
+> **Mask PII before passing it in** — the component renders the strings as-is.
+
+---
+
+## Reusable beyond E-Sign
+
+Change `length`, `heading`, `description`, and labels for any OTP flow:
+
+```jsx
+<OtpDialog
+  title="Verify phone"
+  heading="Enter code"
+  description="We texted a 4-digit code to:"
+  contacts={["+91 ******789"]}
+  length={4}
+  showBack={false}
+  resendLabel="Send again"
+/>
+```
+
+---
+
+## No Back button
+
+```jsx
+<OtpDialog showBack={false} />
+```
+
+<Canvas of={OtpDialogStories.NoBackButton} />
+
+---
+
+## Responsive behaviour
+
+The panel is **`width: 100%` capped at 550px** (the Figma width). The footer
+**wraps** on narrow screens (timer text drops above the buttons), and the code
+boxes use a smaller gap on mobile (via `OtpInput`). Render inside a centered
+modal:
+
+```jsx
+<div className="fixed inset-0 grid place-items-center bg-black/40 p-4">
+  <OtpDialog {...props} />
+</div>
+```
+
+---
+
+## Props
+
+| Prop                | Type                              | Default              | Notes                                          |
+| ------------------- | --------------------------------- | -------------------- | ---------------------------------------------- |
+| `title`             | node                              | `E - Sign`           | Header title.                                  |
+| `headerIcon`        | node \| `null`                    | info badge           | Header glyph; `null` hides it.                 |
+| `heading`           | node                              | `Enter OTP`          | Body heading (Header-18).                      |
+| `description`       | node                              | 6-digit prompt       | Text above the contact list.                   |
+| `contacts`          | `node[]` \| `null`                | sample 2             | Masked destinations; `[]`/`null` hides box.    |
+| `length`            | `number`                          | `6`                  | Number of code boxes.                          |
+| `value` / `defaultValue` | `string`                     | —                    | Controlled / uncontrolled code.                |
+| `onChange`          | `(value: string) => void`         | —                    | Fires on every change.                         |
+| `onComplete`        | `(value: string) => void`         | —                    | Fires once when all boxes fill.                |
+| `state`             | `default \| error \| success`     | `default`            | Boxes + banner.                                |
+| `errorMessage` / `successMessage` | node                | sensible             | Banner copy.                                   |
+| `resendDelay`       | `number`                          | `30`                 | Internal countdown start (seconds).            |
+| `secondsRemaining`  | `number`                          | —                    | Controlled timer override.                     |
+| `onResend`          | `() => void`                      | —                    | Resend handler; restarts the timer.            |
+| `resendLabel`       | node                              | `Resend OTP`         | Resend button label.                           |
+| `resendDisabled`    | `boolean`                         | `false`              | Force-disable resend.                          |
+| `formatResendText`  | `(seconds: number) => node`       | "You can resend …"   | Footer text builder.                           |
+| `showBack`          | `boolean`                         | `true`               | Show the Back button.                          |
+| `backLabel` / `onBack` | node / `() => void`            | `Back` / —           | Back button.                                   |
+| `onClose`           | `() => void`                      | —                    | X handler; omit to hide the X.                 |
+| `closeLabel`        | string                            | `Close`              | Accessible name for the X.                     |
+| `disabled`          | `boolean`                         | `false`              | Disable inputs + actions.                      |
+| `className`         | string                            | —                    | Merged onto the panel.                         |
+
+All other native `<div>` props are forwarded; `data-state` reflects the state.
+
+---
+
+## Tokens
+
+| Part            | Token(s)                                                |
+| --------------- | ------------------------------------------------------- |
+| Header          | `bg-purple-50`, title `text-heading`, info `text-subheading` |
+| Body / heading  | `bg-surface-card`, `text-body-primary`                  |
+| Contacts box    | `bg-neutral-50`, list text `text-subheading`            |
+| Boxes / banners | via `OtpInput` + `red-*` / `green-*` (see OtpInput)      |
+| Footer          | `bg-surface-grey-bg`; Back = `Button variant="neutral"`, Resend = `Button variant="primary"` |
+
+Panel: `radius 24px`, `shadow-card`, `overflow-hidden`.
+
+---
+
+## Accessibility
+
+- `role="dialog"` labelled by the header title.
+- The code input is a labelled group of numeric `<input>`s (see `OtpInput`).
+- Error banner is `role="alert"`; success banner is `role="status"`.
+- Back / Resend / Close are real `Button`s / buttons with focus rings; Resend's
+  disabled state during the countdown is conveyed natively.

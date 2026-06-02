@@ -83,3 +83,31 @@ Pill: `padding 4px 12px`, `radius 16px`, `gap 6px`, label 14px / 600.
 The label carries the meaning, so the default icons are `aria-hidden`. If you
 render a badge with **no text**, add an accessible name yourself (e.g.
 `aria-label`) so the status isn't lost to screen readers.
+
+---
+
+## Usage best practices
+
+- **Let the label carry the meaning.** Keep it to one or two words ("Complete",
+  "3 errors") — the colour is reinforcement, not the message.
+- **Match the variant to status semantics**, not to decoration: `success` for
+  done, `danger` for blocking, `pending` for in-progress, `info` for neutral.
+- **Don't use a Badge as a button.** It's a static indicator — for a clickable
+  chip use `SelectionPill`.
+
+## Responsive behaviour
+
+Badges are **inline and `shrink-0`**, so they never squash in a flex row. In a
+wrapping row of badges, add a `gap` and let them flow onto multiple lines:
+
+```jsx
+<div className="flex flex-wrap items-center gap-2">
+  {flags.map((f) => (
+    <Badge key={f.id} variant={f.variant}>{f.label}</Badge>
+  ))}
+</div>
+```
+
+For a badge that must sit tight against a long, truncating title, keep the
+title in a `min-w-0 truncate` element and the badge as a sibling so the badge
+stays fully visible while the title ellipsises.

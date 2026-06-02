@@ -49,6 +49,60 @@ export type { SectionTitleProps } from "./components/ui/SectionTitle";
 export { Badge, badgeVariants } from "./components/ui/Badge";
 export type { BadgeProps, BadgeVariant } from "./components/ui/Badge";
 
+export { Toggle, toggleVariants } from "./components/ui/Toggle";
+export type { ToggleProps } from "./components/ui/Toggle";
+
+export {
+  SelectionPill,
+  selectionPillVariants,
+} from "./components/ui/SelectionPill";
+export type { SelectionPillProps } from "./components/ui/SelectionPill";
+
+export { Checkbox } from "./components/ui/Checkbox";
+export type { CheckboxProps } from "./components/ui/Checkbox";
+
+export {
+  CheckboxCard,
+  checkboxCardVariants,
+} from "./components/ui/CheckboxCard";
+export type { CheckboxCardProps } from "./components/ui/CheckboxCard";
+
+export {
+  ActionCard,
+  ActionCardHeader,
+  ActionCardBody,
+  ActionCardFooter,
+  ActionCardBadge,
+  ActionCardButton,
+  actionCardButtonVariants,
+  useActionCardTone,
+} from "./components/ui/ActionCard";
+export type {
+  ActionCardProps,
+  ActionCardTone,
+  ActionCardHeaderProps,
+  ActionCardBodyProps,
+  ActionCardFooterProps,
+  ActionCardBadgeProps,
+  ActionCardButtonProps,
+} from "./components/ui/ActionCard";
+
+export { StatCard } from "./components/ui/StatCard";
+export type { StatCardProps, StatCardTone } from "./components/ui/StatCard";
+
+export { OtpInput } from "./components/ui/OtpInput";
+export type { OtpInputProps, OtpInputState } from "./components/ui/OtpInput";
+
+export { AadhaarESign, AadhaarCardPreview } from "./components/ui/AadhaarESign";
+export type {
+  AadhaarESignProps,
+  AadhaarESignState,
+  AadhaarCardPreviewProps,
+} from "./components/ui/AadhaarESign";
+
+export { OtpDialog } from "./components/ui/OtpDialog";
+export type { OtpDialogProps, OtpDialogState } from "./components/ui/OtpDialog";
+
 export {
   Accordion,
   AccordionItem,
@@ -160,5 +214,34 @@ export {
   isTheme,
 } from "./themes";
 export type { Theme, ThemeDefinition, ThemeMode } from "./themes";
+
+export {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "./components/ui/Card";
+
+export { Label } from "./components/ui/Label";
+export type { LabelProps } from "./components/ui/Label";
+
+export { Input, inputVariants } from "./components/ui/Input";
+export type { InputProps } from "./components/ui/Input";
+
+export { FormField, FieldIconBox, fieldStateClasses } from "./components/ui/FormField";
+export type {
+  FormFieldProps,
+  FormFieldRenderProps,
+  FieldIconBoxProps,
+  FieldState,
+} from "./components/ui/FormField";
+
+export { TextField } from "./components/ui/TextField";
+export type { TextFieldProps } from "./components/ui/TextField";
+
+export { Textarea } from "./components/ui/Textarea";
+export type { TextareaProps } from "./components/ui/Textarea";
 
 export { cn } from "./lib/cn";

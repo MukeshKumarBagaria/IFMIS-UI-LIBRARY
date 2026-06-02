@@ -147,66 +147,70 @@ const ASSIGNED: ModuleId[] = [
  * consumer. The Sidebar is purely presentational; it does not call the
  * router or persist anything.
  */
-export const Default: Story = {
-  render: () => {
-    const [activeModule, setActiveModule] = useState<ModuleId>("hrms");
-    const [activeMenu, setActiveMenu] = useState("hrms.exit");
-    const [search, setSearch] = useState("");
+function DefaultDemo() {
+  const [activeModule, setActiveModule] = useState<ModuleId>("hrms");
+  const [activeMenu, setActiveMenu] = useState("hrms.exit");
+  const [search, setSearch] = useState("");
 
-    return (
-      <div className="bg-grey-50 min-h-screen p-6">
-        <Sidebar
-          search={{ value: search, onChange: setSearch }}
-          worklist={{
-            count: 12,
-            onClick: () => alert("open worklist"),
-          }}
-          modules={{
-            assigned: ASSIGNED,
-            activeId: activeModule,
-            onChange: setActiveModule,
-          }}
-          menu={{
-            items: MENU,
-            activeId: activeMenu,
-            onSelect: setActiveMenu,
-          }}
-        />
-      </div>
-    );
-  },
+  return (
+    <div className="bg-grey-50 min-h-screen p-6">
+      <Sidebar
+        search={{ value: search, onChange: setSearch }}
+        worklist={{
+          count: 12,
+          onClick: () => alert("open worklist"),
+        }}
+        modules={{
+          assigned: ASSIGNED,
+          activeId: activeModule,
+          onChange: setActiveModule,
+        }}
+        menu={{
+          items: MENU,
+          activeId: activeMenu,
+          onSelect: setActiveMenu,
+        }}
+      />
+    </div>
+  );
+}
+
+export const Default: Story = {
+  render: () => <DefaultDemo />,
 };
 
 /**
  * The collapsed rail. Click any button to expand back to the full
  * Sidebar.
  */
-export const Collapsed: Story = {
-  render: () => {
-    const [collapsed, setCollapsed] = useState(true);
-    const [activeModule, setActiveModule] = useState<ModuleId>("hrms");
-    const [activeMenu, setActiveMenu] = useState("hrms.exit");
-    const [search, setSearch] = useState("");
+function CollapsedDemo() {
+  const [collapsed, setCollapsed] = useState(true);
+  const [activeModule, setActiveModule] = useState<ModuleId>("hrms");
+  const [activeMenu, setActiveMenu] = useState("hrms.exit");
+  const [search, setSearch] = useState("");
 
-    return (
-      <div className="bg-grey-50 min-h-screen p-6">
-        <Sidebar
-          collapsed={collapsed}
-          onCollapseToggle={() => setCollapsed((v) => !v)}
-          search={{ value: search, onChange: setSearch }}
-          worklist={{ count: 28, onClick: () => alert("open worklist") }}
-          modules={{
-            assigned: ASSIGNED,
-            activeId: activeModule,
-            onChange: setActiveModule,
-          }}
-          menu={{
-            items: MENU,
-            activeId: activeMenu,
-            onSelect: setActiveMenu,
-          }}
-        />
-      </div>
-    );
-  },
+  return (
+    <div className="bg-grey-50 min-h-screen p-6">
+      <Sidebar
+        collapsed={collapsed}
+        onCollapseToggle={() => setCollapsed((v) => !v)}
+        search={{ value: search, onChange: setSearch }}
+        worklist={{ count: 28, onClick: () => alert("open worklist") }}
+        modules={{
+          assigned: ASSIGNED,
+          activeId: activeModule,
+          onChange: setActiveModule,
+        }}
+        menu={{
+          items: MENU,
+          activeId: activeMenu,
+          onSelect: setActiveMenu,
+        }}
+      />
+    </div>
+  );
+}
+
+export const Collapsed: Story = {
+  render: () => <CollapsedDemo />,
 };

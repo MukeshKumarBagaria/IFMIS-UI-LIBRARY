@@ -144,7 +144,7 @@ export function WorklistButton({
       className={cn(
         "flex w-[15.4375rem] h-11 px-2 justify-between items-center self-stretch",
         "rounded-2xl border border-orange-200 bg-orange-100",
-        "text-[#4B3960] transition-colors hover:bg-orange-200",
+        "text-heading transition-colors hover:bg-orange-200",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400",
       )}
     >
@@ -283,7 +283,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
         ref={ref}
         className={cn(
           "flex w-[279px] flex-col items-start gap-6",
-          "text-[#4B3960]",
+          "text-heading",
           className,
         )}
         aria-label="Primary navigation"
@@ -373,7 +373,7 @@ interface CollapsedSidebarProps extends HTMLAttributes<HTMLElement> {
  */
 const CollapsedSidebar = forwardRef<HTMLElement, CollapsedSidebarProps>(
   (
-    { onExpand, modules, worklist, search, menu, className, ...props },
+    { onExpand, modules, worklist, search: _search, menu, className, ...props },
     ref,
   ) => {
     return (
@@ -381,7 +381,7 @@ const CollapsedSidebar = forwardRef<HTMLElement, CollapsedSidebarProps>(
         ref={ref}
         className={cn(
           "flex flex-col items-stretch gap-6 w-[7.5rem]",
-          "text-[#4B3960]",
+          "text-heading",
           className,
         )}
         aria-label="Primary navigation (collapsed)"
@@ -409,7 +409,7 @@ const CollapsedSidebar = forwardRef<HTMLElement, CollapsedSidebarProps>(
               aria-label="Open search"
               className={cn(
                 "flex w-10 h-10 items-center justify-center shrink-0",
-                "rounded-full border border-grey-400 bg-white text-[#4B3960]",
+                "rounded-full border border-grey-400 bg-white text-heading",
                 "transition-colors hover:bg-grey-100",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500",
               )}
@@ -432,7 +432,7 @@ const CollapsedSidebar = forwardRef<HTMLElement, CollapsedSidebarProps>(
           >
             {modules && (
               <>
-                <h3 className="text-[#4B3960] text-sm font-semibold leading-tight">
+                <h3 className="text-heading text-sm font-semibold leading-tight">
                   Assigned
                   <br />
                   Modules
@@ -448,7 +448,7 @@ const CollapsedSidebar = forwardRef<HTMLElement, CollapsedSidebarProps>(
                     aria-label="Expand modules"
                     className={cn(
                       "flex w-10 h-10 items-center justify-center shrink-0",
-                      "rounded-full border border-grey-400 bg-white text-[#4B3960]",
+                      "rounded-full border border-grey-400 bg-white text-heading",
                       "transition-colors hover:bg-grey-100",
                       "focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500",
                     )}
@@ -466,7 +466,7 @@ const CollapsedSidebar = forwardRef<HTMLElement, CollapsedSidebarProps>(
                 aria-label="Open sub-modules menu"
                 className={cn(
                   "flex h-10 px-3 items-center justify-between self-stretch",
-                  "rounded-2xl bg-grey-100 text-[#4B3960]",
+                  "rounded-2xl bg-grey-100 text-heading",
                   "transition-colors hover:bg-grey-200",
                   "focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500",
                 )}
@@ -535,7 +535,7 @@ function CollapsedActiveModuleCard({
       aria-label={`${label} (active module)`}
       className={cn(
         "flex w-10 h-10 p-2 items-center justify-center shrink-0",
-        "rounded-xl text-[#4B3960] transition-transform hover:scale-105",
+        "rounded-xl text-heading transition-transform hover:scale-105",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500",
       )}
       style={{ background: gradient }}

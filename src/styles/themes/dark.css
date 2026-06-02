@@ -19,11 +19,16 @@
   --surface-border-purple:  #4B3960;
   --surface-card-white:     #2A2431;
 
+  /* ---- Decorative gradients (provisional) ----------------------------- */
+  --gradient-card-checked:       linear-gradient(105deg, #48146C 0.35%, #A461D1 100%);
+  --gradient-card-checked-hover: linear-gradient(105deg, #3A1056 0.35%, #8D3AC5 100%);
+
   /* ---- Text tokens ---------------------------------------------------- */
   --text-heading:        #D4C5E8;
   --text-subheading:     #B5A9C2;
   --text-body-primary:   #F1F1F1;
   --text-body-secondary: #B5B5B5;
+  --text-body-disabled:  #575757;  /* provisional — dark spec not finalised */
 
   /* ---- Semantic tokens ------------------------------------------------ */
   --background:            var(--surface-page-bg);

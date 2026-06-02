@@ -41,6 +41,7 @@ const twMerge = extendTailwindMerge({
             "subheading",
             "body-primary",
             "body-secondary",
+            "body-disabled",
             "muted-foreground",
           ],
         },

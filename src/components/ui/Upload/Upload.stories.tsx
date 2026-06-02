@@ -187,43 +187,45 @@ export const Showcase: Story = {
 };
 
 /** Interactive: run a fake upload through every state. */
+function InteractiveDemo() {
+  const [state, setState] = useState<UploadState>("default");
+  const [progress, setProgress] = useState(0);
+  const [files, setFiles] = useState<UploadFile[]>([]);
+
+  const run = () => {
+    setState("uploading");
+    setProgress(0);
+    let p = 0;
+    const timer = setInterval(() => {
+      p += 25;
+      setProgress(p);
+      if (p >= 100) {
+        clearInterval(timer);
+        setFiles([{ id: crypto.randomUUID(), name: "file_name-2026" }]);
+        setState("uploaded");
+      }
+    }, 400);
+  };
+
+  return (
+    <Upload
+      label="Label"
+      state={state}
+      progress={progress}
+      files={files}
+      onUpload={run}
+      onCancel={() => setState("default")}
+      onRetry={run}
+      onAddMore={() =>
+        setFiles((f) => [...f, { id: crypto.randomUUID(), name: "file_name-2026" }])
+      }
+      onDeleteFile={(file) =>
+        setFiles((f) => f.filter((x) => x.id !== file.id))
+      }
+    />
+  );
+}
+
 export const Interactive: Story = {
-  render: () => {
-    const [state, setState] = useState<UploadState>("default");
-    const [progress, setProgress] = useState(0);
-    const [files, setFiles] = useState<UploadFile[]>([]);
-
-    const run = () => {
-      setState("uploading");
-      setProgress(0);
-      let p = 0;
-      const timer = setInterval(() => {
-        p += 25;
-        setProgress(p);
-        if (p >= 100) {
-          clearInterval(timer);
-          setFiles([{ id: crypto.randomUUID(), name: "file_name-2026" }]);
-          setState("uploaded");
-        }
-      }, 400);
-    };
-
-    return (
-      <Upload
-        label="Label"
-        state={state}
-        progress={progress}
-        files={files}
-        onUpload={run}
-        onCancel={() => setState("default")}
-        onRetry={run}
-        onAddMore={() =>
-          setFiles((f) => [...f, { id: crypto.randomUUID(), name: "file_name-2026" }])
-        }
-        onDeleteFile={(file) =>
-          setFiles((f) => f.filter((x) => x.id !== file.id))
-        }
-      />
-    );
-  },
+  render: () => <InteractiveDemo />,
 };

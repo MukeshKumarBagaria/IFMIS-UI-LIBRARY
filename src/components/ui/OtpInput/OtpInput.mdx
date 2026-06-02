@@ -1,0 +1,113 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as OtpInputStories from "./OtpInput.stories";
+
+<Meta of={OtpInputStories} title="UI/OtpInput/Guide" />
+
+# OtpInput
+
+An accessible, segmented **code input** for OTP / PIN / verification codes. It's
+the shared primitive behind [`AadhaarESign`](?path=/docs/ui-aadhaaresign-guide--docs)
+and [`OtpDialog`](?path=/docs/ui-otpdialog-guide--docs), and you can drop it
+into any form on its own.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## Basics
+
+```jsx
+import { OtpInput } from "@ifmis/ui";
+
+<OtpInput length={6} onComplete={(code) => verify(code)} />
+```
+
+<Canvas of={OtpInputStories.Default} />
+
+Behaviour:
+
+- **Sequential entry** — digits fill left-to-right; the value is always a clean
+  prefix string (no gaps).
+- **Keyboard** — typing advances; <kbd>Backspace</kbd> removes + steps back;
+  <kbd>←</kbd>/<kbd>→</kbd> move.
+- **Paste** — pasting a code distributes digits across the boxes.
+- **Digits only**, with `inputMode="numeric"` for the mobile number pad and
+  `autocomplete="one-time-code"` for iOS SMS autofill.
+
+---
+
+## States
+
+```jsx
+<OtpInput state="error" defaultValue="245143" />
+<OtpInput state="success" defaultValue="245143" />
+```
+
+<Canvas of={OtpInputStories.Error} />
+<Canvas of={OtpInputStories.Success} />
+
+---
+
+## Controlled vs uncontrolled
+
+```jsx
+{/* Uncontrolled */}
+<OtpInput length={4} defaultValue="" onComplete={submit} />
+
+{/* Controlled */}
+const [code, setCode] = useState("");
+<OtpInput value={code} onChange={setCode} onComplete={submit} />
+```
+
+`onComplete` fires once, when the last empty box is filled — handy for
+auto-submitting:
+
+<Canvas of={OtpInputStories.Controlled} />
+
+---
+
+## Usage best practices
+
+- **Pair `onComplete` with auto-submit** so users don't hunt for a button after
+  the last digit — but still provide an explicit submit for accessibility.
+- **Reset `state` to `default` on the next edit** after an error, so the red
+  border clears as the user corrects the code.
+- **Don't store the code in global state** longer than needed — treat it as
+  transient.
+- For a labelled field, set `id` and point a `<label htmlFor>` at it, or pass
+  `aria-label`.
+
+---
+
+## Responsive behaviour
+
+The boxes sit in a wrapping flex row with a smaller gap on mobile
+(`gap-3 sm:gap-6`), so a 6-digit code fits narrow screens without overflow.
+Each box is a fixed 44×44 tap target.
+
+---
+
+## Props
+
+| Prop          | Type                          | Default            | Notes                                       |
+| ------------- | ----------------------------- | ------------------ | ------------------------------------------- |
+| `length`      | `number`                      | `6`                | Number of boxes.                            |
+| `value`       | `string`                      | —                  | Controlled value.                           |
+| `defaultValue`| `string`                      | `""`               | Uncontrolled initial value.                 |
+| `onChange`    | `(next: string) => void`      | —                  | Fires on every change.                      |
+| `onComplete`  | `(value: string) => void`     | —                  | Fires once when all boxes fill.             |
+| `state`       | `default \| error \| success` | `default`          | Box border colour.                          |
+| `disabled`    | `boolean`                     | `false`            | Disable all boxes.                          |
+| `autoFocus`   | `boolean`                     | `false`            | Focus the first box on mount.               |
+| `aria-label`  | string                        | `Verification code`| Group name (+ per-box labels derive from it).|
+| `id`          | string                        | —                  | Applied to the first box.                   |
+| `className`   | string                        | —                  | On the group wrapper.                       |
+
+---
+
+## Accessibility
+
+- Boxes are real `<input inputMode="numeric">` in a `role="group"`; each gets a
+  per-box `aria-label` ("…, digit 2 of 6").
+- Fully keyboard-operable; `state` is visual only — convey error/success text
+  next to the field (both dialogs do this with a banner).

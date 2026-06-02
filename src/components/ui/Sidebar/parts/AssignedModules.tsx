@@ -150,13 +150,13 @@ function OverflowPopover({
       }}
     >
       <div className="flex items-center justify-between">
-        <h4 className="text-[#4B3960] text-base font-semibold">
+        <h4 className="text-heading text-base font-semibold">
           Assigned Modules
         </h4>
         <button
           type="button"
           onClick={onClose}
-          className="text-[#4B3960] hover:bg-grey-100 rounded-full p-1"
+          className="text-heading hover:bg-grey-100 rounded-full p-1"
           aria-label="Close"
         >
           <X size={16} weight="bold" />
@@ -239,7 +239,7 @@ export function AssignedModules({
 
   return (
     <div className="relative flex flex-col gap-2 self-stretch">
-      <h3 className="text-[#4B3960] text-base font-semibold leading-none">
+      <h3 className="text-heading text-base font-semibold leading-none">
         Assigned Modules
       </h3>
 
@@ -264,7 +264,7 @@ export function AssignedModules({
               onClick={() => setOpen((v) => !v)}
               className={cn(
                 "flex w-10 h-10 items-center justify-center shrink-0",
-                "rounded-full border border-grey-400 bg-white text-[#4B3960]",
+                "rounded-full border border-grey-400 bg-white text-heading",
                 "transition-colors hover:bg-grey-100",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500",
               )}

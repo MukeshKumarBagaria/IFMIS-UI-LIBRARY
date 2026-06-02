@@ -1,0 +1,86 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as LabelStories from "./Label.stories";
+
+<Meta of={LabelStories} title="UI/Label/Guide" />
+
+# Label
+
+An accessible **form-field label**. Always pair it with a control through
+`htmlFor` / `id` — clicking the label then focuses the field, and screen
+readers announce the two together.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## Basic usage
+
+```jsx
+import { Label, Input } from "@ifmis/ui";
+
+<div className="flex flex-col gap-1.5">
+  <Label htmlFor="email">Email address</Label>
+  <Input id="email" type="email" />
+</div>
+```
+
+<Canvas of={LabelStories.WithInput} />
+
+---
+
+## Required fields
+
+`required` appends a red asterisk (decorative — `aria-hidden`, so it isn't read
+as "star"). Convey the requirement to assistive tech on the **input** via the
+native `required` attribute:
+
+```jsx
+<Label htmlFor="pan" required>PAN number</Label>
+<Input id="pan" required />
+```
+
+<Canvas of={LabelStories.Required} />
+
+---
+
+## Usage best practices
+
+- **Always link `htmlFor` to the input's `id`.** A floating label that isn't
+  associated is invisible to screen readers and doesn't grow the click target.
+- **Put `required` on both** the `Label` (for the visual asterisk) and the
+  native input (for real validation + AT semantics).
+- **Keep labels short and above the field.** This component is styled for a
+  top-aligned label; for inline layouts, adjust with `className`.
+- **Don't use a placeholder as a label** — placeholders vanish on input and
+  fail accessibility. Use a real `Label`.
+
+---
+
+## Props
+
+| Prop        | Type      | Default | Notes                                       |
+| ----------- | --------- | ------- | ------------------------------------------- |
+| `required`  | `boolean` | `false` | Appends a decorative red asterisk.          |
+| `children`  | node      | —       | The label text.                             |
+| `className` | string    | —       | Merged onto the `<label>`.                  |
+
+All native `<label>` attributes (`htmlFor`, `id`, `onClick`, `ref`, …) are
+forwarded.
+
+---
+
+## Tokens
+
+`Text/Body/Medium-14` (`text-body-xs`, weight 500) in `text-body-primary`. The
+asterisk uses `text-destructive`. A `peer-disabled:` rule dims the label when a
+sibling control marked `peer` is disabled.
+
+---
+
+## Accessibility
+
+- Renders a real `<label>` — associate it with `htmlFor={inputId}`.
+- The required asterisk is `aria-hidden`; use the input's `required` /
+  `aria-required` for the actual semantics.
+- For grouped controls (radio/checkbox sets), prefer a `<fieldset>` +
+  `<legend>` over a single `Label`.

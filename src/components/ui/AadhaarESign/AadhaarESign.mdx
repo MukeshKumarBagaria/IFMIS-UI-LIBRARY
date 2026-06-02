@@ -1,0 +1,196 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as AadhaarESignStories from "./AadhaarESign.stories";
+
+<Meta of={AadhaarESignStories} title="UI/AadhaarESign/Guide" />
+
+# AadhaarESign
+
+The **Aadhaar E-Sign** dialog panel — a purple header (pen + title + close), a
+body with a prompt, a masked-number label, a **functional segmented digit
+input**, and an Aadhaar card preview, and a grey footer with a **Send OTP**
+action.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+> This is the dialog **panel**. Render it inside your app's modal/overlay; it
+> exposes `role="dialog"`, is labelled by its header, and calls `onClose` when
+> the X is pressed.
+
+---
+
+## States
+
+```jsx
+import { AadhaarESign } from "@ifmis/ui";
+
+<AadhaarESign onClose={close} onSubmit={(digits) => sendOtp(digits)} />
+<AadhaarESign state="error" defaultValue="2114" />
+<AadhaarESign state="success" defaultValue="2114" />
+```
+
+<Canvas of={AadhaarESignStories.Default} />
+<Canvas of={AadhaarESignStories.Error} />
+<Canvas of={AadhaarESignStories.Success} />
+
+`state` recolours the boxes (grey → red / green) and shows an inline message
+banner. Override the copy with `errorMessage` / `successMessage`.
+
+---
+
+## The digit input
+
+The boxes are a real, accessible segmented input:
+
+- **Sequential entry** — digits fill left-to-right with no gaps, so the value
+  is always a clean prefix string.
+- **Keyboard** — typing advances; <kbd>Backspace</kbd> removes the last digit
+  and steps back; <kbd>←</kbd>/<kbd>→</kbd> move between boxes.
+- **Paste** — pasting a code distributes digits across the boxes.
+- **Digits only** — non-numeric input is ignored; `inputMode="numeric"` brings
+  up the number pad on mobile.
+
+Controlled or uncontrolled, like the rest of the library:
+
+```jsx
+{/* Uncontrolled */}
+<AadhaarESign defaultValue="" onSubmit={(d) => sendOtp(d)} />
+
+{/* Controlled */}
+const [digits, setDigits] = useState("");
+<AadhaarESign value={digits} onChange={setDigits} onSubmit={sendOtp} />
+```
+
+---
+
+## Validating on submit
+
+A typical flow: require all digits, verify on **Send OTP**, then flip `state`.
+
+<Canvas of={AadhaarESignStories.Interactive} />
+
+```jsx
+const [digits, setDigits] = useState("");
+const [state, setState] = useState("default");
+
+<AadhaarESign
+  value={digits}
+  onChange={(next) => { setDigits(next); setState("default"); }}
+  state={state}
+  requireComplete                 // Send OTP stays disabled until 4 digits
+  onClose={close}
+  onSubmit={async (d) => {
+    const ok = await verifyLastFour(d);
+    setState(ok ? "success" : "error");
+  }}
+/>;
+```
+
+`submitting` shows a spinner on the button and disables it during the request.
+
+<Canvas of={AadhaarESignStories.Submitting} />
+
+---
+
+## The card preview
+
+By default a **self-contained, masked Aadhaar card** is drawn with tokens — no
+bundled image, nothing to expire. Highlight the relevant last-four with
+`cardLastFour`. Supply your own card with `cardImageSrc` (an `<img>`), fully
+replace the slot with `cardPreview`, or pass `cardPreview={null}` to hide it.
+
+```jsx
+<AadhaarESign cardLastFour="8888" />                 {/* built-in card  */}
+<AadhaarESign cardImageSrc="/aadhaar-thumb.png" />   {/* your image     */}
+<AadhaarESign cardPreview={<MyCard />} />            {/* full override  */}
+<AadhaarESign cardPreview={null} />                  {/* no card        */}
+```
+
+<Canvas of={AadhaarESignStories.WithCardImage} />
+
+---
+
+## Reusable beyond Aadhaar
+
+The same component works for any short numeric code — change `length`, the
+`prompt`, and the `label`:
+
+```jsx
+<AadhaarESign length={6} prompt="Enter the 6-digit OTP" label="OTP sent to your mobile" cardPreview={null} />
+```
+
+<Canvas of={AadhaarESignStories.SixDigits} />
+
+---
+
+## Responsive behaviour
+
+The panel is **`width: 100%` capped at 500px** (the Figma width). Inside, the
+input column and the card preview sit in a row that **wraps** on narrow widths,
+so the card drops below the boxes rather than overflowing. Render it inside a
+centered modal container:
+
+```jsx
+<div className="fixed inset-0 grid place-items-center bg-black/40 p-4">
+  <AadhaarESign onClose={close} onSubmit={sendOtp} />
+</div>
+```
+
+---
+
+## Props
+
+| Prop                          | Type                              | Default                | Notes                                          |
+| ----------------------------- | --------------------------------- | ---------------------- | ---------------------------------------------- |
+| `title`                       | node                              | `Aadhaar E - Sign`     | Header title.                                  |
+| `headerIcon`                  | node \| `null`                    | pen                    | Header glyph; `null` hides it.                 |
+| `prompt`                      | node                              | `Enter the last 4 …`   | Body prompt (Header-18).                       |
+| `label`                       | node                              | `Aadhaar ID number …`  | Label above the boxes.                         |
+| `length`                      | `number`                          | `4`                    | Number of digit boxes.                         |
+| `value` / `defaultValue`      | `string`                          | `""`                   | Controlled / uncontrolled digits.              |
+| `onChange`                    | `(value: string) => void`         | —                      | Fires with the next digit string.              |
+| `state`                       | `default \| error \| success`     | `default`              | Box colour + message banner.                   |
+| `errorMessage` / `successMessage` | node                          | sensible               | Banner copy.                                   |
+| `onSubmit`                    | `(value: string) => void`         | —                      | Send OTP handler.                              |
+| `submitLabel`                 | node                              | `Send OTP`             | Button label.                                  |
+| `submitting`                  | `boolean`                         | `false`                | Spinner + disable submit.                      |
+| `requireComplete`             | `boolean`                         | `false`                | Disable submit until all boxes filled.         |
+| `onClose`                     | `() => void`                      | —                      | X handler; omit to hide the X.                 |
+| `closeLabel`                  | string                            | `Close`                | Accessible name for the X.                     |
+| `cardImageSrc`                | string                            | —                      | `<img>` for the card preview.                  |
+| `cardPreview`                 | node \| `null`                    | built-in card          | Override / hide the card slot.                 |
+| `cardLastFour`                | string                            | `8888`                 | Highlighted digits on the built-in card.       |
+| `disabled`                    | `boolean`                         | `false`                | Disable inputs + submit.                       |
+| `className`                   | string                            | —                      | Merged onto the panel.                         |
+
+All other native `<div>` props (`id`, `data-*`, `aria-*`, `ref`, …) are
+forwarded; `data-state` reflects the current state.
+
+---
+
+## Tokens
+
+| Part            | Token(s)                                                |
+| --------------- | ------------------------------------------------------- |
+| Header          | `bg-purple-50`, title `text-heading`                    |
+| Body / prompt   | `bg-surface-card`, `text-body-primary`                  |
+| Label           | `text-body-secondary` (`Body/Medium-14`)               |
+| Boxes (default) | `border-surface-border-grey`, `text-body-secondary`     |
+| Boxes (error)   | `border-red-600`; banner `bg-red-100` / `text-red-800`  |
+| Boxes (success) | `border-green-600`; banner `bg-green-100` / `text-green-800` |
+| Footer          | `bg-surface-grey-bg`; button = `Button variant="primary"` |
+
+Panel: `radius 24px`, `shadow-card`, `overflow-hidden`. Boxes: `44px`,
+`radius 12px`, `gap 24px`.
+
+---
+
+## Accessibility
+
+- The panel is a `role="dialog"` labelled by its header title.
+- Each digit box is a real `<input inputMode="numeric">` with a per-box
+  `aria-label` ("…, digit 2 of 4"); the group carries the field label.
+- The error banner is `role="alert"` (announced immediately); the success
+  banner is `role="status"` (polite).
+- The close button has an accessible name (`closeLabel`) and a visible focus
+  ring. `Send OTP` is a real `Button` with native disabled/loading handling.
+- The decorative card preview and icons are `aria-hidden`.

@@ -1,0 +1,17 @@
+# Code owners for @ifmis/ui
+# Syntax: https://docs.gitlab.com/ee/user/project/codeowners/
+#
+# Replace the placeholder groups below with your real GitLab groups/usernames.
+
+# Everything in the library needs design-system maintainers' review.
+*                                   @ifmis-design-system-maintainers
+
+# Privileged files — require an extra set of eyes from the platform team.
+/.gitlab-ci.yml                     @ifmis-platform
+/.npmrc                             @ifmis-platform
+/PUBLISHING.md                      @ifmis-platform
+/package.json                       @ifmis-platform @ifmis-design-system-maintainers
+
+# Design tokens / theming — changes ripple across every consumer.
+/src/styles/                        @ifmis-design-system-maintainers
+/src/themes/                        @ifmis-design-system-maintainers

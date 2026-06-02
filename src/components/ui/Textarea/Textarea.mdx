@@ -1,0 +1,94 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as TextareaStories from "./Textarea.stories";
+
+<Meta of={TextareaStories} title="UI/Textarea/Guide" />
+
+# Textarea
+
+The multi-line counterpart to [`TextField`](?path=/docs/ui-textfield-guide--docs)
+— the same `FormField` shell (label, subtext, ARIA) and state styling, with a
+vertically-resizable `<textarea>` and an optional character counter.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## Basics
+
+```jsx
+import { Textarea } from "@ifmis/ui";
+
+<Textarea label="Remarks" placeholder="Add a note…" rows={5} />
+```
+
+<Canvas of={TextareaStories.Default} />
+
+---
+
+## Character counter
+
+Set `maxLength` (the counter turns on automatically) or force it with
+`showCount`. It updates live, controlled or uncontrolled:
+
+```jsx
+<Textarea label="Reason" maxLength={250} required />
+```
+
+<Canvas of={TextareaStories.WithCounter} />
+
+---
+
+## States
+
+```jsx
+<Textarea label="Comment" error="This field is required" />
+<Textarea label="Notes" helperText="Visible only to reviewers." />
+<Textarea label="Locked" disabled />
+<Textarea label="Imported" value="…" state="fetched" readOnly />
+```
+
+<Canvas of={TextareaStories.ErrorState} />
+
+Same state model as `TextField`: default / hover / focus / disabled / fetched,
+plus the red error treatment.
+
+---
+
+## Usage best practices
+
+- **Size with `rows`**, then let users drag to resize (`resize-y` is built in).
+- **Pair `maxLength` with the counter** so users see how much room is left.
+- **Use `fetched`** for imported/read-only long text, `disabled` for "not
+  editable here".
+
+---
+
+## Responsive behaviour
+
+Full-width by default; constrain via the parent. The textarea grows
+vertically, so long content pushes the form down rather than overflowing.
+
+---
+
+## Props
+
+| Prop          | Type                                      | Default   | Notes                                  |
+| ------------- | ----------------------------------------- | --------- | -------------------------------------- |
+| `label` / `labelIcon` / `required` | …                    | —         | Same as `TextField`.                   |
+| `error` / `helperText`             | node                 | —         | Subtext (error reddens + banner).      |
+| `state`       | `default \| error \| disabled \| fetched` | `default` | Usually inferred.                      |
+| `rows`        | `number`                                  | `4`       | Visible rows.                          |
+| `showCount`   | `boolean`                                 | auto      | Character counter (on when `maxLength`).|
+| `boxClassName` / `textareaClassName` / `className` | string   | —         | Class hooks.                           |
+
+All native `<textarea>` attributes (`value`, `defaultValue`, `onChange`,
+`maxLength`, `name`, `placeholder`, `disabled`, `readOnly`, `ref`, …) are
+forwarded.
+
+---
+
+## Accessibility
+
+- Label ↔ textarea linked via `htmlFor`/`id`.
+- `error` sets `aria-invalid` and an `role="alert"` banner tied via
+  `aria-describedby`; helper text is described the same way.

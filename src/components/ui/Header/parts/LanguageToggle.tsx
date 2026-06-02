@@ -98,6 +98,11 @@ function LanguageToggleInner<T extends string = string>(
   );
 }
 
+// React derives the devtools name from the render function; give it the
+// public component name so it shows as "LanguageToggle" rather than the
+// internal "LanguageToggleInner".
+LanguageToggleInner.displayName = "LanguageToggle";
+
 export const LanguageToggle = forwardRef(LanguageToggleInner) as <
   T extends string = string,
 >(

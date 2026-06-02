@@ -1,0 +1,183 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as CheckboxCardStories from "./CheckboxCard.stories";
+
+<Meta of={CheckboxCardStories} title="UI/CheckboxCard/Guide" />
+
+# CheckboxCard
+
+A card-shaped, selectable checkbox with a **bold title** and an optional
+**subtext**. Click anywhere on the card — including the label — to toggle. The
+checked card fills with a 105° purple gradient; on hover the gradient deepens.
+
+Backed by a real, visually-hidden `<input type="checkbox">` so it works in
+forms, with the keyboard, and with screen readers out of the box.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## States
+
+```jsx
+import { CheckboxCard } from "@ifmis/ui";
+
+<CheckboxCard
+  defaultChecked
+  title="Checked"
+  description="This is a subtext for this card"
+/>
+
+<CheckboxCard
+  title="Checked"
+  description="This is a subtext for this card"
+/>
+```
+
+<Canvas of={CheckboxCardStories.States} />
+
+The hover treatment only appears on a **checked, enabled** card — that's the
+only state the Figma spec assigns one to.
+
+---
+
+## Controlled vs uncontrolled
+
+**Uncontrolled** — the card tracks its own value:
+
+```jsx
+<CheckboxCard
+  defaultChecked
+  title="Premium plan"
+  description="14-day free trial"
+  onCheckedChange={(next) => save(next)}
+/>
+```
+
+**Controlled** — you own the value. This is the usual choice in a list, where
+one parent holds the whole selection.
+
+### Single-select list (radio-like)
+
+<Canvas of={CheckboxCardStories.SingleSelectList} />
+
+```jsx
+const [picked, setPicked] = useState("standard");
+
+{plans.map((p) => (
+  <CheckboxCard
+    key={p.id}
+    title={p.title}
+    description={p.description}
+    checked={picked === p.id}
+    onCheckedChange={(on) => on && setPicked(p.id)}
+  />
+))}
+```
+
+### Multi-select list
+
+<Canvas of={CheckboxCardStories.MultiSelectList} />
+
+```jsx
+const [picked, setPicked] = useState(new Set(["analytics"]));
+
+{features.map((f) => (
+  <CheckboxCard
+    key={f.id}
+    title={f.title}
+    description={f.description}
+    checked={picked.has(f.id)}
+    onCheckedChange={(on) =>
+      setPicked((prev) => {
+        const next = new Set(prev);
+        on ? next.add(f.id) : next.delete(f.id);
+        return next;
+      })
+    }
+  />
+))}
+```
+
+---
+
+## Title only
+
+The subtext is optional — drop it for a single-line chip-style card.
+
+<Canvas of={CheckboxCardStories.TitleOnly} />
+
+---
+
+## Disabled
+
+Disabled cards fade to 60% opacity, set `cursor: not-allowed`, and **suppress
+the hover gradient**.
+
+<Canvas of={CheckboxCardStories.Disabled} />
+
+---
+
+## Use in a form
+
+The underlying control is a real input, so the standard form attributes just
+work — `name`, `value`, `required`, `form`, etc. are forwarded:
+
+```jsx
+<form onSubmit={…}>
+  <CheckboxCard
+    name="plan"
+    value="premium"
+    required
+    title="Premium plan"
+    description="14-day free trial"
+  />
+  <button type="submit">Continue</button>
+</form>
+```
+
+---
+
+## Props
+
+| Prop                 | Type                         | Default | Notes                                            |
+| -------------------- | ---------------------------- | ------- | ------------------------------------------------ |
+| `title`              | node                         | —       | Bold first line. **Required.**                   |
+| `description`        | node                         | —       | Optional subtext.                                |
+| `checked`            | `boolean`                    | —       | Controlled value. Pair with `onCheckedChange`.   |
+| `defaultChecked`     | `boolean`                    | `false` | Uncontrolled initial value.                      |
+| `onCheckedChange`    | `(checked: boolean) => void` | —       | Fires with the next value on change.             |
+| `disabled`           | `boolean`                    | `false` | Fades the card and blocks interaction + hover.   |
+| `className`          | string                       | —       | Merged onto the visible card surface.            |
+| `indicatorClassName` | string                       | —       | Merged onto the circular indicator.              |
+
+All other native `<input>` props (`name`, `value`, `required`, `id`, `ref`,
+`aria-*`, `data-*`, …) are forwarded to the underlying checkbox.
+
+---
+
+## Tokens
+
+| State          | Surface                                | Border               | Indicator                          | Title             | Subtext            |
+| -------------- | -------------------------------------- | -------------------- | ---------------------------------- | ----------------- | ------------------ |
+| unchecked      | `surface-grey-bg` (#F7F7F7)            | `surface-border-grey`| `bg-heading` + white check         | `heading`         | `body-secondary`   |
+| checked        | `--gradient-card-checked`              | `surface-card` white | `bg-white` + `text-heading` check  | white             | white              |
+| checked + hover| `--gradient-card-checked-hover`        | white                | (unchanged)                        | white             | white              |
+
+Card box: `height 60px`, `padding 0 8px`, `gap 6px`, `radius 16px`, `border 1px`.
+
+The two gradients live in the active theme file
+(`src/styles/themes/<theme>.css`) as `--gradient-card-checked` and
+`--gradient-card-checked-hover` — swap them once to repaint every card in a
+new theme.
+
+---
+
+## Accessibility
+
+- Backed by a real `<input type="checkbox">`, so it's natively focusable,
+  keyboard-driven (<kbd>Space</kbd>) and announced as a checkbox to AT.
+- A `<label>` wraps the input and the card, so clicking either toggles it and
+  the visible **title** is the accessible name.
+- A visible focus ring (`ring-ring`) traces the card surface on keyboard
+  focus.
+- The decorative indicator is `aria-hidden` — the title carries the meaning.

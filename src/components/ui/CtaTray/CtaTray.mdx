@@ -171,3 +171,24 @@ The tray is a normal block — make it stick with your own layout classes:
 
 ❌ Don't rebuild the card/pill with raw Tailwind — compose `CtaTray`.
 ❌ Don't manage the tint manually unless you need controlled mode.
+
+---
+
+## Responsive behaviour
+
+The tray is **full-width**; the inner button pill wraps when the buttons don't
+fit. To pin it to the bottom of a scrolling form on mobile, make the wrapper
+sticky:
+
+```jsx
+<div className="sticky bottom-0 z-10 bg-background pt-3">
+  <CtaTray>
+    <ResetButton type="reset" />
+    <ForwardButton type="submit" />
+  </CtaTray>
+</div>
+```
+
+On very narrow screens, prefer two or three buttons in the tray; move
+secondary/destructive actions into an overflow menu rather than letting the
+pill wrap to three lines.

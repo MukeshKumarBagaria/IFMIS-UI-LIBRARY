@@ -108,4 +108,41 @@
   --brand-blue-800: #0A415C;
   --brand-blue-900: #083045;
   --brand-blue-950: #062432;
+
+  /* ---- Tonal gradients (shared across themes) ------------------------ */
+  /* Used by ActionCard headers and other tone-tagged surfaces.           */
+  /* Maps 1:1 to Figma `Brand/<Colour>Gradient`.                          */
+  --brand-gradient-orange: linear-gradient(90deg, #ECA993 0%, #F4D9BE 100%);
+  --brand-gradient-green:  linear-gradient(90deg, #93ECBF 0%, #BEF4D9 100%);
+  --brand-gradient-red:    linear-gradient(90deg, #EC9393 0%, #F4BEBE 100%);
+
+  /* ---- Stat-card tints (decorative, shared across themes) ------------ */
+  /* Pale surface + border + progress-track + progress-fill gradient per  */
+  /* tone. The text and icon colours reuse the regular palette steps      */
+  /* (e.g. `text-purple-800`, `bg-purple-200`) — only these four bespoke  */
+  /* tints per tone live here. Consumed via `bg-[var(--…)]` utilities.    */
+  --statcard-purple-surface: #F8F2FD;
+  --statcard-purple-border:  #DDBEF4;
+  --statcard-purple-track:   #F3E9FB;
+  --statcard-purple-fill:    linear-gradient(95deg, #D4DAF7 0.79%, #BA7DE8 98.73%);
+
+  --statcard-green-surface:  #F2FDF7;
+  --statcard-green-border:   #BEF4D9;
+  --statcard-green-track:    #E9FBF2;
+  --statcard-green-fill:     linear-gradient(95deg, #E0F7D4 0.79%, #7DE8B2 98.73%);
+
+  --statcard-red-surface:    #FDF2F2;
+  --statcard-red-border:     #F4BEBE;
+  --statcard-red-track:      #FBE9E9;
+  --statcard-red-fill:       linear-gradient(95deg, #F7E3D4 0.79%, #E87D7D 98.73%);
+
+  --statcard-yellow-surface: #FDFBF2;
+  --statcard-yellow-border:  #F4EBBE;
+  --statcard-yellow-track:   #FBF8E9;
+  --statcard-yellow-fill:    linear-gradient(95deg, #F7E3D4 0.79%, #E8D67D 98.73%);
+
+  --statcard-blue-surface:   #F2F9FD;
+  --statcard-blue-border:    #BEE2F4;
+  --statcard-blue-track:     #E9F5FB;
+  --statcard-blue-fill:      linear-gradient(95deg, #D4F7F7 0.79%, #7DC4E8 98.73%);
 }

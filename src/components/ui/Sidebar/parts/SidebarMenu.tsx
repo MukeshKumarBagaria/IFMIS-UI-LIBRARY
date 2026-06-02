@@ -112,7 +112,7 @@ export function SidebarMenu({
   if (inSearchMode) {
     return (
       <div className="flex flex-col gap-2 self-stretch">
-        <h3 className="text-[#4B3960] text-sm font-semibold leading-none">
+        <h3 className="text-heading text-sm font-semibold leading-none">
           {results.length === 0 ? searchEmptyTitle : searchResultsTitle}
         </h3>
         {results.length === 0 ? (
@@ -137,7 +137,7 @@ export function SidebarMenu({
   return (
     <div className="flex flex-col gap-2 self-stretch">
       {title && (
-        <h3 className="text-[#4B3960] text-sm font-semibold leading-none">
+        <h3 className="text-heading text-sm font-semibold leading-none">
           {title}
         </h3>
       )}
@@ -505,7 +505,7 @@ function SubmenuRow({ node, activeId, onSelect, onLeafSelect }: SubmenuRowProps)
         <span
           className={cn(
             "flex items-center gap-1.5 shrink-0",
-            isActive ? "text-white" : "text-[#4B3960]",
+            isActive ? "text-white" : "text-heading",
           )}
         >
           {node.badge !== undefined && (
