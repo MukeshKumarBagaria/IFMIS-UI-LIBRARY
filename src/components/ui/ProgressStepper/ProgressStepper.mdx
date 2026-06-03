@@ -1,0 +1,276 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as ProgressStepperStories from "./ProgressStepper.stories";
+
+<Meta of={ProgressStepperStories} title="UI/ProgressStepper/Guide" />
+
+# ProgressStepper
+
+A **collapsible vertical workflow tracker**. A purple header bar with a
+collapse toggle, a body containing a coloured **dot rail** + dashed
+connectors, a stack of **step cards** (`success` / `pending` / `rejected`),
+and an optional **View Details** footer button.
+
+Drop it into a page rail, a side panel, or a modal — it's `w-full` by
+default, so the parent decides the width.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## The Figma frame
+
+```jsx
+import { ProgressStepper } from "@ifmis/ui";
+
+const steps = [
+  {
+    id: "creator",
+    label: "Creator",
+    status: "success",
+    timestamp: "Submitted on 05 May 2026",
+    user: { name: "Amit Mohan", role: "Employee" },
+  },
+  {
+    id: "verifier",
+    label: "Verifier",
+    status: "pending",
+    timestamp: "Received on 05 May 2026",
+    user: { name: "Amit Mohan", role: "Employee" },
+    remarks: "This is a remark made when forwarding the application",
+  },
+  {
+    id: "approver",
+    label: "Approver",
+    status: "rejected",
+    timestamp: "Received on 05 May 2026",
+    user: { name: "Amit Mohan", role: "Employee" },
+    remarks: "This is a remark made when returning the application",
+  },
+];
+
+<ProgressStepper steps={steps} showViewDetails onViewDetails={openDetails} />;
+```
+
+<Canvas of={ProgressStepperStories.Default} />
+
+---
+
+## Step statuses
+
+Three statuses drive every visible colour on a row:
+
+| status      | card           | dot                | badge default | name colour |
+| ----------- | -------------- | ------------------ | ------------- | ----------- |
+| `success`   | green-25/200   | green-200 / 600    | `Submitted`   | green-800   |
+| `pending`   | yellow-25/200  | yellow-200 / 600   | `Pending`     | yellow-800  |
+| `rejected`  | red-25/200     | red-200 / 600      | `Rejected`    | red-800     |
+
+Per the IFMIS workflow convention, **the Creator step should never be
+`rejected`** — keep it `success` (filed) or `pending` (drafted). The
+component doesn't enforce this; it's a business rule.
+
+---
+
+## The `steps` array
+
+Each item is a `ProgressStep`:
+
+```ts
+{
+  id?: string,           // stable key (recommended)
+  label: ReactNode,      // e.g. "Creator"
+  status: "success" | "pending" | "rejected",
+
+  badgeLabel?: ReactNode | null,   // override or null to hide
+  badgeIcon?:  ReactNode | null,   // override or null to hide
+
+  timestamp?: ReactNode,           // shown next to the clock icon
+
+  user?: {
+    name: string,
+    role?: ReactNode,
+    initials?: string,             // derived from `name` when absent
+    avatarSrc?: string,            // replaces initials when set
+    avatarAlt?: string,
+  },
+
+  remarks?: ReactNode,             // shown when truthy
+  remarksTitle?: ReactNode,        // defaults to "Remarks"
+}
+```
+
+Anything you leave out is hidden, so the same component handles a one-line
+filed receipt and a multi-line rejected card without extra props.
+
+### Custom copy (label, badge, remarks heading)
+
+<Canvas of={ProgressStepperStories.CustomCopy} />
+
+### Hiding the badge
+
+```jsx
+<ProgressStepper steps={steps.map((s) => ({ ...s, badgeLabel: null }))} />
+```
+
+<Canvas of={ProgressStepperStories.HiddenBadges} />
+
+### Avatar image
+
+```jsx
+user: {
+  name: "Amit Mohan",
+  role: "Employee",
+  avatarSrc: "/avatars/amit.jpg",
+  avatarAlt: "Amit Mohan's photo",
+}
+```
+
+<Canvas of={ProgressStepperStories.WithAvatarImage} />
+
+---
+
+## Collapsing
+
+Collapse works **uncontrolled** by default. Click the caret in the header
+to hide the body; click again to restore it:
+
+<Canvas of={ProgressStepperStories.Collapsed} />
+
+```jsx
+<ProgressStepper steps={steps} defaultCollapsed />
+```
+
+Go **controlled** when the collapse state needs to sync with surrounding UI
+(persisted in URL, shared with another panel, etc.):
+
+```jsx
+const [collapsed, setCollapsed] = useState(false);
+
+<ProgressStepper
+  steps={steps}
+  collapsed={collapsed}
+  onCollapsedChange={setCollapsed}
+/>;
+```
+
+<Canvas of={ProgressStepperStories.Interactive} />
+
+### Disable the toggle entirely
+
+```jsx
+<ProgressStepper steps={steps} collapsible={false} />
+```
+
+<Canvas of={ProgressStepperStories.NotCollapsible} />
+
+The header button disappears and the body is always rendered.
+
+---
+
+## View Details footer
+
+Opt-in via `showViewDetails`. The label and click handler are both yours:
+
+```jsx
+<ProgressStepper
+  steps={steps}
+  showViewDetails
+  viewDetailsLabel="Open application"
+  onViewDetails={() => router.push(`/applications/${id}`)}
+/>
+```
+
+It uses the shared `Button` primitive (small secondary variant), so it
+inherits the design system's focus ring, hover state, and disabled style.
+
+---
+
+## Responsive behaviour
+
+The panel is `width: 100%` — the parent decides how wide it is. Drop it
+into:
+
+- A **fixed side rail** with `w-[320px]` for the Figma look.
+- A **fluid column** alongside the main content for mid-size screens.
+- A **full-width** mobile sheet — every card already wraps and the rail
+  scales with the cards.
+
+```jsx
+<aside className="w-full md:max-w-[320px]">
+  <ProgressStepper steps={steps} />
+</aside>
+```
+
+The dot rail uses a `20px` fixed column; the cards take the rest. Long
+labels, badges, and timestamps wrap inside the card without breaking the
+rail alignment.
+
+---
+
+## Props
+
+| Prop                  | Type                                         | Default              | Notes                                                       |
+| --------------------- | -------------------------------------------- | -------------------- | ----------------------------------------------------------- |
+| `steps`               | `ProgressStep[]`                             | —                    | The workflow data.                                          |
+| `title`               | node                                         | `"Progress"`         | Header title.                                               |
+| `collapsible`         | `boolean`                                    | `true`               | Whether the header shows a toggle.                          |
+| `defaultCollapsed`    | `boolean`                                    | `false`              | Uncontrolled initial state.                                 |
+| `collapsed`           | `boolean`                                    | —                    | Controlled state; pair with `onCollapsedChange`.            |
+| `onCollapsedChange`   | `(next: boolean) => void`                    | —                    | Fires on user toggle.                                       |
+| `collapseLabel`       | `string`                                     | state-dependent      | Accessible name for the toggle.                             |
+| `showViewDetails`     | `boolean`                                    | `false`              | Render the footer button.                                   |
+| `viewDetailsLabel`    | node                                         | `"View Details"`     | Footer button label.                                        |
+| `viewDetailsIcon`     | node \| `null`                               | `ArrowCircleUpRight` | Footer button trailing icon. `null` hides the icon.         |
+| `onViewDetails`       | `() => void`                                 | —                    | Footer button handler.                                      |
+| `className`           | string                                       | —                    | Merged onto the outer panel.                                |
+
+All other native `<div>` props are forwarded to the panel root.
+
+### `ProgressStep` shape
+
+| Field          | Type                          | Default        | Notes                                                |
+| -------------- | ----------------------------- | -------------- | ---------------------------------------------------- |
+| `id`           | `string`                      | —              | Used as React key when present.                      |
+| `label`        | node                          | —              | Title at the top of the card.                        |
+| `status`       | `success \| pending \| rejected` | —          | Drives colour everywhere.                            |
+| `badgeLabel`   | node \| `null`                | per status     | Set `null` to hide the badge.                        |
+| `badgeIcon`    | node \| `null`                | per status     | Set `null` for a text-only badge.                    |
+| `timestamp`    | node                          | —              | Hidden when absent.                                  |
+| `user.name`    | string                        | —              | Drives initials fallback.                            |
+| `user.role`    | node                          | —              | Optional second line.                                |
+| `user.initials`| string                        | derived        | Two letters from `name`.                             |
+| `user.avatarSrc` | string                      | —              | Image replaces initials when set.                    |
+| `user.avatarAlt` | string                      | `user.name`    | Alt text.                                            |
+| `remarks`      | node                          | —              | Renders the side-banded block when truthy.           |
+| `remarksTitle` | node                          | `"Remarks"`    | Heading inside the remarks block.                    |
+
+---
+
+## Tokens
+
+| Part            | Token(s)                                                                |
+| --------------- | ----------------------------------------------------------------------- |
+| Panel           | `rounded-2xl`, `shadow-card`, `bg-surface-card`                         |
+| Header          | `bg-purple-700`, title `text-white text-base font-semibold`             |
+| Toggle button   | `bg-purple-50`, `border-purple-300`, `text-purple-700`                  |
+| Card surfaces   | `*-25` fill + `*-200` border, per status                                |
+| Title text      | `*-700`, per status                                                     |
+| Avatar          | `*-100` fill + `*-200` border + `*-800` text                            |
+| Name / heading  | `*-800`, per status                                                     |
+| Remarks         | `*-100` fill, `*-400` left band, `rounded-xl`                           |
+| Dot ring / fill | `*-200` ring + `*-600` fill                                             |
+| Connector       | `border-l-2 border-dashed` in next step's `*-300`                        |
+| Badge           | shared `Badge` primitive (`success` / `pending` / `danger`)              |
+| Footer button   | shared `Button` (small secondary) + Phosphor `ArrowCircleUpRight`        |
+
+---
+
+## Accessibility
+
+- The toggle is a real `<button>` with `aria-expanded`, `aria-controls`,
+  and a state-aware `aria-label` (`Expand progress` / `Collapse progress`).
+- The body uses the `hidden` attribute when collapsed, so assistive tech
+  doesn't see the hidden content.
+- The clock + dot + connector decorations are all `aria-hidden` — the
+  textual content (label, timestamp, name, remarks) is the source of truth.
+- The footer button inherits the design system's `focus-visible` ring.

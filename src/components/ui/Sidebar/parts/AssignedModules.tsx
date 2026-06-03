@@ -239,7 +239,7 @@ export function AssignedModules({
 
   return (
     <div className="relative flex flex-col gap-2 self-stretch">
-      <h3 className="text-heading text-base font-semibold leading-none">
+      <h3 className="text-heading text-base font-semibold leading-tight">
         Assigned Modules
       </h3>
 

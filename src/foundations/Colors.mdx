@@ -1,0 +1,286 @@
+import { Meta } from "@storybook/blocks";
+import { ColorRamp, TokenList } from "./_helpers";
+
+<Meta title="Foundations/Colors" />
+
+# Colors
+
+Every colour in `@ifmis/ui` comes from a token in one of three layers:
+
+1. **Brand palettes** — raw ramps shared across themes (green, red,
+   orange, yellow, blue, grey).
+2. **Theme palettes** — primary (`purple`) and tinted neutral. Different per
+   theme.
+3. **Semantic tokens** — the theme-agnostic API (`--primary`,
+   `--background`, `--success`, surface, text). This is what components
+   consume.
+
+> Every swatch on this page is rendered by reading the **live CSS variable**
+> at render time. If a colour ever drifts from Figma, this page is the first
+> thing that flags it. Flip the Storybook theme toolbar to see the
+> theme-dependent tokens update.
+
+---
+
+## How to consume a colour
+
+In components, never write a hex. Use the Tailwind utility named after the
+token. `globals.css` ties every `--brand-*` / `--color-*` variable to a
+class:
+
+```jsx
+// good
+<div className="bg-green-100 border border-green-400 text-green-800">…</div>
+<div className="bg-primary text-primary-foreground">…</div>
+
+// bad — hardcoded, doesn't theme
+<div style={{ background: "#0F8A49" }}>…</div>
+```
+
+When the same colour appears in a *theme-dependent* place (page chrome,
+brand button, focus ring), prefer the semantic token (`bg-primary`) so it
+follows the theme. Brand ramps (`bg-green-200`) are for *semantic* status
+colours that mean the same thing in every theme.
+
+---
+
+## Semantic tokens (theme-aware)
+
+These are the canonical names components reach for. The colour they resolve
+to depends on the active theme — they're the contract between the design
+system and components.
+
+<TokenList
+  title="Surfaces"
+  description="Page chrome, cards, modals."
+  tokens={[
+    { token: "--background", caption: "Page background" },
+    { token: "--foreground", caption: "Default text on background" },
+    { token: "--card", caption: "Card surface" },
+    { token: "--card-foreground", caption: "Text on card" },
+    { token: "--muted", caption: "Muted/disabled fill" },
+    { token: "--muted-foreground", caption: "Text on muted" },
+    { token: "--surface-page-bg", caption: "Page chrome wash" },
+    { token: "--surface-grey-bg", caption: "Generic grey surface" },
+    { token: "--surface-grey-header", caption: "Greyed-out header strip" },
+    { token: "--surface-card-white", caption: "Solid card white" },
+    { token: "--surface-border-grey", caption: "Default border" },
+    { token: "--surface-border-purple", caption: "Brand border" },
+  ]}
+/>
+
+<TokenList
+  title="Brand"
+  description="Primary action surfaces and accents."
+  tokens={[
+    { token: "--primary", caption: "Solid brand colour" },
+    { token: "--primary-foreground", caption: "Text on primary" },
+    { token: "--secondary", caption: "Secondary surface" },
+    { token: "--secondary-foreground", caption: "Text on secondary" },
+    { token: "--accent", caption: "Highlight surface" },
+    { token: "--accent-foreground", caption: "Text on accent" },
+  ]}
+/>
+
+<TokenList
+  title="Status"
+  description="Success / danger / warning / info / pending — same meaning in every theme."
+  tokens={[
+    { token: "--success", caption: "Confirmed / complete" },
+    { token: "--success-foreground" },
+    { token: "--destructive", caption: "Danger / destructive" },
+    { token: "--destructive-foreground" },
+    { token: "--warning", caption: "Warning / attention" },
+    { token: "--warning-foreground" },
+    { token: "--info", caption: "Neutral information" },
+    { token: "--info-foreground" },
+    { token: "--pending", caption: "In-progress / awaiting" },
+    { token: "--pending-foreground" },
+  ]}
+/>
+
+<TokenList
+  title="Lines & focus"
+  description="Borders, inputs, focus rings."
+  tokens={[
+    { token: "--border", caption: "Standard border" },
+    { token: "--border-strong", caption: "Strong border" },
+    { token: "--input", caption: "Form input border" },
+    { token: "--ring", caption: "Focus ring colour" },
+  ]}
+/>
+
+<TokenList
+  title="Typography"
+  description="Text colours — pair these with --background variants."
+  tokens={[
+    { token: "--text-heading", caption: "Headings" },
+    { token: "--text-subheading", caption: "Sub-headings" },
+    { token: "--text-body-primary", caption: "Primary body text" },
+    { token: "--text-body-secondary", caption: "Secondary / muted text" },
+    { token: "--text-body-disabled", caption: "Disabled text" },
+  ]}
+/>
+
+---
+
+## Brand palettes (theme-independent)
+
+Six shared ramps. Use these directly when you need a *semantic* status colour
+that has the same meaning in every theme. Each ramp goes 25 (almost-white)
+through 950 (near-black).
+
+<ColorRamp
+  title="Green — success"
+  prefix="--brand-green-"
+  description="Confirmed states, success banners, the Submitted badge."
+/>
+
+<ColorRamp
+  title="Red — danger"
+  prefix="--brand-red-"
+  description="Destructive actions, error banners, the Rejected badge."
+/>
+
+<ColorRamp
+  title="Orange — pending / returned"
+  prefix="--brand-orange-"
+  description="Pending iconography, the Returned badge, attention surfaces."
+/>
+
+<ColorRamp
+  title="Yellow — warning"
+  prefix="--brand-yellow-"
+  description="Caution banners, the Pending card surface."
+/>
+
+<ColorRamp
+  title="Blue — info"
+  prefix="--brand-blue-"
+  description="Informational banners, links, neutral indicators."
+/>
+
+<ColorRamp
+  title="Grey — pure neutral"
+  prefix="--brand-grey-"
+  description="Untinted greys: borders, dividers, disabled surfaces."
+/>
+
+---
+
+## Theme palettes (theme-dependent)
+
+These ramps change when you flip themes. Flip the Storybook toolbar from
+`purple` to `dark` and watch the values change live.
+
+<ColorRamp
+  title="Primary — purple"
+  prefix="--brand-primary-purple-"
+  description="The brand accent. `bg-primary`, `text-primary-foreground` resolve here."
+/>
+
+<ColorRamp
+  title="Neutral (tinted)"
+  prefix="--brand-neutral-"
+  description="Theme-tinted neutrals — preferred over the pure grey ramp when the surface should pick up the brand temperature."
+/>
+
+---
+
+## Tonal gradients
+
+Decorative wash gradients shared across themes. Used for ActionCard
+headers and any other tone-tagged surface.
+
+<TokenList
+  title="Gradients"
+  tokens={[
+    { token: "--brand-gradient-orange", caption: "ActionCard orange tone" },
+    { token: "--brand-gradient-green", caption: "ActionCard green tone" },
+    { token: "--brand-gradient-red", caption: "ActionCard red tone" },
+  ]}
+/>
+
+---
+
+## StatCard tints
+
+Bespoke pale-surface / border / progress-track / progress-fill quartets
+per tone. Used only by `StatCard` and any consumer building a similar
+"big number on a gradient" layout.
+
+<TokenList
+  title="Purple"
+  tokens={[
+    { token: "--statcard-purple-surface" },
+    { token: "--statcard-purple-border" },
+    { token: "--statcard-purple-track" },
+    { token: "--statcard-purple-fill" },
+  ]}
+/>
+
+<TokenList
+  title="Green"
+  tokens={[
+    { token: "--statcard-green-surface" },
+    { token: "--statcard-green-border" },
+    { token: "--statcard-green-track" },
+    { token: "--statcard-green-fill" },
+  ]}
+/>
+
+<TokenList
+  title="Red"
+  tokens={[
+    { token: "--statcard-red-surface" },
+    { token: "--statcard-red-border" },
+    { token: "--statcard-red-track" },
+    { token: "--statcard-red-fill" },
+  ]}
+/>
+
+<TokenList
+  title="Yellow"
+  tokens={[
+    { token: "--statcard-yellow-surface" },
+    { token: "--statcard-yellow-border" },
+    { token: "--statcard-yellow-track" },
+    { token: "--statcard-yellow-fill" },
+  ]}
+/>
+
+<TokenList
+  title="Blue"
+  tokens={[
+    { token: "--statcard-blue-surface" },
+    { token: "--statcard-blue-border" },
+    { token: "--statcard-blue-track" },
+    { token: "--statcard-blue-fill" },
+  ]}
+/>
+
+---
+
+## Best practices
+
+- **Never inline a hex code.** Use the named token / utility every time.
+  The first time you "just need this one custom colour" is the moment your
+  theme breaks.
+- **Pair semantic colour with semantic markup.** A red surface (`bg-red-100`)
+  needs `role="alert"`-grade copy on it — don't use the danger palette for
+  pure decoration.
+- **Prefer semantic tokens over raw palette steps** when the meaning is
+  theme-shared. `bg-primary` over `bg-purple-600` for a brand button.
+- **Use the 25 / 50 steps for ambient washes**, 100–300 for chips and
+  surfaces, 400–600 for icons and borders, 700–900 for text.
+- **Status colour is reinforcement, not signal.** Always pair status colour
+  with a label or icon — never carry meaning with colour alone (WCAG SC
+  1.4.1).
+
+---
+
+## Versioning
+
+The token names on this page are the **public contract**. Adding a new
+token (`--brand-teal-500`) is a minor bump; renaming or removing one is
+a major. See PUBLISHING.md.

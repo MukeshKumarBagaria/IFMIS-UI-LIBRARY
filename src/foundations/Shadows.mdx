@@ -1,0 +1,81 @@
+import { Meta } from "@storybook/blocks";
+import { ShadowSample } from "./_helpers";
+
+<Meta title="Foundations/Shadows" />
+
+# Shadows
+
+The IFMIS shadow system is intentionally **minimal**. Most elevation in the
+design system is achieved with borders and surface colour, not shadow —
+shadow is reserved for "floating" things (cards above page chrome, popups,
+sticky headers in scrolling content).
+
+---
+
+## Tokens
+
+<div
+  style={{
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+    gap: 20,
+    margin: "16px 0",
+  }}
+>
+  <ShadowSample
+    token="--shadow-card"
+    label="shadow-card"
+    caption="Default card elevation"
+  />
+</div>
+
+| Token            | Tailwind        | Value                                | Use for                                  |
+| ---------------- | --------------- | ------------------------------------ | ---------------------------------------- |
+| `--shadow-card`  | `shadow-card`   | `0 0 25px rgba(0, 0, 0, 0.1)`        | Cards, popups, panels, modals.           |
+
+### Why only one?
+
+The Figma component library uses a single shadow for every floating
+surface (`Card shadows`). Multiple elevation levels add visual noise
+without improving hierarchy — we use **border weight + surface colour** to
+separate layered components instead.
+
+If a future design *genuinely* needs a second elevation level (e.g. a
+sticky toast above the modal), add a new token in `globals.css`:
+
+```css
+--shadow-toast: 0 8px 24px rgba(0, 0, 0, 0.16);
+```
+
+…and update this page. Don't reach for a one-off `style` value.
+
+---
+
+## How to apply
+
+```jsx
+// good
+<div className="rounded-3xl bg-surface-card shadow-card">…</div>
+
+// avoid
+<div style={{ boxShadow: "0 0 25px rgba(0,0,0,0.1)" }}>…</div>
+```
+
+---
+
+## Best practices
+
+- **Don't shadow grid cards.** Stat cards, action cards inside a grid sit
+  on a surface — a shadow on each one looks busy. Reserve shadow for
+  things that *float* above the surface.
+- **Pair shadow with `rounded-2xl` or `rounded-3xl`.** A sharp-cornered
+  shadow looks like a print-preview artefact.
+- **Dark mode considerations.** Shadow on dark backgrounds is barely
+  visible — fine, we lean on borders in dark mode instead.
+
+---
+
+## Versioning
+
+Renaming `--shadow-card` is a breaking change (major). Adding a new
+shadow is minor.

@@ -225,29 +225,44 @@
    * ===================================================================== */
   --font-sans: "Google Sans Flex", "Google Sans", Inter, system-ui, sans-serif;
 
-  /* Headings — SemiBold (600), line-height 100% */
+  /*
+   * Headings — SemiBold (600), line-height 1.2 (`leading-tight`).
+   *
+   * Figma specifies "100%" line-height for headings, which in CSS terms is
+   * `line-height: 1`. We deliberately render slightly looser (`1.2`)
+   * because CSS line-boxes at `1` clip descenders (g / j / p / q / y)
+   * inside any ancestor that uses `overflow: hidden` — which is *every*
+   * card / dialog / sticky panel in the system. 1.2 keeps the design
+   * visually identical (~3 px of extra leading at 20 px) while
+   * guaranteeing the whole glyph is visible.
+   *
+   * If you ever need the literal Figma "100%" line-height (e.g. inside a
+   * fixed-height pill where the height has been hand-calibrated), use
+   * Tailwind's `leading-none` on that element directly — but only when
+   * the surrounding container does NOT clip overflow.
+   */
   --text-h1: 2rem;        /* 32px */
-  --text-h1--line-height: 1;
+  --text-h1--line-height: 1.2;
   --text-h1--font-weight: 600;
 
   --text-h2: 1.5rem;      /* 24px */
-  --text-h2--line-height: 1;
+  --text-h2--line-height: 1.2;
   --text-h2--font-weight: 600;
 
   --text-h3: 1.25rem;     /* 20px */
-  --text-h3--line-height: 1;
+  --text-h3--line-height: 1.2;
   --text-h3--font-weight: 600;
 
   --text-h4: 1.125rem;    /* 18px */
-  --text-h4--line-height: 1;
+  --text-h4--line-height: 1.2;
   --text-h4--font-weight: 600;
 
   --text-h5: 1rem;        /* 16px */
-  --text-h5--line-height: 1;
+  --text-h5--line-height: 1.2;
   --text-h5--font-weight: 600;
 
   --text-h6: 0.875rem;    /* 14px */
-  --text-h6--line-height: 1;
+  --text-h6--line-height: 1.2;
   --text-h6--font-weight: 600;
 
   /* Body — sizes match Figma B1–B4 / b1–b4 */

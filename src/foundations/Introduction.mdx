@@ -1,0 +1,109 @@
+import { Meta } from "@storybook/blocks";
+
+<Meta title="Foundations/Introduction" />
+
+# @ifmis/ui — Foundations
+
+This section is the **system reference** behind the components. Everything
+visible in a `Button`, `Card`, `ProgressStepper`, or any other primitive is
+assembled from the tokens, type scale, spacing, shadows, and theme rules
+documented here. Hand-rolling values inside a consumer app — _"let me just
+hard-code `#56108A`"_ — defeats the system and breaks the next theme.
+
+> **Rule of thumb.** If you ever need a colour, font size, padding, or
+> shadow that isn't in this section, raise it as a new token in the design
+> system **before** writing it in code.
+
+---
+
+## How it's wired
+
+```
+src/styles/
+├── globals.css                  ← Tailwind v4 @theme block: token → utility
+└── themes/
+    ├── _brand.css               ← shared brand palette (green, red, …)
+    ├── purple.css               ← purple theme (default, light)
+    ├── dark.css                 ← dark companion theme
+    └── index.css                ← @imports every theme
+```
+
+Three layers, in order:
+
+1. **Brand palette** (`_brand.css`) — raw colour ramps that don't change
+   between themes (green/red/orange/yellow/blue/grey). One ramp per
+   semantic family, 25 → 950.
+2. **Theme palette** (`<theme>.css`) — the parts that *do* change between
+   themes: primary scale, neutral scale, surface roles, text colours, and
+   the **semantic tokens** (`--primary`, `--background`, `--success`, …)
+   that components actually consume.
+3. **Tailwind `@theme`** (`globals.css`) — names every variable into a
+   Tailwind utility (`bg-green-500`, `text-heading`, `bg-primary`, …) so
+   components stay JSX-only and never write raw `var(--…)` themselves.
+
+The full theming flow + how to add a new theme lives in
+[Foundations → Theming](?path=/docs/foundations-theming--docs).
+
+---
+
+## What's in this section
+
+| Page                                                                     | What it covers                                                       |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| [Colors](?path=/docs/foundations-colors--docs)                           | Every brand ramp + every semantic colour token, with live swatches.  |
+| [Typography](?path=/docs/foundations-typography--docs)                   | Heading scale (H1–H6), body sizes, font weights, line heights.       |
+| [Spacing & Radius](?path=/docs/foundations-spacing-radius--docs)         | The 4-px spacing scale, the corner-radius scale, semantic radii.     |
+| [Shadows](?path=/docs/foundations-shadows--docs)                         | Elevation tokens (`shadow-card`, etc.) with live samples.            |
+| [Theming](?path=/docs/foundations-theming--docs)                         | How `ThemeProvider` works; how to register a new theme end-to-end.   |
+
+---
+
+## Working principles
+
+These are the rules the library was built against. Read them once; they
+explain why every other page looks the way it does.
+
+### 1. Tokens, not values
+
+Components never reference raw hex codes — they reference `bg-primary`,
+`text-heading`, `border-purple-400`. Swap a theme and every component
+re-skins for free. As a consumer, **never** inline colours/sizes in your
+app code — always reach for a Tailwind utility backed by a token.
+
+### 2. Same tokens, every theme
+
+The semantic API (`--primary`, `--background`, `--success`, …) is
+identical across themes. A theme only changes which palette step those
+semantic tokens point at. This is what makes `dark` a drop-in replacement
+for `purple` without component changes.
+
+### 3. Accessibility is baked in
+
+Every focusable component ships a `focus-visible` ring (`ring-2 ring-ring`)
+sized for keyboard users. Status colour is always paired with a label or
+icon — never carry meaning by colour alone.
+
+### 4. JSX over CSS
+
+If you find yourself writing a custom `.css` file in a consumer app to
+override the library, stop. Either:
+
+- Use the `className` prop on the component (every primitive merges it via
+  `cn()`); or
+- File an issue — the gap is in the system, not in your app.
+
+### 5. Atomic composition
+
+Bigger components are built out of smaller ones (`ProgressStepper` →
+`ProgressCard` → `Badge` + `Avatar` + `Remarks`). When you reach for a
+high-level component, prefer the smallest one that gets the job done —
+it leaves room for the next layout change.
+
+---
+
+## Versioning
+
+Tokens are **part of the public API**. Renaming `--brand-green-600` is a
+breaking change (major). Adding `--brand-green-1000` is additive (minor).
+See [PUBLISHING.md](https://gitlab.example.com/ifmis/ui/-/blob/main/PUBLISHING.md)
+for the full SemVer policy.

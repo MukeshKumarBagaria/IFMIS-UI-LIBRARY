@@ -230,7 +230,7 @@ const ProfileDropdown = forwardRef<HTMLDivElement, ProfileDropdownProps>(
 
         {user.roles && user.roles.length > 0 ? (
           <div className="flex w-full flex-col gap-2 px-1">
-            <span className="font-sans font-semibold text-[16px] leading-none text-heading">
+            <span className="font-sans font-semibold text-[16px] leading-tight text-heading">
               {labels.rolesHeading}
             </span>
             <div className="flex w-full items-stretch gap-2">
@@ -425,11 +425,11 @@ export const ProfileMenu = forwardRef<HTMLDivElement, ProfileMenuProps>(
         >
           <Avatar user={user} size={32} variant="glass" />
           <div className="hidden sm:flex min-w-0 flex-col items-start">
-            <span className="font-sans font-semibold text-[14px] leading-none text-white truncate max-w-[120px] lg:max-w-[160px]">
+            <span className="font-sans font-semibold text-[14px] leading-tight text-white truncate max-w-[120px] lg:max-w-[160px]">
               {user.name}
             </span>
             {user.designation ? (
-              <span className="hidden lg:block font-sans text-[12px] leading-none text-neutral-100 truncate max-w-[160px] mt-1">
+              <span className="hidden lg:block font-sans text-[12px] leading-tight text-neutral-100 truncate max-w-[160px] mt-1">
                 {user.designation}
               </span>
             ) : null}

@@ -1,0 +1,253 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as ProgressCardStories from "./ProgressCard.stories";
+
+<Meta of={ProgressCardStories} title="UI/ProgressCard/Guide" />
+
+# ProgressCard
+
+A **status-tinted workflow step card** — the atomic building block of the
+IFMIS progress system. One of four statuses
+(`success` / `pending` / `rejected` / `returned`) drives every visible
+colour: card surface, title, badge, avatar chip, name line, and the optional
+remarks side band.
+
+Use it **standalone** to call out a single workflow event in a page, or
+stack multiple instances inside [`ProgressStepper`](?path=/docs/ui-progressstepper-guide--docs)
+for the full vertical rail with dots + connectors.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## The four statuses
+
+<Canvas of={ProgressCardStories.AllStatuses} />
+
+| status     | card           | badge default | glyph        | text colours       |
+| ---------- | -------------- | ------------- | ------------ | ------------------ |
+| `success`  | green-25/200   | `Submitted`   | CheckCircle  | green-700 / 800    |
+| `pending`  | yellow-25/200  | `Pending`     | Spinner      | yellow-700 / 800   |
+| `rejected` | red-25/200     | `Rejected`    | XCircle      | red-700 / 800      |
+| `returned` | orange-25/200  | `Returned`    | KeyReturn    | orange-700 / 800   |
+
+Status colours come from the shared **`PROGRESS_STATUS_TOKENS`** map so the
+card always matches its dot in the stepper rail.
+
+---
+
+## Minimum usage
+
+```jsx
+import { ProgressCard } from "@ifmis/ui";
+
+<ProgressCard
+  status="success"
+  label="Creator"
+  timestamp="Submitted on 05 May 2026"
+  user={{ name: "Amit Mohan", role: "Employee" }}
+/>;
+```
+
+<Canvas of={ProgressCardStories.Success} />
+
+Everything except `status` and `label` is optional — drop in only the rows
+that matter for the moment.
+
+---
+
+## Each status
+
+### Success
+
+<Canvas of={ProgressCardStories.Success} />
+
+### Pending
+
+<Canvas of={ProgressCardStories.Pending} />
+
+### Rejected
+
+<Canvas of={ProgressCardStories.Rejected} />
+
+### Returned
+
+<Canvas of={ProgressCardStories.Returned} />
+
+---
+
+## Custom copy
+
+The label, badge, and remarks heading all accept any node:
+
+```jsx
+<ProgressCard
+  status="pending"
+  label="Under review"
+  badgeLabel="In queue"
+  timestamp="Since 03 Jan 2026"
+  user={{ name: "Ravi Kumar", role: "Sub-Inspector" }}
+  remarks="Need clarification on annexure B before forwarding."
+  remarksTitle="Note from reviewer"
+/>
+```
+
+<Canvas of={ProgressCardStories.CustomCopy} />
+
+---
+
+## Badges
+
+### Hide the badge
+
+```jsx
+<ProgressCard status="success" label="Creator" badgeLabel={null} />
+```
+
+<Canvas of={ProgressCardStories.NoBadge} />
+
+### Swap the glyph
+
+```jsx
+import { Star } from "@phosphor-icons/react";
+
+<ProgressCard
+  status="success"
+  label="Creator"
+  badgeLabel="Featured"
+  badgeIcon={<Star weight="fill" />}
+/>;
+```
+
+<Canvas of={ProgressCardStories.CustomBadgeIcon} />
+
+The custom icon inherits the badge's icon colour via `currentColor`.
+
+---
+
+## Users
+
+The `user` object renders an avatar + name + optional role:
+
+```jsx
+user={{ name: "Amit Mohan", role: "Employee" }}
+```
+
+- **Initials** are derived from `user.name` automatically (`"Amit Mohan"` →
+  `AM`). Override with `user.initials` when the auto-generated pair is wrong
+  for the locale.
+- **Avatar image** — pass `user.avatarSrc` to swap the initials for an
+  `<img>`. Use `user.avatarAlt` for the alt text (defaults to `user.name`).
+
+<Canvas of={ProgressCardStories.WithAvatarImage} />
+
+---
+
+## Remarks
+
+Remarks appear as a tinted side-banded callout when `remarks` is truthy:
+
+```jsx
+<ProgressCard
+  status="rejected"
+  label="Approver"
+  user={{ name: "Amit Mohan" }}
+  remarks="Application doesn't meet eligibility under Section 4."
+/>
+```
+
+The block colour follows the card status — yellow for `pending`, red for
+`rejected`, orange for `returned`, green for `success`.
+
+---
+
+## Composing into the stepper
+
+A `ProgressStepper` is just an organism around an array of `ProgressCard`s.
+Whatever you can pass to one, you can pass to the other:
+
+```jsx
+import { ProgressCard, ProgressStepper } from "@ifmis/ui";
+
+// standalone
+<ProgressCard status="success" label="Creator" /* … */ />
+
+// composed
+<ProgressStepper
+  steps={[
+    { id: "c", status: "success",  label: "Creator",  /* … */ },
+    { id: "v", status: "returned", label: "Verifier", /* … */ },
+  ]}
+/>
+```
+
+The stepper handles the dot rail, dashed connectors, header, and View
+Details footer.
+
+---
+
+## Responsive behaviour
+
+`ProgressCard` is `width: 100%` — the parent constrains it. Drop it into:
+
+- A **side rail** with `w-[280px]` (the Figma frame width).
+- A **fluid column** between page sections.
+- A **mobile sheet** — the badge, timestamp, and remarks all wrap on narrow
+  widths without breaking the layout.
+
+```jsx
+<aside className="w-full md:max-w-[320px]">
+  <ProgressCard {...} />
+</aside>
+```
+
+---
+
+## Props
+
+| Prop           | Type                                | Default       | Notes                                              |
+| -------------- | ----------------------------------- | ------------- | -------------------------------------------------- |
+| `status`       | `success \| pending \| rejected \| returned` | —    | Drives every colour.                               |
+| `label`        | node                                | —             | Title at the top of the card.                      |
+| `badgeLabel`   | node \| `null`                      | per status    | `null` hides the badge entirely.                   |
+| `badgeIcon`    | node \| `null`                      | per status    | `null` makes a text-only badge.                    |
+| `timestamp`    | node                                | —             | Shown with a clock icon when present.              |
+| `user.name`    | string                              | —             | Drives initials fallback.                          |
+| `user.role`    | node                                | —             | Secondary line.                                    |
+| `user.initials`| string                              | derived       | Overrides auto-generated initials.                 |
+| `user.avatarSrc` | string                            | —             | Replaces initials with an `<img>`.                 |
+| `user.avatarAlt` | string                            | `user.name`   | Alt text for the avatar image.                     |
+| `remarks`      | node                                | —             | Shows the side-banded block when truthy.           |
+| `remarksTitle` | node                                | `"Remarks"`   | Heading inside the remarks block.                  |
+| `className`    | string                              | —             | Merged onto the outer card.                        |
+
+All other native `<div>` props are forwarded. The card root carries
+`data-status` so you can target it in custom CSS or tests.
+
+---
+
+## Tokens
+
+| Part        | Token(s)                                                           |
+| ----------- | ------------------------------------------------------------------ |
+| Card        | `*-25` fill + `*-200` border, per status                           |
+| Title       | `*-700`, per status                                                |
+| Badge       | `*-100` fill + `*-400` border + `*-800` text                       |
+| Badge icon  | `green-600` / `orange-600` (pending+returned) / `red-600` / etc.   |
+| Avatar      | `*-100` fill + `*-200` border + `*-800` text                       |
+| Name        | `*-800`, per status                                                |
+| Remarks     | `*-100` fill, `*-400` left band, `rounded-xl`                      |
+| Heading     | `*-800`, per status                                                |
+
+All come from `src/components/ui/ProgressCard/tokens.ts`.
+
+---
+
+## Accessibility
+
+- The card root carries `data-status` for programmatic styling/testing —
+  the visible label + badge text + remarks already convey the status.
+- The clock icon is `aria-hidden`; the timestamp text is authoritative.
+- The badge glyph is `aria-hidden` and decorative — the badge label is the
+  source of truth.
+- Avatar images need an `avatarAlt` for screen readers (defaults to
+  `user.name`).

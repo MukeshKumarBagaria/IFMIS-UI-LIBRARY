@@ -112,7 +112,7 @@ export function SidebarMenu({
   if (inSearchMode) {
     return (
       <div className="flex flex-col gap-2 self-stretch">
-        <h3 className="text-heading text-sm font-semibold leading-none">
+        <h3 className="text-heading text-sm font-semibold leading-tight">
           {results.length === 0 ? searchEmptyTitle : searchResultsTitle}
         </h3>
         {results.length === 0 ? (
@@ -137,7 +137,7 @@ export function SidebarMenu({
   return (
     <div className="flex flex-col gap-2 self-stretch">
       {title && (
-        <h3 className="text-heading text-sm font-semibold leading-none">
+        <h3 className="text-heading text-sm font-semibold leading-tight">
           {title}
         </h3>
       )}
@@ -195,7 +195,7 @@ function SearchResultRow({
           {path.length > 0 && (
             <span
               className={cn(
-                "truncate text-xs font-medium leading-none",
+                "truncate text-xs font-medium leading-tight",
                 isActive ? "text-white/75" : "text-body-secondary/70",
               )}
             >

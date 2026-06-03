@@ -476,7 +476,7 @@ export const Upload = forwardRef<HTMLDivElement, UploadProps>(
                 label={uploadLabel}
                 onClick={onUpload}
               />
-              <p className="self-start text-sm font-normal leading-none text-body-secondary">
+              <p className="self-start text-sm font-normal leading-tight text-body-secondary">
                 {hint}
               </p>
             </>
@@ -492,7 +492,7 @@ export const Upload = forwardRef<HTMLDivElement, UploadProps>(
                 onClick={onUpload}
               />
               <div className="flex w-full items-center justify-between">
-                <p className="text-sm font-normal leading-none text-body-secondary">
+                <p className="text-sm font-normal leading-tight text-body-secondary">
                   {hint}
                 </p>
                 <PillButton label={cancelLabel} tone="grey" onClick={onCancel} />
@@ -509,7 +509,7 @@ export const Upload = forwardRef<HTMLDivElement, UploadProps>(
                 onClick={onUpload}
               />
               <div className="flex w-full items-center justify-between">
-                <p className="text-sm font-normal leading-none text-body-secondary">
+                <p className="text-sm font-normal leading-tight text-body-secondary">
                   {hint}
                 </p>
                 <PillButton

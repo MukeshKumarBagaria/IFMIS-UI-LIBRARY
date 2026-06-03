@@ -1,0 +1,287 @@
+import { Meta } from "@storybook/blocks";
+
+<Meta title="Foundations/Theming" />
+
+# Theming
+
+`@ifmis/ui` ships **two registered themes** out of the box:
+
+| Name      | Mode  | Description                          |
+| --------- | ----- | ------------------------------------ |
+| `purple`  | light | IFMIS default brand theme (default). |
+| `dark`    | dark  | Dark companion theme.                |
+
+> Use the Storybook toolbar (top of the page) to flip between them; every
+> token in the [Colors](?path=/docs/foundations-colors--docs) page updates
+> live.
+
+---
+
+## Using a theme in a consumer app
+
+Wrap the app once with `<ThemeProvider>`:
+
+```jsx
+import "@ifmis/ui/styles.css";
+import { ThemeProvider } from "@ifmis/ui";
+
+export default function App() {
+  return (
+    <ThemeProvider theme="purple">
+      {/* the rest of the app */}
+    </ThemeProvider>
+  );
+}
+```
+
+`ThemeProvider` sets `data-theme="<name>"` on its container, which scopes
+the theme's CSS variables to that subtree. You can nest a different theme
+locally (e.g. a "preview the dark mode" panel inside a settings page):
+
+```jsx
+<ThemeProvider theme="purple">
+  <Settings />
+  <div className="rounded-2xl p-4">
+    <ThemeProvider theme="dark">
+      <PreviewPanel />
+    </ThemeProvider>
+  </div>
+</ThemeProvider>
+```
+
+### Reading the current theme
+
+```jsx
+import { useTheme } from "@ifmis/ui";
+
+function Footer() {
+  const { theme, setTheme } = useTheme();
+  return (
+    <button onClick={() => setTheme(theme === "purple" ? "dark" : "purple")}>
+      Currently: {theme}
+    </button>
+  );
+}
+```
+
+### Type-safe theme names
+
+```jsx
+import { themes, THEME_NAMES, isTheme, getTheme } from "@ifmis/ui";
+
+themes.forEach((t) => console.log(t.name, t.mode));   // [{name:"purple",mode:"light"}, …]
+
+THEME_NAMES;                                          // readonly ("purple" | "dark")[]
+
+if (isTheme(someValue)) {
+  const meta = getTheme(someValue);
+  console.log(meta.label);
+}
+```
+
+The `Theme` type union is *derived from the registry* — adding a new theme
+to `src/themes/registry.ts` automatically widens it.
+
+---
+
+## How a theme is structured
+
+A theme is a single CSS file that overrides:
+
+1. **Theme palette** — `--brand-primary-purple-25..950` and
+   `--brand-neutral-25..950`. The brand ramps (green/red/orange/…) come
+   from `_brand.css` and do not change between themes.
+2. **Surface tokens** — `--surface-page-bg`, `--surface-grey-bg`,
+   `--surface-card-white`, etc.
+3. **Text tokens** — `--text-heading`, `--text-subheading`,
+   `--text-body-primary`, `--text-body-secondary`, `--text-body-disabled`.
+4. **Semantic tokens** — `--background`, `--foreground`, `--primary`,
+   `--success`, `--ring`, … (the theme-agnostic API).
+5. **Decorative gradients** — any tone-specific gradients used by
+   compound components (e.g. `--gradient-card-checked`).
+
+Everything else (`globals.css` `@theme` block, accent ramps, typography
+scale, spacing, shadows) is shared and identical across themes.
+
+```
+src/styles/themes/
+├── _brand.css         shared accent ramps
+├── purple.css         [data-theme="purple"] block
+├── dark.css           [data-theme="dark"]   block
+└── index.css          @import every theme file
+```
+
+---
+
+## Adding a new theme
+
+Worked example — adding a `"government"` theme.
+
+### 1. Create the theme file
+
+`src/styles/themes/government.css`:
+
+```css
+:root,
+[data-theme="government"] {
+  /* 1. THEME PALETTE — primary + tinted neutral */
+  --brand-primary-purple-25:  #F5F8FC;
+  --brand-primary-purple-50:  #E5EFFA;
+  /* …all 12 steps… */
+  --brand-primary-purple-950: #061528;
+
+  --brand-neutral-25:  /* … */;
+  /* …all 12 steps… */
+
+  /* 2. SURFACE TOKENS */
+  --surface-page-bg:        #F0F4F8;
+  --surface-grey-bg:        #F4F7FA;
+  --surface-grey-header:    #E7ECF1;
+  --surface-border-grey:    #A6B0BC;
+  --surface-border-purple:  #5C7A99;
+  --surface-card-white:     #FFFFFF;
+
+  /* 3. TEXT TOKENS */
+  --text-heading:        #1B2733;
+  --text-subheading:     #0E1B29;
+  --text-body-primary:   #2E2E2E;
+  --text-body-secondary: #595959;
+  --text-body-disabled:  #C7CDD4;
+
+  /* 4. SEMANTIC TOKENS (theme-agnostic API) */
+  --background: var(--surface-page-bg);
+  --foreground: var(--text-body-primary);
+  --primary:    var(--brand-primary-purple-700);
+  --primary-foreground: #FFFFFF;
+  --ring:       var(--brand-blue-500);
+  /* …everything else, structurally identical to purple.css… */
+}
+```
+
+> Copy the structure of `purple.css` step-for-step — *don't* skip blocks.
+> Missing tokens fall through to whatever the previous `:root` declared,
+> which produces baffling cross-theme bugs.
+
+### 2. Register it
+
+`src/styles/themes/index.css`:
+
+```css
+@import "./_brand.css";
+@import "./purple.css";
+@import "./dark.css";
+@import "./government.css";          /* ← new */
+```
+
+`src/themes/registry.ts`:
+
+```ts
+export const themes = [
+  { name: "purple",     label: "Purple",     mode: "light", description: "…" },
+  { name: "dark",       label: "Dark",       mode: "dark",  description: "…" },
+  { name: "government", label: "Government", mode: "light", description: "Government-of-India dark blue accent." },
+] as const satisfies readonly ThemeDefinition[];
+```
+
+That's it. TypeScript widens `Theme`, the Storybook toolbar picks the new
+name up automatically, every component re-skins.
+
+### 3. Visual QA
+
+Open Storybook, flip to the new theme, walk every component story. The
+[Foundations → Colors](?path=/docs/foundations-colors--docs) page is the
+single best place to spot a missing token — every semantic colour swatch
+must resolve, not show "—".
+
+### 4. Snapshot the test build
+
+```bash
+npm run build-storybook
+```
+
+If a deprecated token was used somewhere (the new theme doesn't define
+it), the build still passes but the swatch is empty — that's the signal
+to fix it.
+
+---
+
+## Dark mode
+
+Tailwind's `dark:` variant is wired in `globals.css`:
+
+```css
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+```
+
+Use it sparingly — most components don't need a `dark:` variant because
+the semantic tokens (`bg-card`, `text-body-primary`, `border`) already
+flip. The places it *is* needed:
+
+- One-off accent rules on a component (e.g. a focus ring on a coloured
+  surface).
+- Static images that need a different file in dark mode.
+
+```jsx
+<img src={logoLight} className="block dark:hidden" />
+<img src={logoDark}  className="hidden dark:block" />
+```
+
+### Adding another dark theme
+
+Extend the variant in `globals.css`:
+
+```css
+@custom-variant dark (&:where(
+  [data-theme="dark"], [data-theme="dark"] *,
+  [data-theme="purple-dark"], [data-theme="purple-dark"] *
+));
+```
+
+---
+
+## SSR / hydration
+
+`ThemeProvider` reads the initial theme from a `theme` prop, so SSR is
+deterministic — no flash-of-wrong-theme. If the host app persists the
+user's choice in `localStorage`, read it on the server (via cookies) and
+pass it down:
+
+```jsx
+// e.g. Next.js
+const theme = cookies().get("theme")?.value ?? "purple";
+
+return (
+  <html data-theme={theme}>
+    <body>
+      <ThemeProvider theme={theme}>{children}</ThemeProvider>
+    </body>
+  </html>
+);
+```
+
+The `data-theme` on `<html>` is the source of truth; `ThemeProvider`
+keeps it in sync if the consumer flips themes client-side.
+
+---
+
+## Best practices
+
+- **Treat tokens like an API.** Renaming a semantic token is a breaking
+  change — even if "no one uses it".
+- **Every theme must implement every semantic token.** Use the
+  [Colors](?path=/docs/foundations-colors--docs) page to verify.
+- **One `<ThemeProvider>` at the root**, plus optional nested ones for
+  preview panels. Don't sprinkle providers around the tree — it breaks
+  CSS variable inheritance reasoning.
+- **Component code never references a theme name.** No `if (theme ===
+  "dark")` inside components — that's what semantic tokens are for.
+
+---
+
+## Versioning
+
+- Adding a new theme is **additive** (minor).
+- Removing a theme is **breaking** (major) — consumers may target its
+  `data-theme` value directly.
+- Changing the colour palette of an existing theme is **breaking** in
+  spirit but usually shipped as minor with a CHANGELOG note.

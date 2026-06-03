@@ -1,0 +1,195 @@
+import { Meta } from "@storybook/blocks";
+import { TypeSample } from "./_helpers";
+
+<Meta title="Foundations/Typography" />
+
+# Typography
+
+The IFMIS type system is a **closed scale** — six heading sizes and four
+body sizes — paired with two weights and four colour roles. Anything that
+doesn't fit one of these slots needs a discussion, not a one-off
+`text-[19px]`.
+
+The system mirrors Figma 1:1, including the slightly unusual choice of
+**`line-height: 100%` for headings** (`leading-none` in Tailwind). That's
+intentional — denser, tighter headings make scannable forms.
+
+> Every row below renders with the actual token applied; the metadata
+> column reads the computed style at runtime, so the size/weight/leading
+> numbers are real.
+
+---
+
+## Quick start
+
+In components, never set `font-size` / `font-weight` / `line-height`
+yourself. Reach for a typography utility or a higher-level component:
+
+```jsx
+import { Heading, Text } from "@ifmis/ui";
+
+<Heading level={1}>Dashboard</Heading>
+<Heading level={3}>Recent transactions</Heading>
+
+<Text>Default paragraph copy.</Text>
+<Text size="xs" weight="medium">Form field label</Text>
+<Text size="xs" color="secondary">Helper text under a field</Text>
+```
+
+When you're inside another component and `<Heading>` is overkill, the raw
+utility classes work too:
+
+```jsx
+<p className="text-h3 text-heading">Section title</p>
+<p className="text-body-xs font-medium text-body-secondary">Helper</p>
+```
+
+---
+
+## Font family
+
+```css
+--font-sans: "Google Sans Flex", "Google Sans", Inter, system-ui, sans-serif;
+```
+
+Set on `html` in `globals.css` — every component inherits it. The
+fallbacks (Inter → system-ui) keep the layout stable while Google Sans
+loads.
+
+If a consumer app embeds a custom font (Hindi / regional), override
+`--font-sans` on a wrapper element:
+
+```jsx
+<div style={{ fontFamily: '"Noto Sans Devanagari", ...' }}>
+  {/* content */}
+</div>
+```
+
+---
+
+## Heading scale
+
+Headings are SemiBold (600) with `leading-none`. Use the smallest level
+that gets the job done — visual hierarchy is built with **size + spacing
++ colour**, not weight.
+
+<TypeSample label="H1 — Page title" className="text-h1" sample="Quarterly Performance Report" />
+<TypeSample label="H2 — Section" className="text-h2" sample="Audit Activity" />
+<TypeSample label="H3 — Card / panel" className="text-h3" sample="Recent transactions" />
+<TypeSample label="H4 — Sub-section" className="text-h4" sample="Approval status" />
+<TypeSample label="H5 — Compact heading" className="text-h5" sample="Application status" />
+<TypeSample label="H6 — Minor heading" className="text-h6" sample="Last updated" />
+
+### When to use which
+
+| Level | Use for                                            | Example                       |
+| ----- | -------------------------------------------------- | ----------------------------- |
+| H1    | Single page title — one per page.                  | "Quarterly Performance Report"|
+| H2    | Major section that has its own scroll anchor.      | "Audit Activity"              |
+| H3    | Card title, modal title, panel title.              | "Recent transactions"         |
+| H4    | Body-level subheading inside a card.               | "Approval status"             |
+| H5/H6 | Compact metadata heading inside small components.  | OtpDialog body heading        |
+
+Skipping levels is fine when it makes the layout clearer — never use a
+heading just to "get the right font size". The
+[`Heading`](?path=/docs/ui-typography-guide--docs) component lets you keep
+the visual level (`level={3}`) while choosing the semantic element
+(`as="h2"`).
+
+---
+
+## Body scale
+
+Body sizes are Regular (400) by default; use `font-medium` for emphasis
+inside copy.
+
+<TypeSample label="Body LG — 20 / 30" className="text-body-lg" />
+<TypeSample label="Body MD — 18 / 27" className="text-body-md" />
+<TypeSample label="Body SM — 16 / 24" className="text-body-sm" />
+<TypeSample label="Body XS — 14 / 21" className="text-body-xs" sample="Helper text inside a form field" />
+
+| Size  | Use for                                                  |
+| ----- | -------------------------------------------------------- |
+| LG    | Hero paragraph, intro copy.                              |
+| MD    | Default page body copy.                                  |
+| SM    | Dense body — table cells, card body.                     |
+| XS    | Helpers, captions, labels, breadcrumb crumbs.            |
+
+---
+
+## Weights
+
+Tailwind weight utilities map 1:1 to CSS values:
+
+| Class               | Weight | Use for                              |
+| ------------------- | ------ | ------------------------------------ |
+| `font-normal`       | 400    | Default body copy.                   |
+| `font-medium`       | 500    | Form labels, emphasised body.        |
+| `font-semibold`     | 600    | All headings, button labels, badges. |
+| `font-bold`         | 700    | Reserve for very rare emphasis.      |
+
+There's **no italic** anywhere in the system — IFMIS prefers weight over
+slant for emphasis.
+
+---
+
+## Colour roles
+
+Text colour is theme-aware via the four semantic tokens. Always pair the
+text colour with the surface colour it sits on.
+
+<TypeSample
+  label="Heading — text-heading"
+  className="text-h3 text-heading"
+  sample="Heading colour"
+/>
+<TypeSample
+  label="Subheading — text-subheading"
+  className="text-h4 text-subheading"
+  sample="Subheading colour"
+/>
+<TypeSample
+  label="Body primary — text-body-primary"
+  className="text-body-sm text-body-primary"
+  sample="Primary body colour"
+/>
+<TypeSample
+  label="Body secondary — text-body-secondary"
+  className="text-body-sm text-body-secondary"
+  sample="Secondary / muted body colour"
+/>
+<TypeSample
+  label="Body disabled — text-body-disabled"
+  className="text-body-sm text-body-disabled"
+  sample="Disabled state"
+/>
+
+| Token                  | Token name                | Where                                        |
+| ---------------------- | ------------------------- | -------------------------------------------- |
+| `text-heading`         | `--text-heading`          | All headings.                                |
+| `text-subheading`      | `--text-subheading`       | Card sub-headings, dialog accent text.       |
+| `text-body-primary`    | `--text-body-primary`     | Default paragraph copy.                      |
+| `text-body-secondary`  | `--text-body-secondary`   | Helpers, captions, metadata.                 |
+| `text-body-disabled`   | `--text-body-disabled`    | Disabled fields, inactive list rows.         |
+
+---
+
+## Best practices
+
+- **Stay on the scale.** If a design has a 19 px headline, push back —
+  either round to 18 (h4) or 20 (h3). Custom sizes are how systems erode.
+- **Pair semantic component + semantic colour.** `<Heading>` carries the
+  visual weight; `text-heading` carries the colour. Always use both.
+- **One H1 per page.** Use `<Heading level={1} as="h1">` once; use
+  `as="h2"` (or higher) on the rest.
+- **Don't fight `leading-none` on headings.** That tightness is the system
+  — if a heading runs over two lines and needs more leading, change the
+  copy, not the type.
+- **Use `font-medium` on form labels** — that's the IFMIS convention.
+
+---
+
+## Versioning
+
+Renaming a typography token or changing its computed value is a **breaking
+change** (major). Adding a new size (e.g. `--text-body-xxs`) is minor.

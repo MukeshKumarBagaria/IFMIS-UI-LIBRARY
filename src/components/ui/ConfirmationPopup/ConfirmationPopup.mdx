@@ -1,0 +1,220 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as ConfirmationPopupStories from "./ConfirmationPopup.stories";
+
+<Meta of={ConfirmationPopupStories} title="UI/ConfirmationPopup/Guide" />
+
+# ConfirmationPopup
+
+A compact **"Are you sure?"** panel for destructive or irreversible flows.
+A 400px-wide card with a soft peach→white gradient, a circular brand icon,
+a one-line prompt, and a paired **No / Yes** action row.
+
+It's the panel _only_ — render it inside your app's modal/overlay. It
+exposes `role="alertdialog"` and is labelled by its title text.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## The defaults (Figma 1:1)
+
+```jsx
+import { ConfirmationPopup } from "@ifmis/ui";
+
+<ConfirmationPopup
+  onConfirm={() => submit()}
+  onCancel={() => close()}
+/>;
+```
+
+<Canvas of={ConfirmationPopupStories.Default} />
+
+- Width `400px`, padding `20px`, radius `24px`, gap `40px`.
+- Background: `linear-gradient(180deg, #ECA993 -84.08%, #FFFFFF 46.41%)`.
+- Default icon: filled **Info**, `60×60`, in `text-orange-600` (`#B85014`).
+- Default title: `"Are you sure of this action?"`.
+- Default actions: outlined **No** (`text-orange-600`, `border-orange-600`)
+  + solid **Yes** (`bg-orange-600`, `text-white`); both `150×44`, radius
+  `16px`.
+
+Every one of those is overridable — see the sections below.
+
+---
+
+## Custom copy
+
+The title and both button labels accept any React node.
+
+```jsx
+<ConfirmationPopup
+  title="Discard this draft?"
+  confirmLabel="Discard"
+  cancelLabel="Keep editing"
+  onConfirm={discard}
+  onCancel={close}
+/>
+```
+
+<Canvas of={ConfirmationPopupStories.DestructiveCopy} />
+
+---
+
+## Changing the icon
+
+There are three ways to control the icon:
+
+### 1. Keep the default Info glyph, change its colour
+
+Pass any Tailwind text-colour utility via `iconColorClassName`:
+
+```jsx
+<ConfirmationPopup
+  title="Delete this record?"
+  confirmLabel="Delete"
+  iconColorClassName="text-red-600"
+/>
+```
+
+<Canvas of={ConfirmationPopupStories.RedIconColor} />
+
+### 2. Use a different glyph
+
+Pass any node as `icon`. You're responsible for its size and colour — the
+Figma frame uses `60×60` filled icons:
+
+```jsx
+import { Trash } from "@phosphor-icons/react";
+
+<ConfirmationPopup
+  title="Move this item to trash?"
+  confirmLabel="Move to trash"
+  icon={<Trash size={60} weight="fill" className="text-red-600" />}
+/>;
+```
+
+<Canvas of={ConfirmationPopupStories.CustomIcon} />
+
+### 3. Hide the icon
+
+```jsx
+<ConfirmationPopup icon={null} title="Submit your form for approval?" />
+```
+
+<Canvas of={ConfirmationPopupStories.NoIcon} />
+
+---
+
+## Recolouring the buttons
+
+Both buttons accept a `className` override that's merged on top of the
+defaults. This lets you swap the brand orange for any other palette
+without rebuilding the panel.
+
+```jsx
+<ConfirmationPopup
+  title="Permanently delete this user?"
+  confirmLabel="Delete"
+  cancelButtonClassName="border-red-600 text-red-600 hover:bg-red-50 active:bg-red-100"
+  confirmButtonClassName="bg-red-600 hover:bg-red-700 active:bg-red-800"
+/>
+```
+
+<Canvas of={ConfirmationPopupStories.RedButtons} />
+
+> The default classes already include `hover:` / `active:` / `focus-visible:`
+> rules. When you swap the base palette, swap those too so interaction
+> feedback stays correct.
+
+---
+
+## Wiring the actions
+
+`onConfirm` and `onCancel` are plain callbacks. Disable both while an
+async confirm is in flight by toggling `disabled`:
+
+```jsx
+const [busy, setBusy] = useState(false);
+
+<ConfirmationPopup
+  disabled={busy}
+  onConfirm={async () => {
+    setBusy(true);
+    try {
+      await api.deleteUser(id);
+      modal.close();
+    } finally {
+      setBusy(false);
+    }
+  }}
+  onCancel={modal.close}
+/>;
+```
+
+<Canvas of={ConfirmationPopupStories.Interactive} />
+
+---
+
+## Rendering inside a modal
+
+The component is the *panel*. Drop it into a centered overlay:
+
+```jsx
+{open && (
+  <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
+    <ConfirmationPopup
+      onConfirm={() => { confirm(); setOpen(false); }}
+      onCancel={() => setOpen(false)}
+    />
+  </div>
+)}
+```
+
+`role="alertdialog"` is set automatically; the title text is wired to
+`aria-labelledby` so screen readers announce the prompt.
+
+---
+
+## Props
+
+| Prop                     | Type                          | Default                          | Notes                                                       |
+| ------------------------ | ----------------------------- | -------------------------------- | ----------------------------------------------------------- |
+| `title`                  | node                          | `Are you sure of this action?`   | One-line prompt; also wired as the dialog's accessible name. |
+| `icon`                   | node \| `null`                | default Info glyph               | `null` hides the icon entirely; any node replaces it.       |
+| `iconColorClassName`     | string                        | `text-orange-600`                | Recolours the *default* icon. Ignored when `icon` is a node. |
+| `confirmLabel`           | node                          | `Yes`                            | Confirm button label.                                       |
+| `cancelLabel`            | node                          | `No`                             | Cancel button label.                                        |
+| `onConfirm`              | `() => void`                  | —                                | Confirm handler.                                            |
+| `onCancel`               | `() => void`                  | —                                | Cancel handler.                                             |
+| `confirmButtonClassName` | string                        | —                                | Merged onto the confirm button.                             |
+| `cancelButtonClassName`  | string                        | —                                | Merged onto the cancel button.                              |
+| `disabled`               | `boolean`                     | `false`                          | Disables both buttons.                                      |
+| `className`              | string                        | —                                | Merged onto the outer panel.                                |
+
+All other native `<div>` props are forwarded to the panel.
+
+---
+
+## Tokens
+
+| Part           | Token(s)                                                                 |
+| -------------- | ------------------------------------------------------------------------ |
+| Panel          | `bg-[linear-gradient(180deg,#ECA993_-84.08%,#FFFFFF_46.41%)]`, `rounded-3xl` |
+| Title          | `text-h4` (Header-18, 600), `text-body-primary`                          |
+| Default icon   | Phosphor `Info` (filled), `text-orange-600` (`#B85014`)                  |
+| Confirm button | `bg-orange-600` → `text-white`, hover `orange-700`, active `orange-800`   |
+| Cancel button  | `border-orange-600` + `text-orange-600`, hover `orange-50`, active `orange-100` |
+
+Both buttons share `h-11 w-[150px] rounded-2xl px-3 font-semibold`.
+
+---
+
+## Accessibility
+
+- `role="alertdialog"` (more urgent than a plain dialog), labelled by the
+  title text via `aria-labelledby`.
+- Both actions are real `<button type="button">` elements with keyboard
+  focus rings (`focus-visible:ring-2 ring-ring`).
+- `disabled` is forwarded natively to both buttons.
+- The default Info glyph is `aria-hidden` — the title text is the
+  authoritative label. If you supply a custom icon that conveys meaning
+  beyond the title, label it yourself.

@@ -3,8 +3,13 @@
 This document is the **single source of truth** for releasing
 `@ifmis/ui` to other IFMIS teams over **GitLab's npm Package Registry**.
 
+We run our **own self-hosted GitLab instance** (`gitlab.example.com`
+throughout this doc — replace with your actual host once known). The flow
+below assumes that; any difference vs. `gitlab.com` is called out inline.
+
 It covers:
 
+0. [**Bootstrap to v0.1.0 — the first launch**](#0-bootstrap-to-v010--the-first-launch)
 1. [Who this is for](#1-who-this-is-for)
 2. [Concepts](#2-concepts)
 3. [One-time setup](#3-one-time-setup)
@@ -19,6 +24,263 @@ It covers:
 12. [Storybook deployment (GitLab Pages)](#12-storybook-deployment-gitlab-pages)
 13. [Troubleshooting](#13-troubleshooting)
 14. [Glossary](#14-glossary)
+
+---
+
+## 0. Bootstrap to v0.1.0 — the first launch
+
+This is the **literal step-by-step** to ship the first version of
+`@ifmis/ui` from a fresh GitLab project to a working package install in a
+consumer app. Read this once end-to-end before doing it.
+
+### 0.1 What you'll have at the end
+
+- A protected `main` branch in **your self-hosted GitLab** with this code.
+- A `v0.1.0` Git tag.
+- A CI pipeline that built `dist/` and pushed `@ifmis/ui@0.1.0` to the
+  project's npm registry.
+- A Storybook site live at the project's GitLab Pages URL.
+- A consumer app that runs `npm install @ifmis/ui` and gets the version.
+
+### 0.2 Prerequisites
+
+- A GitLab user with **Maintainer** on the new project.
+- A workstation with `node >=18`, `npm >=9`, `git`, and your GitLab SSH key
+  set up.
+- The **numeric Project ID** of the new GitLab project (Settings → General).
+  Throughout this section: `<UI_PROJECT_ID>`.
+- The **hostname** of your self-hosted GitLab. Throughout: `gitlab.example.com`
+  (replace).
+
+### 0.3 Bootstrap, step by step
+
+**1. Create the GitLab project.**
+
+In your self-hosted GitLab UI: New project → Create blank project. Name it
+`ui`, group it under `ifmis/`, default branch `main`. Do not initialise
+with a README (we have one).
+
+**2. Push this repo as `main`.**
+
+```bash
+cd ~/code/IFMIS-UI-LIBRARY
+git init
+git add -A
+git commit -m "chore: bootstrap @ifmis/ui"
+git branch -M main
+git remote add origin git@gitlab.example.com:ifmis/ui.git
+git push -u origin main
+```
+
+**3. Verify package metadata matches your host.**
+
+In `package.json`, confirm or update:
+
+```jsonc
+{
+  "name": "@ifmis/ui",
+  "version": "0.1.0",
+  "repository": { "type": "git", "url": "git+https://gitlab.example.com/ifmis/ui.git" },
+  "homepage": "https://gitlab.example.com/ifmis/ui#readme",
+  "bugs":     { "url": "https://gitlab.example.com/ifmis/ui/-/issues" },
+  "publishConfig": {
+    "@ifmis:registry": "https://gitlab.example.com/api/v4/projects/<UI_PROJECT_ID>/packages/npm/",
+    "access": "restricted"
+  },
+  "files": ["dist"]
+}
+```
+
+> **Self-hosted GitLab note.** The `publishConfig.@ifmis:registry` URL
+> uses your host, **not** `gitlab.com`. The same applies everywhere a URL
+> appears in this doc.
+
+Commit + push the change.
+
+**4. Run the verification gates locally.**
+
+```bash
+npm ci
+npm run typecheck
+npm run lint
+npm test
+npm run build           # produces dist/
+npm run build-storybook # produces storybook-static/
+```
+
+All four must be green before you tag. If you can't reproduce green
+locally, fix it first — never lean on CI to "see if it works".
+
+**5. Create the CI tokens.**
+
+In the GitLab UI, on the new project:
+
+- **Settings → Access Tokens** → New project access token.
+  - Name: `ui-publish-bot`
+  - Role: **Maintainer**
+  - Scopes: `api`, `write_registry`
+  - Expiration: 1 year out
+- Repeat for `ui-read-only`:
+  - Role: **Reporter**
+  - Scopes: `read_api`, `read_registry`
+
+Copy the token values somewhere secure for the next step. **They are shown
+only once.**
+
+**6. Store the publish token as a protected CI variable.**
+
+- **Settings → CI/CD → Variables → Add variable.**
+  - Key: `NPM_PUBLISH_TOKEN`
+  - Value: the `ui-publish-bot` token value from step 5.
+  - Type: **Variable**.
+  - Flags: ✅ **Protected**, ✅ **Masked**.
+- Add a second variable `NPM_READ_TOKEN` with the `ui-read-only` value.
+  Protect + mask the same way.
+
+> Protected means the variable is only exposed on protected branches /
+> tags. Masked redacts it from job logs. **Always both.**
+
+**7. Protect `main` and `v*` tags.**
+
+- **Settings → Repository → Protected branches**: `main` — Maintainers can
+  merge; nobody can push directly.
+- **Settings → Repository → Protected tags**: `v*` — Maintainers can
+  create. **This is the gate that authorises the publish job.**
+
+**8. Add the CI pipeline.**
+
+Create `.gitlab-ci.yml` at the repo root with the contents shown in
+[§6 Automated release pipeline](#6-automated-release-pipeline-gitlab-ciyml).
+Commit and push.
+
+Wait for the verify+build pipeline on `main` to go green.
+
+**9. Add the merge request template + CODEOWNERS.**
+
+`.gitlab/merge_request_templates/default.md`:
+
+```md
+## What changed
+
+## Why
+
+## Bump
+- [ ] patch
+- [ ] minor
+- [ ] major
+
+## CHANGELOG entry added
+- [ ] under `## Unreleased`
+
+## Visual diff (component changes)
+<!-- attach Figma + Storybook screenshots -->
+
+## Migration notes (if major)
+```
+
+`.gitlab/CODEOWNERS`:
+
+```
+* @ifmis-design-system-maintainers
+/.gitlab-ci.yml @ifmis-platform
+/PUBLISHING.md  @ifmis-platform
+```
+
+Commit and push.
+
+**10. Cut the release.**
+
+On a clean working tree, on `main`:
+
+```bash
+git switch main
+git pull --rebase
+npm version 0.1.0 -m "release: %s"        # commits + tags v0.1.0
+git push origin main --follow-tags
+```
+
+The push triggers two jobs:
+
+- **`build`** — runs on the commit, produces `dist/`.
+- **`publish`** — runs on the `v0.1.0` tag, posts the package to the
+  registry.
+
+Watch the pipeline in the GitLab UI. When `publish` goes green, browse to
+**Deploy → Package Registry** on the project — `@ifmis/ui` `0.1.0` is
+listed.
+
+**11. Verify a consumer can install.**
+
+In any other GitLab project (or a scratch dir on your machine):
+
+```bash
+# .npmrc at the consumer's repo root
+@ifmis:registry=https://gitlab.example.com/api/v4/projects/<UI_PROJECT_ID>/packages/npm/
+//gitlab.example.com/api/v4/projects/<UI_PROJECT_ID>/packages/npm/:_authToken=${NPM_READ_TOKEN}
+```
+
+```bash
+export NPM_READ_TOKEN=<your read-only token>
+npm install @ifmis/ui@0.1.0 react react-dom
+```
+
+The install should succeed and `node_modules/@ifmis/ui/dist/index.js`
+should be present.
+
+**12. Publish the Storybook site (optional but strongly recommended).**
+
+Add the `pages` job from [§12](#12-storybook-deployment-gitlab-pages) and
+push. After the next tag, Storybook is browsable at
+`https://ifmis.gitlab.example.com/ui/` (path depends on your GitLab Pages
+config — check **Deploy → Pages** for the actual URL).
+
+**13. Announce.**
+
+Post in `#ifmis-platform`:
+
+> `@ifmis/ui` `0.1.0` is live. Install:
+> `npm install @ifmis/ui@0.1.0` (after wiring `.npmrc` per
+> §7.1). Storybook: `<url>`. CHANGELOG: `<url>`.
+
+You're done. Future releases follow [§4 The release flow](#4-the-release-flow-tldr).
+
+### 0.4 Self-hosted GitLab — differences vs gitlab.com
+
+Almost nothing. The flow is identical because GitLab's npm registry API
+shape (`/api/v4/projects/:id/packages/npm/`) is the same everywhere. The
+*only* differences are:
+
+| Concern               | Self-hosted                                              | gitlab.com                              |
+| --------------------- | -------------------------------------------------------- | --------------------------------------- |
+| Registry URL          | `https://<your-host>/api/v4/projects/<id>/packages/npm/` | `https://gitlab.com/api/v4/…`           |
+| GitLab Pages URL      | Whatever your admin configured (often a sub-domain).     | `https://<group>.gitlab.io/<project>/`  |
+| CI runner             | Your own runner — check it's tagged and online.          | GitLab.com shared runners (default).    |
+| TLS cert              | Make sure your runner trusts the GitLab CA.              | Trusted out of the box.                 |
+| Outbound npm registry | You may proxy npm.js through Nexus/Artifactory.          | Direct.                                 |
+
+If your self-hosted GitLab uses a private CA, the CI runners need that CA
+in their trust store; otherwise `npm publish` fails with `self-signed
+certificate in certificate chain`. Fix it in the runner image, not by
+disabling TLS verification.
+
+### 0.5 Smoke-test checklist
+
+Paste this into the `v0.1.0` release MR:
+
+```md
+## v0.1.0 launch smoke test
+- [ ] `npm ci`, `npm run typecheck`, `npm run lint`, `npm test` all green
+- [ ] `npm run build` produces a non-empty `dist/`
+- [ ] `npm run build-storybook` produces a non-empty `storybook-static/`
+- [ ] Tag `v0.1.0` created via `npm version`
+- [ ] CI: `verify` ✅, `build` ✅, `publish` ✅
+- [ ] Package visible in **Deploy → Package Registry**
+- [ ] Consumer install succeeds with the published `.npmrc`
+- [ ] Storybook visible at the GitLab Pages URL
+- [ ] Announcement posted in `#ifmis-platform`
+```
+
+---
 
 ---
 

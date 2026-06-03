@@ -103,6 +103,26 @@ export type {
 export { OtpDialog } from "./components/ui/OtpDialog";
 export type { OtpDialogProps, OtpDialogState } from "./components/ui/OtpDialog";
 
+export { ConfirmationPopup } from "./components/ui/ConfirmationPopup";
+export type { ConfirmationPopupProps } from "./components/ui/ConfirmationPopup";
+
+export { ProgressCard, initialsFromName } from "./components/ui/ProgressCard";
+export type {
+  ProgressCardProps,
+  ProgressCardStatus,
+  ProgressCardUser,
+  ProgressStatusTokens,
+} from "./components/ui/ProgressCard";
+export { PROGRESS_STATUS_TOKENS } from "./components/ui/ProgressCard";
+
+export { ProgressStepper } from "./components/ui/ProgressStepper";
+export type {
+  ProgressStepperProps,
+  ProgressStep,
+  ProgressStepStatus,
+  ProgressStepUser,
+} from "./components/ui/ProgressStepper";
+
 export {
   Accordion,
   AccordionItem,

@@ -1,0 +1,116 @@
+import { Meta } from "@storybook/blocks";
+import { SpacingSample } from "./_helpers";
+
+<Meta title="Foundations/Spacing & Radius" />
+
+# Spacing & Radius
+
+`@ifmis/ui` uses Tailwind v4's default **4 px spacing scale** (`p-1` = 4 px,
+`p-2` = 8 px, …) and a small set of corner-radius tokens calibrated to the
+Figma component library.
+
+---
+
+## Spacing scale
+
+Tailwind generates the scale dynamically — every multiple of 4 (`p-1`,
+`gap-3`, `mt-12`) is available. Below are the steps you'll reach for most
+often, with the IFMIS usage convention.
+
+<SpacingSample label="space-1 / 4px"  size="4px"  caption="Tight gap between an icon and its label" />
+<SpacingSample label="space-1.5 / 6px" size="6px"  caption="Default badge gap, button icon gap" />
+<SpacingSample label="space-2 / 8px"  size="8px"  caption="Default card padding-x, list gap" />
+<SpacingSample label="space-3 / 12px" size="12px" caption="Card padding-y, form field gap" />
+<SpacingSample label="space-4 / 16px" size="16px" caption="Section spacing inside a card" />
+<SpacingSample label="space-5 / 20px" size="20px" caption="Compact modal/popup padding" />
+<SpacingSample label="space-6 / 24px" size="24px" caption="Standard section spacing" />
+<SpacingSample label="space-8 / 32px" size="32px" caption="Major section break" />
+<SpacingSample label="space-10 / 40px" size="40px" caption="Hero spacing, dialog gap-y" />
+<SpacingSample label="space-12 / 48px" size="48px" caption="Page-level gap between regions" />
+
+### Conventions
+
+- **Card / panel padding** — `p-2` to `p-3` for compact rows, `p-4` for
+  default cards.
+- **Form field gap** — `gap-3` (12 px) between label/control/helper.
+- **Dialog padding** — `p-5` (20 px) for compact popups (ConfirmationPopup),
+  `p-3` (12 px) for header/footer strips inside a dialog.
+- **Stepper gap** — `gap-4` (16 px) between cards, `gap-y-4` between rows.
+
+When in doubt, prefer **multiples of 4** that match the surrounding
+component's gap.
+
+---
+
+## Radius scale
+
+Two scales coexist:
+
+1. **Tailwind radius** — `rounded-sm`, `rounded`, `rounded-md`, …
+2. **IFMIS named radii** — semantic shapes that match the Figma component
+   library, exposed as the same Tailwind classes (`rounded-2xl`,
+   `rounded-3xl`).
+
+| Class              | Value   | Use for                                                   |
+| ------------------ | ------- | --------------------------------------------------------- |
+| `rounded-sm`       | 2 px    | Tiny dots, decorative bars (e.g. stat-card progress).     |
+| `rounded`          | 4 px    | Default for tight chips, focusable icon hit-areas.        |
+| `rounded-md`       | 6 px    | Token swatches, small previews.                           |
+| `rounded-lg`       | 8 px    | Small cards, form inputs.                                 |
+| `rounded-xl`       | 12 px   | Remarks blocks, inner side-banded callouts.               |
+| `rounded-2xl`      | 16 px   | **The IFMIS default**: cards, badges, buttons, dialogs.   |
+| `rounded-3xl`      | 24 px   | Modals, popups, the outer panel of bigger components.     |
+| `rounded-full`     | 9999 px | Avatars, status dots, circular buttons.                   |
+
+The **default for everything new** is `rounded-2xl` (16 px). Reach for
+`rounded-3xl` only on a top-level overlay (popup, dialog panel).
+
+### Border widths
+
+- `border` (1 px) — default control + card border.
+- `border-[1.5px]` — secondary / outlined buttons (Figma is 1.5 px).
+- `border-2` — focus rings, the dashed stepper connector.
+- `border-l-4` — side-banded callouts (Remarks blocks).
+
+---
+
+## Composing layouts
+
+Always reach for **flex/grid + gap** before margins. Margin collapse is the
+single biggest source of "this looks fine in dev, broken in prod" — gap
+lives on the parent and is deterministic.
+
+```jsx
+// good
+<div className="flex flex-col gap-4">
+  <Heading level={3}>Section</Heading>
+  <Card>…</Card>
+  <Card>…</Card>
+</div>
+
+// avoid
+<div>
+  <Heading level={3} className="mb-4">Section</Heading>
+  <Card className="mb-4">…</Card>
+  <Card>…</Card>
+</div>
+```
+
+---
+
+## Best practices
+
+- **Stay on multiples of 4.** Custom values (`p-[7px]`) leak into the
+  design — if a Figma frame specifies 7 px, ask the designer (it's almost
+  always a misclick).
+- **Container queries > media queries** for component-level layout shifts.
+  Most of our components are `w-full` and let the parent constrain them.
+- **`gap`, not `space-x`/`space-y`**. Gap works on grid and flex; the
+  `space-*` classes have RTL gotchas.
+
+---
+
+## Versioning
+
+Renaming any token here is a breaking change (major). Adding a new step
+(`rounded-4xl`) is minor.
