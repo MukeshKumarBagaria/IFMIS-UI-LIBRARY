@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CaretRight, X } from "@phosphor-icons/react";
 import { cn } from "../../../../lib/cn";
+import { HoverPillTip } from "../../HoverPill";
 import { MODULES, type ModuleDef, type ModuleId } from "../modules";
 
 /* -------------------------------------------------------------------------- */
@@ -68,21 +69,25 @@ export function ActiveModuleCard({ module, onClick }: ModuleCardProps) {
 export function InactiveModuleCard({ module, onClick }: ModuleCardProps) {
   const { Icon, label, gradient, textColor = "#4B3960" } = module;
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "flex w-10 h-10 p-2 flex-col items-center justify-center shrink-0",
-        "rounded-xl",
-        "transition-transform hover:scale-110 focus:outline-none",
-        "focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2",
-      )}
-      style={{ background: gradient, color: textColor }}
-      title={label}
-      aria-label={label}
-    >
-      <ModuleIconBadge Icon={Icon} size="sm" />
-    </button>
+    // Show the module name in a hover pill (above the icon). `decorative`
+    // keeps it from being announced twice — the button already carries the
+    // label via `aria-label`.
+    <HoverPillTip label={label} placement="top" decorative>
+      <button
+        type="button"
+        onClick={onClick}
+        className={cn(
+          "flex w-10 h-10 p-2 flex-col items-center justify-center shrink-0",
+          "rounded-xl",
+          "transition-transform hover:scale-110 focus:outline-none",
+          "focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2",
+        )}
+        style={{ background: gradient, color: textColor }}
+        aria-label={label}
+      >
+        <ModuleIconBadge Icon={Icon} size="sm" />
+      </button>
+    </HoverPillTip>
   );
 }
 

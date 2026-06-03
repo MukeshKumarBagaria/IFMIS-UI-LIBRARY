@@ -6,7 +6,9 @@ import {
   isValidElement,
   useState,
 } from "react";
+import { CaretLeft } from "@phosphor-icons/react";
 import { cn } from "../../../lib/cn";
+import { Button } from "../Button";
 import type { FormButtonTone } from "../FormButton";
 
 /* -------------------------------------------------------------------------- */
@@ -44,6 +46,14 @@ export interface CtaTrayProps
   align?: CtaTrayAlign;
   /** Accessible label for the button group. Default `"Form actions"`. */
   ariaLabel?: string;
+  /**
+   * Back-button handler. When provided, a neutral (grey) outlined "Back"
+   * button is rendered at the **far left** of the tray and the action pill is
+   * pushed to the right (overriding `align`). Omit to hide the button.
+   */
+  onBack?: () => void;
+  /** Label for the back button. Defaults to `"Back"`. */
+  backLabel?: React.ReactNode;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -144,6 +154,8 @@ export const CtaTray = forwardRef<HTMLDivElement, CtaTrayProps>(
       highlight = true,
       align = "end",
       ariaLabel = "Form actions",
+      onBack,
+      backLabel = "Back",
       className,
       ...props
     },
@@ -190,11 +202,25 @@ export const CtaTray = forwardRef<HTMLDivElement, CtaTrayProps>(
         className={cn(
           "flex w-full items-center rounded-3xl bg-white p-5",
           "shadow-[0_0_50px_0_rgba(0,0,0,0.10)]",
-          ALIGN[align],
+          // A Back button forces the tray to split: Back left, pill right.
+          onBack ? "justify-between" : ALIGN[align],
           className,
         )}
         {...props}
       >
+        {onBack && (
+          <Button
+            type="button"
+            variant="neutral"
+            size="standard"
+            onClick={onBack}
+            leftIcon={<CaretLeft weight="bold" />}
+            className="shrink-0"
+          >
+            {backLabel}
+          </Button>
+        )}
+
         <div
           role="group"
           aria-label={ariaLabel}

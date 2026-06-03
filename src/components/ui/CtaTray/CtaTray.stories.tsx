@@ -43,6 +43,7 @@ const meta: Meta<typeof CtaTray> = {
           "```",
           "",
           "### Customise",
+          "- `onBack`: renders a **Back** button at the far left (pill moves right).",
           "- `align`: `end` (default) · `start` · `center` · `between`.",
           "- `highlight={false}` keeps the pill grey regardless of clicks.",
           "- Controlled tint: pass `tone` + `onToneChange`.",
@@ -71,6 +72,13 @@ const standardButtons = (
 /** Click any button — the pill recolours to that button's tone. */
 export const Default: Story = {
   render: () => <CtaTray>{standardButtons}</CtaTray>,
+};
+
+/** With a leftmost **Back** button — matches the Figma frame 1:1. */
+export const WithBack: Story = {
+  render: () => (
+    <CtaTray onBack={() => alert("Back")}>{standardButtons}</CtaTray>
+  ),
 };
 
 /** The five highlight states from the Figma frame (forced via `tone`). */

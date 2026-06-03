@@ -1,6 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { PageTitle } from "./PageTitle";
 
 describe("PageTitle", () => {
@@ -29,27 +28,14 @@ describe("PageTitle", () => {
     expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
   });
 
-  it("renders the back button and fires onBack when clicked", async () => {
-    const onBack = vi.fn();
-    render(<PageTitle title="Voucher" onBack={onBack} />);
-    const back = screen.getByRole("button", { name: "Back" });
-    await userEvent.click(back);
-    expect(onBack).toHaveBeenCalledOnce();
-  });
-
-  it("omits the back button when onBack is not provided", () => {
+  it("does not render any button (the Back action lives in CtaTray)", () => {
     render(<PageTitle title="Voucher" />);
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
-  it("supports a custom back label", () => {
-    render(<PageTitle title="Voucher" onBack={() => {}} backLabel="Go back" />);
-    expect(screen.getByRole("button", { name: "Go back" })).toBeInTheDocument();
-  });
-
   it("renders the decorative diamonds by default and hides them on request", () => {
     const { container, rerender } = render(<PageTitle title="Voucher" />);
-    // No breadcrumbs / back button, so the only SVGs are the two diamonds.
+    // No breadcrumbs, so the only SVGs are the two diamonds.
     expect(container.querySelectorAll("svg")).toHaveLength(2);
 
     rerender(<PageTitle title="Voucher" hideDecoration />);

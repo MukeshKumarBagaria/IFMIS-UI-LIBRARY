@@ -87,4 +87,42 @@ describe("CtaTray", () => {
     );
     expect(pill()).toHaveClass("bg-orange-50");
   });
+
+  it("renders a Back button and fires onBack when clicked", async () => {
+    const onBack = vi.fn();
+    render(
+      <CtaTray onBack={onBack}>
+        <SaveButton />
+        <ForwardButton />
+      </CtaTray>,
+    );
+    const back = screen.getByRole("button", { name: "Back" });
+    await userEvent.click(back);
+    expect(onBack).toHaveBeenCalledOnce();
+  });
+
+  it("omits the Back button when onBack is not provided", () => {
+    render(
+      <CtaTray>
+        <SaveButton />
+      </CtaTray>,
+    );
+    expect(
+      screen.queryByRole("button", { name: "Back" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("supports a custom back label and leaves the pill tone untouched", async () => {
+    render(
+      <CtaTray onBack={() => {}} backLabel="Go back">
+        <SaveButton />
+      </CtaTray>,
+    );
+    expect(
+      screen.getByRole("button", { name: "Go back" }),
+    ).toBeInTheDocument();
+    // Clicking Back must not recolour the action pill.
+    await userEvent.click(screen.getByRole("button", { name: "Go back" }));
+    expect(pill()).toHaveClass("bg-surface-grey-bg");
+  });
 });

@@ -1,0 +1,159 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as HoverPillStories from "./HoverPill.stories";
+
+<Meta of={HoverPillStories} title="UI/HoverPill/Guide" />
+
+# HoverPill
+
+The small grey **on-hover pill** from the Figma spec: a rounded Header-14 pill
+(secondary text on a grey surface) with a solid grey arrow protruding from one
+edge. Two exports:
+
+- **`HoverPill`** — the standalone visual pill (drop it anywhere).
+- **`HoverPillTip`** — wraps a trigger and reveals a `HoverPill` on hover/focus.
+  This powers the Sidebar's "show the module name on hover".
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## Placements
+
+Six arrow positions match the Figma frame. The name describes **where the pill
+sits relative to its anchor**; the arrow always points back at the anchor:
+
+| Placement                      | Pill is…             | Arrow            |
+| ------------------------------ | -------------------- | ---------------- |
+| `top-start` / `top-end`        | above the anchor     | bottom, points ↓ |
+| `bottom-start` / `bottom-end`  | below the anchor     | top, points ↑    |
+| `left`                         | left of the anchor   | right, points →  |
+| `right`                        | right of the anchor  | left, points ←   |
+
+Two centred convenience placements — `top` and `bottom` — point at the middle
+of the anchor (handy for tooltips).
+
+<Canvas of={HoverPillStories.AllPlacements} />
+
+```jsx
+import { HoverPill } from "@ifmis/ui";
+
+<HoverPill placement="top-start">Deposit</HoverPill>;
+```
+
+<Canvas of={HoverPillStories.Single} />
+
+---
+
+## As a tooltip
+
+`HoverPillTip` wraps any focusable trigger and shows the pill on hover **and**
+keyboard focus. It's CSS-positioned (no portal), so the trigger's container must
+not clip overflow.
+
+```jsx
+import { HoverPillTip } from "@ifmis/ui";
+import { Coins } from "@phosphor-icons/react";
+
+<HoverPillTip label="Deposit" placement="top">
+  <button aria-label="Deposit">
+    <Coins />
+  </button>
+</HoverPillTip>;
+```
+
+<Canvas of={HoverPillStories.AsTooltip} />
+
+By default the pill is a `role="tooltip"` wired to the trigger via
+`aria-describedby`. When the trigger already has the same accessible name (an
+icon button with `aria-label`), pass `decorative` so screen readers don't
+announce it twice:
+
+```jsx
+<HoverPillTip label="Deposit" decorative>
+  <button aria-label="Deposit">…</button>
+</HoverPillTip>
+```
+
+### In the Sidebar
+
+The Sidebar uses exactly this: each **non-active** module thumbnail is wrapped
+in a `HoverPillTip` (placement `top`, `decorative`) so hovering an icon reveals
+the module's name — no extra wiring needed.
+
+---
+
+## Controlled
+
+`HoverPillTip` is uncontrolled by default (hover/focus). Drive it yourself with
+`open` for tours, tests, or custom triggers:
+
+```jsx
+<HoverPillTip label="Deposit" open={showHint}>
+  <button>…</button>
+</HoverPillTip>
+```
+
+<Canvas of={HoverPillStories.TooltipOpen} />
+
+---
+
+## Props
+
+### `HoverPill`
+
+| Prop        | Type                 | Default       | Notes                              |
+| ----------- | -------------------- | ------------- | ---------------------------------- |
+| `children`  | node                 | —             | Pill text.                         |
+| `placement` | `HoverPillPlacement` | `"top-start"` | Arrow edge + alignment.            |
+| `className` | string               | —             | Merged onto the pill.              |
+
+All other `<div>` attributes are forwarded.
+
+### `HoverPillTip`
+
+| Prop          | Type                 | Default | Notes                                            |
+| ------------- | -------------------- | ------- | ------------------------------------------------ |
+| `label`       | node                 | —       | The pill text shown on hover/focus.              |
+| `children`    | element              | —       | A single focusable trigger.                      |
+| `placement`   | `HoverPillPlacement` | `"top"` | Which side the pill appears on.                  |
+| `open`        | boolean              | —       | Controlled visibility.                           |
+| `defaultOpen` | boolean              | `false` | Initial visibility when uncontrolled.            |
+| `disabled`    | boolean              | `false` | Never show the tip.                              |
+| `decorative`  | boolean              | `false` | `aria-hidden` pill, no `aria-describedby`.        |
+| `className`   | string               | —       | Classes for the inline wrapper.                  |
+| `pillClassName` | string             | —       | Classes for the floating pill.                   |
+
+---
+
+## Tokens
+
+| Part        | Token                       | Value (purple theme) |
+| ----------- | --------------------------- | -------------------- |
+| Pill border | `surface-border-grey`       | `#A6A6A6`            |
+| Pill fill   | `surface-grey-bg`           | `#F7F7F7`            |
+| Pill text   | `body-secondary` (Header-14)| `#595959`            |
+| Arrow       | `surface-border-grey`       | `#A6A6A6`            |
+
+Pill height `34px`, radius `16px`, padding `0 12px`. The arrow is a 14px-base
+CSS triangle filled with the border grey.
+
+---
+
+## Accessibility
+
+- `HoverPillTip` shows on **hover and keyboard focus**, so it's reachable
+  without a mouse.
+- The pill is `role="tooltip"` linked via `aria-describedby` — unless
+  `decorative` is set (use it when the trigger already names itself).
+- Because it's CSS-positioned, keep the trigger inside a container that doesn't
+  clip overflow (or the pill will be cut off).
+
+## Spacing
+
+The arrow is a **solid grey triangle** (`#A6A6A6`, the border colour) fused to
+the pill edge — it overlaps the pill by 1px so there's no gap or seam, reading
+as one shape. The pointer protrudes ~7px past the pill edge, so when you lay
+several pills out (or place one near other content) leave room on the arrow's
+side. `HoverPillTip` already adds an 8px gap between the trigger and the pill;
+for standalone `HoverPill`s use a generous `gap`/padding so the arrow never
+overlaps a neighbour or its caption.

@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { Label } from "./Label";
-import { Input } from "../Input";
 
 const meta: Meta<typeof Label> = {
   title: "UI/Label",
@@ -34,14 +33,18 @@ export const Required: Story = {
   args: { children: "PAN number", required: true },
 };
 
-/** The intended pairing: a label wired to an input. */
+/** The intended pairing: a label wired to a control. */
 export const WithInput: Story = {
   render: () => (
     <div className="flex max-w-sm flex-col gap-1.5">
       <Label htmlFor="grn" required>
         GRN number
       </Label>
-      <Input id="grn" placeholder="Enter GRN" />
+      <input
+        id="grn"
+        placeholder="Enter GRN"
+        className="h-11 w-full rounded-2xl border border-border bg-card px-3 text-body-sm text-body-primary outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      />
     </div>
   ),
 };

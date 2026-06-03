@@ -1,0 +1,195 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as SearchFieldStories from "./SearchField.stories";
+
+<Meta of={SearchFieldStories} title="UI/SearchField/Guide" />
+
+# SearchField
+
+A rounded **search input** with a leading magnifying-glass icon. It covers
+every Figma state — default, hover, active, active with suggestions, and
+disabled — and ships a **collapsible** 40×40 icon variant for tight toolbars.
+
+Under the hood it's a real `<input role="combobox">` driving a `role="listbox"`
+popover, with full keyboard support and `aria-activedescendant`, so focus,
+assistive tech and forms work for free.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## Quickstart
+
+Nothing is required — pass an `aria-label` (there's no visible label) and wire
+up `onSearch` (fired on Enter) or `onValueChange` (every keystroke).
+
+```jsx
+import { SearchField } from "@ifmis/ui";
+
+<SearchField aria-label="Search" onSearch={(q) => run(q)} />;
+```
+
+<Canvas of={SearchFieldStories.Default} />
+
+When the field holds a value, the text renders in **Header-16** (primary,
+semibold); empty, it shows the muted placeholder:
+
+<Canvas of={SearchFieldStories.Active} />
+
+---
+
+## Suggestions (autocomplete)
+
+Pass `suggestions` to get an autocomplete popover. By default they're
+**auto-filtered** by a case-insensitive substring of the typed text; the
+value-matching row is highlighted purple-100, the keyboard/hover-active row
+purple-50.
+
+```jsx
+<SearchField
+  aria-label="Search people"
+  suggestions={[
+    { value: "John Doe" },
+    { value: "John Woe" },
+    { value: "John Wick" },
+  ]}
+  onSuggestionSelect={(s) => pick(s.value)}
+/>
+```
+
+<Canvas of={SearchFieldStories.WithSuggestions} />
+
+For **server-side** search, fetch your own results and pass `autoFilter={false}`
+so the list renders verbatim:
+
+```jsx
+<SearchField
+  autoFilter={false}
+  value={query}
+  onValueChange={(q) => {
+    setQuery(q);
+    fetchResults(q); // update `suggestions` from the response
+  }}
+  suggestions={results}
+/>
+```
+
+Each suggestion is `{ value, label?, disabled? }` — `label` defaults to `value`
+and may be any node; a `disabled` suggestion stays visible but isn't selectable.
+
+---
+
+## Collapsible
+
+Set `collapsible` to render a **40×40 round icon button** that expands into the
+full field on click (and focuses it). When left empty and blurred, an
+uncollapsed-uncontrolled field collapses again — ideal for a header toolbar.
+
+```jsx
+<SearchField collapsible aria-label="Search" />
+```
+
+<Canvas of={SearchFieldStories.Collapsible} />
+
+You can also control it with `collapsed` + `onCollapsedChange`.
+
+---
+
+## Controlled
+
+Drive the text from your own state with `value` + `onValueChange`:
+
+```jsx
+const [q, setQ] = useState("");
+
+<SearchField value={q} onValueChange={setQ} suggestions={results} />;
+```
+
+<Canvas of={SearchFieldStories.Controlled} />
+
+---
+
+## All states
+
+<Canvas of={SearchFieldStories.AllStates} />
+
+---
+
+## Keyboard & accessibility
+
+- The input is a `role="combobox"` with `aria-autocomplete="list"`,
+  `aria-expanded`, and `aria-activedescendant` pointing at the active option.
+- The popover is a `role="listbox"`; each suggestion is a `role="option"` with
+  `aria-selected`.
+- **Keys:** `↓` opens / moves down, `↑` moves up, `Home` / `End` jump to the
+  ends (skipping disabled rows), `Enter` selects the active suggestion or — if
+  none is active — fires `onSearch`, `Esc` closes the list.
+- Always provide an `aria-label` (the field has no visible label).
+- Clicking outside closes the popover (and collapses an empty collapsible
+  field).
+
+---
+
+## Props
+
+| Prop                 | Type                              | Default      | Notes                                               |
+| -------------------- | --------------------------------- | ------------ | --------------------------------------------------- |
+| `value`              | string                            | —            | Controlled text. Pair with `onValueChange`.         |
+| `defaultValue`       | string                            | `""`         | Uncontrolled initial text.                          |
+| `onValueChange`      | `(value: string) => void`         | —            | Fires on every change / suggestion pick.            |
+| `onSearch`           | `(value: string) => void`         | —            | Fires on Enter when no suggestion is active.        |
+| `suggestions`        | `SearchSuggestion[]`              | —            | `{ value, label?, disabled? }[]`.                   |
+| `onSuggestionSelect` | `(s: SearchSuggestion) => void`   | —            | Fires when a suggestion is chosen.                  |
+| `autoFilter`         | boolean                           | `true`       | Filter suggestions by the typed text.               |
+| `minChars`           | number                            | `1`          | Characters before suggestions appear.               |
+| `icon`               | node                              | search glyph | Swap the leading icon.                              |
+| `placeholder`        | string                            | `"Search…"`  | Empty-state text.                                   |
+| `disabled`           | boolean                           | `false`      | Disable the field.                                  |
+| `collapsible`        | boolean                           | `false`      | Render the expandable icon button.                  |
+| `collapsed`          | boolean                           | —            | Controlled collapsed state.                         |
+| `defaultCollapsed`   | boolean                           | `true`†      | Uncontrolled initial collapsed state (†collapsible).|
+| `onCollapsedChange`  | `(collapsed: boolean) => void`    | —            | Fires on collapse/expand.                           |
+| `aria-label`         | string                            | —            | Accessible name (recommended).                      |
+| `className`          | string                            | —            | Classes for the outer wrapper / icon button.        |
+| `inputClassName`     | string                            | —            | Classes for the search box.                         |
+| `listboxClassName`   | string                            | —            | Classes for the suggestions popover.                |
+
+All other native `<input>` attributes (`name`, `autoComplete`, `maxLength`, …)
+are forwarded.
+
+---
+
+## Tokens
+
+Every colour is a design token, so theming "just works":
+
+| Part                  | Token                              | Value (purple theme) |
+| --------------------- | ---------------------------------- | -------------------- |
+| Border (default)      | `surface-border-grey`              | `#A6A6A6`            |
+| Hover fill            | `neutral-100`                      | `#F1EDF5`            |
+| Active border         | `purple-500` (1.5px)               | `#8B39C2`            |
+| Disabled border       | `grey-200`                         | `#E5E5E5`            |
+| Value text            | `body-primary` (Header-16, 600)    | `#2E2E2E`            |
+| Placeholder text      | `body-secondary` (Medium-16, 500)  | `#595959`            |
+| Disabled text         | `body-disabled`                    | `#CCCCCC`            |
+| Popover surface       | `neutral-50`                       | `#F8F6FA`            |
+| Popover border        | `surface-border-purple`            | `#A58FBC`            |
+| Suggestion (selected) | `purple-100`                       | `#E8D8F5`            |
+| Suggestion (active)   | `purple-50`                        | `#F3ECFA`            |
+| Suggestion text       | `heading`                          | `#4B3960`            |
+
+Field height `40px`. Radius: `24px` (field & icon button) · `16px` (popover) ·
+`12px` (suggestion). The popover sits **8px** below the field.
+
+---
+
+## Responsive behaviour
+
+The field is **`width: 100%`** of its container — constrain the parent to size
+it (the Figma frame is 300px wide). The popover spans the field's full width and
+scrolls (`max-h`) when the list is long, so it stays usable on small screens.
+
+```jsx
+<div className="max-w-sm">
+  <SearchField aria-label="Search" suggestions={results} />
+</div>
+```

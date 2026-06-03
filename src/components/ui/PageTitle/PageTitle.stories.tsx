@@ -11,12 +11,13 @@ const meta: Meta<typeof PageTitle> = {
       description: {
         component: [
           "The heading band that tops every IFMIS screen: a white card with a",
-          "purple border holding the page title, an optional breadcrumb trail,",
-          "and an optional **Back** button — with the brand diamond motif",
-          "bleeding off the right edge.",
+          "purple border holding the page title and an optional breadcrumb",
+          "trail — with the brand diamond motif bleeding off the right edge.",
           "",
           "It composes the shared `<Heading>` and `<Breadcrumb>`, so typography,",
-          "colour and accessibility match the rest of the library.",
+          "colour and accessibility match the rest of the library. (The page's",
+          "**Back** action lives in the bottom [`CtaTray`](?path=/docs/ui-ctatray-guide--docs),",
+          "not here.)",
           "",
           "### How to use it",
           "```jsx",
@@ -29,15 +30,12 @@ const meta: Meta<typeof PageTitle> = {
           '    { label: "Vouchers", href: "/vouchers" },',
           '    { label: "New" }, // last = current page',
           "  ]}",
-          "  onBack={() => navigate(-1)}",
           "/>",
           "```",
           "",
           "### Props",
           "- `title` — the page heading (rendered as an `<h1>`).",
           "- `breadcrumbs` — items forwarded to `<Breadcrumb>`; omit to hide.",
-          "- `onBack` — handler that renders the Back button; omit to hide.",
-          "- `backLabel` — Back button label (default `\"Back\"`).",
           "- `hideDecoration` — drop the diamond motif.",
         ].join("\n"),
       },
@@ -53,11 +51,10 @@ export const Default: Story = {
   args: {
     title: "This is a page title",
     breadcrumbs: [{ label: "Breadcrumb 1", href: "#" }, { label: "Breadcrumb 2" }],
-    onBack: () => alert("Back"),
   },
 };
 
-/** Just a heading — no breadcrumbs, no back button. */
+/** Just a heading — no breadcrumbs. */
 export const TitleOnly: Story = {
   args: {
     title: "Dashboard",
@@ -77,20 +74,11 @@ export const WithBreadcrumbs: Story = {
   },
 };
 
-/** Title with a back button but no breadcrumbs. */
-export const WithBack: Story = {
-  args: {
-    title: "Create Voucher",
-    onBack: () => alert("Back"),
-  },
-};
-
 /** Decoration removed — useful on very narrow layouts. */
 export const NoDecoration: Story = {
   args: {
     title: "This is a page title",
     breadcrumbs: [{ label: "Breadcrumb 1", href: "#" }, { label: "Breadcrumb 2" }],
-    onBack: () => alert("Back"),
     hideDecoration: true,
   },
 };
