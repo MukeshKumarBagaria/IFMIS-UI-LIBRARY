@@ -1,0 +1,194 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as DropdownStories from "./Dropdown.stories";
+
+<Meta of={DropdownStories} title="UI/Dropdown/Guide" />
+
+# Dropdown
+
+A labelled **select**. A single trigger opens a popover list of options, and
+the **same** component covers single and multiple selection plus every Figma
+state — default, hover, active (open), selected, preview, and disabled.
+
+It composes [`FormField`](?path=/docs/ui-formfield-guide--docs), so the label
+(with optional icon + required marker), error/helper subtext and ARIA wiring
+match every other field in the library. Under the hood it's a real
+`<button role="combobox">` driving a `role="listbox"`, with full keyboard
+support and `aria-activedescendant`.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## Quickstart
+
+Only `options` is required. Pass a `label` (and an optional `labelIcon`) for the
+full field, and a `placeholder` for the empty state.
+
+```jsx
+import { Dropdown } from "@ifmis/ui";
+import { User } from "@phosphor-icons/react";
+
+<Dropdown
+  label="Country"
+  labelIcon={<User />}
+  placeholder="Select a country"
+  options={[
+    { value: "in", label: "India" },
+    { value: "np", label: "Nepal" },
+  ]}
+  onValueChange={(v) => console.log(v)}
+/>;
+```
+
+<Canvas of={DropdownStories.Default} />
+
+When something is selected, the trigger swaps the muted placeholder for the
+chosen label in **Header-16** (primary, semibold):
+
+<Canvas of={DropdownStories.Selected} />
+
+---
+
+## Single vs multiple
+
+Add `multiple` to allow more than one selection. The popover then **stays open**
+and each option toggles. `value` / `onValueChange` switch from a `string` to a
+`string[]` automatically.
+
+```jsx
+<Dropdown
+  multiple
+  label="Countries"
+  defaultValue={["in", "bt"]}
+  options={countries}
+  onValueChange={(values) => console.log(values)} // string[]
+/>
+```
+
+<Canvas of={DropdownStories.Multiple} />
+
+Both modes share the **same item visual**: a 44px purple pill — `purple-100`
+when selected, `purple-50` otherwise — with a circular check indicator on the
+left.
+
+---
+
+## Preview selection
+
+Set `previewSelection` to list the chosen labels in a muted grey box **below**
+the closed field (the Figma "Preview items" frame). It pairs naturally with
+`multiple` as a compact summary of what's selected.
+
+```jsx
+<Dropdown multiple previewSelection label="Countries" options={countries} />
+```
+
+<Canvas of={DropdownStories.PreviewSelection} />
+
+---
+
+## Controlled
+
+Drive the value from your own state with `value` + `onValueChange`:
+
+```jsx
+const [value, setValue] = useState("in");
+
+<Dropdown
+  label="Country"
+  value={value}
+  onValueChange={setValue}
+  options={countries}
+/>;
+```
+
+<Canvas of={DropdownStories.Controlled} />
+
+---
+
+## States
+
+`error` reddens the field and shows the alert subtext; `disabled` greys it out
+and blocks opening. Individual options can be `disabled` too.
+
+<Canvas of={DropdownStories.WithError} />
+<Canvas of={DropdownStories.Disabled} />
+<Canvas of={DropdownStories.WithDisabledOption} />
+
+---
+
+## Keyboard & accessibility
+
+- **Trigger** is a `<button role="combobox">` with `aria-haspopup="listbox"`,
+  `aria-expanded`, and `aria-activedescendant` pointing at the active option.
+- **List** is a `role="listbox"` (`aria-multiselectable` in multiple mode); each
+  item is a `role="option"` with `aria-selected`.
+- **Keys:** `↓` / `↑` move the active option (skipping disabled ones), `Home` /
+  `End` jump to the ends, `Enter` / `Space` select, `Esc` closes and returns
+  focus to the trigger. `↓` / `Enter` / `Space` also open a closed menu.
+- Clicking outside closes the menu. The label is tied to the trigger via
+  `htmlFor` / `id`, so clicking it focuses the control.
+- Pass a `name` to emit hidden inputs (one per selected value) for native form
+  submission.
+
+---
+
+## Props
+
+| Prop               | Type                                       | Default            | Notes                                                  |
+| ------------------ | ------------------------------------------ | ------------------ | ------------------------------------------------------ |
+| `options`          | `DropdownOption[]`                         | —                  | `{ value, label, disabled? }[]`.                       |
+| `multiple`         | `boolean`                                  | `false`            | Allow multiple selection.                              |
+| `value`            | `string \| string[]`                       | —                  | Controlled selection (array in multiple mode).         |
+| `defaultValue`     | `string \| string[]`                       | —                  | Uncontrolled initial selection.                        |
+| `onValueChange`    | `(value: string \| string[]) => void`      | —                  | Fires on change (array in multiple mode).              |
+| `onOpenChange`     | `(open: boolean) => void`                  | —                  | Fires when the popover opens/closes.                   |
+| `placeholder`      | node                                       | `"Select…"`        | Empty-state text.                                      |
+| `label`            | node                                       | —                  | Field label.                                           |
+| `labelIcon`        | node                                       | —                  | Icon before the label (20px).                          |
+| `required`         | boolean                                    | `false`            | Red asterisk + `aria-required`.                        |
+| `disabled`         | boolean                                    | `false`            | Disable the whole control.                             |
+| `error`            | node                                       | —                  | Error subtext + invalid styling.                       |
+| `helperText`       | node                                       | —                  | Neutral helper subtext.                                |
+| `previewSelection` | boolean                                    | `false`            | List chosen labels below the closed field.             |
+| `closeOnSelect`    | boolean                                    | `!multiple`        | Close the popover after a selection.                   |
+| `name`             | string                                     | —                  | Emit hidden inputs for form submission.                |
+| `className`        | string                                     | —                  | Classes for the outer `FormField`.                     |
+| `triggerClassName` | string                                     | —                  | Classes for the trigger button.                        |
+| `listboxClassName` | string                                     | —                  | Classes for the popover listbox.                       |
+
+---
+
+## Tokens
+
+Every colour is a design token, so theming "just works":
+
+| Part                 | Token                                | Value (purple theme) |
+| -------------------- | ------------------------------------ | -------------------- |
+| Trigger border       | `surface-border-grey`                | `#A6A6A6`            |
+| Trigger hover fill   | `neutral-100`                        | `#F1EDF5`            |
+| Open border          | `purple-500` (1.5px)                 | `#8B39C2`            |
+| Caret affix          | `grey-200` border / `surface-grey-bg`| `#E5E5E5` / `#F7F7F7`|
+| Popover border       | `surface-border-purple`              | `#A58FBC`            |
+| Option (selected)    | `purple-100`                         | `#E8D8F5`            |
+| Option (unselected)  | `purple-50`                          | `#F3ECFA`            |
+| Selected label text  | `body-primary` (Header-16, 600)      | `#2E2E2E`            |
+| Placeholder text     | `body-secondary` (Body, 500)         | `#595959`            |
+| Disabled border/fill | `grey-200` / `surface-grey-bg`       | `#E5E5E5` / `#F7F7F7`|
+
+Field height `44px`. Radius: `16px` (field & popover) · `12px` (option) ·
+`8px` (caret affix). The popover sits **8px** below the field.
+
+---
+
+## Responsive behaviour
+
+The field is **`width: 100%`** of its container — size it by constraining the
+parent. The popover spans the field's full width and scrolls (`max-h`) when the
+list is long, so it stays usable on small screens.
+
+```jsx
+<div className="max-w-sm">
+  <Dropdown label="Country" options={countries} />
+</div>
+```

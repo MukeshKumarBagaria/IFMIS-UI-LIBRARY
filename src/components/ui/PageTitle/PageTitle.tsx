@@ -1,22 +1,20 @@
 import { forwardRef, useId } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
-import { CaretLeft } from "@phosphor-icons/react";
 import { cn } from "../../../lib/cn";
 import { Heading } from "../Typography";
 import { Breadcrumb } from "../Breadcrumb";
 import type { BreadcrumbItem, BreadcrumbProps } from "../Breadcrumb";
-import { Button } from "../Button";
 
 /* ===========================================================================
  * PageTitle — the heading band that tops every IFMIS screen.
  *
- * A white card (purple border, 24px radius) holding the page title, an
- * optional breadcrumb trail, and an optional "Back" button, with the brand
- * "DiamondsFour" motif bleeding off the right edge.
+ * A white card (purple border, 24px radius) holding the page title and an
+ * optional breadcrumb trail, with the brand "DiamondsFour" motif bleeding off
+ * the right edge. (The "Back" action lives in the bottom CtaTray, not here.)
  *
  * Design principles (so this stays safe to reuse across every module):
- *   1. Composition, not duplication. The title delegates to <Heading>, the
- *      trail to <Breadcrumb>, and the back action to <Button variant="neutral">.
+ *   1. Composition, not duplication. The title delegates to <Heading> and the
+ *      trail to <Breadcrumb>.
  *      Restyle those primitives once and every PageTitle updates in lockstep.
  *   2. Tokens, not hex. Every colour is a design token (purple-700,
  *      surface-border-purple, surface-card, body-secondary…), so a theme
@@ -43,13 +41,6 @@ export interface PageTitleProps
    * `separator` or `ariaLabel`. `items` is controlled by `breadcrumbs`.
    */
   breadcrumbProps?: Omit<BreadcrumbProps, "items">;
-  /**
-   * Back-button handler. When provided, a neutral (grey) outlined "Back"
-   * button is rendered beneath the breadcrumbs. Omit to hide the button.
-   */
-  onBack?: () => void;
-  /** Label for the back button. Defaults to `"Back"`. */
-  backLabel?: ReactNode;
   /** Hide the decorative diamond motif (e.g. on very narrow layouts). */
   hideDecoration?: boolean;
 }
@@ -60,7 +51,7 @@ export interface PageTitleProps
  * @example Title only
  *   <PageTitle title="Dashboard" />
  *
- * @example Full band — title, breadcrumbs and a back action
+ * @example Full band — title and breadcrumbs
  *   <PageTitle
  *     title="Create Voucher"
  *     breadcrumbs={[
@@ -68,7 +59,6 @@ export interface PageTitleProps
  *       { label: "Vouchers", href: "/vouchers" },
  *       { label: "New" }, // last item = current page
  *     ]}
- *     onBack={() => navigate(-1)}
  *   />
  */
 export const PageTitle = forwardRef<HTMLDivElement, PageTitleProps>(
@@ -77,8 +67,6 @@ export const PageTitle = forwardRef<HTMLDivElement, PageTitleProps>(
       title,
       breadcrumbs,
       breadcrumbProps,
-      onBack,
-      backLabel = "Back",
       hideDecoration = false,
       className,
       ...props
@@ -86,7 +74,6 @@ export const PageTitle = forwardRef<HTMLDivElement, PageTitleProps>(
     ref,
   ) => {
     const hasBreadcrumbs = !!breadcrumbs && breadcrumbs.length > 0;
-    const hasBack = !!onBack;
 
     return (
       <div
@@ -99,26 +86,13 @@ export const PageTitle = forwardRef<HTMLDivElement, PageTitleProps>(
         )}
         {...props}
       >
-        {/* Content column — title, breadcrumbs, back. Above the decoration. */}
+        {/* Content column — title and breadcrumbs. Above the decoration. */}
         <div className="relative z-10 flex flex-col items-start gap-2">
           <Heading level={2} as="h1" className="text-purple-700 tracking-normal">
             {title}
           </Heading>
 
           {hasBreadcrumbs && <Breadcrumb items={breadcrumbs} {...breadcrumbProps} />}
-
-          {hasBack && (
-            <Button
-              variant="neutral"
-              size="small"
-              onClick={onBack}
-              leftIcon={<CaretLeft weight="bold" />}
-              // Figma back button: 12px radius, 12px horizontal padding.
-              className="rounded-xl px-3"
-            >
-              {backLabel}
-            </Button>
-          )}
         </div>
 
         {!hideDecoration && <DiamondsDecoration />}

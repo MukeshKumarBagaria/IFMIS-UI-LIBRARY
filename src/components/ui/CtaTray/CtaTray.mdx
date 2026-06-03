@@ -19,14 +19,16 @@ gentle visual echo of the action in progress.
 
 ```
 ┌──────────────────────────────────────────────── card (white, r-24, shadow) ┐
-│                              ┌──────────────────── pill (r-20, tinted) ──┐  │
-│                              │ Reset  Reject  Return  Save  Forward →     │  │
-│                              └────────────────────────────────────────────┘ │
+│  ┌── Back ──┐                ┌──────────────────── pill (r-20, tinted) ──┐  │
+│  │ ‹ Back   │                │ Reset  Reject  Return  Save  Forward →     │  │
+│  └──────────┘                └────────────────────────────────────────────┘ │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 - **Card** — `width:100%`, `padding:20px`, `border-radius:24px`, white,
   `box-shadow: 0 0 50px rgba(0,0,0,.10)`, content right-aligned by default.
+- **Back** _(optional)_ — a neutral outlined button pinned to the far left,
+  rendered only when you pass `onBack`. The pill then moves to the right.
 - **Pill** — `padding:8px 12px`, `gap:24px`, `border-radius:20px`. Its
   background is driven by the active tone.
 
@@ -77,6 +79,22 @@ The pill background maps to the clicked button's tone:
 ---
 
 ## Customise
+
+### Back button
+
+Pass `onBack` to render a neutral **Back** button at the **far left** of the
+tray; the action pill is pushed to the right (overriding `align`). It's the
+shared `<Button variant="neutral">`, so it inherits the library's focus ring and
+hover/press states. Customise the label with `backLabel`.
+
+```jsx
+<CtaTray onBack={() => navigate(-1)}>
+  <SaveButton onClick={save} />
+  <ForwardButton onClick={next} />
+</CtaTray>
+```
+
+<Canvas of={CtaTrayStories.WithBack} />
 
 ### Alignment
 
@@ -153,6 +171,8 @@ The tray is a normal block — make it stick with your own layout classes:
 | `highlight`    | boolean                                             | `true`          | `false` keeps the pill grey.                     |
 | `align`        | `start \| center \| end \| between`                 | `end`           | Pill placement in the card.                      |
 | `ariaLabel`    | string                                              | `"Form actions"`| Accessible label for the button group.           |
+| `onBack`       | `() => void`                                        | —               | Renders a leftmost Back button. Omit to hide.    |
+| `backLabel`    | node                                                | `"Back"`        | Back button label.                               |
 | `className`    | string                                              | —               | Merged onto the outer card.                      |
 
 ---

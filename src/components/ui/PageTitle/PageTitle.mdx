@@ -6,14 +6,16 @@ import * as PageTitleStories from "./PageTitle.stories";
 # PageTitle
 
 The heading band that tops **every** screen in an IFMIS module: a white card
-with a purple border holding the page **title**, an optional **breadcrumb**
-trail, and an optional **Back** button — with the brand diamond motif bleeding
-off the right edge.
+with a purple border holding the page **title** and an optional **breadcrumb**
+trail — with the brand diamond motif bleeding off the right edge.
 
-It's a thin composition over primitives you already use — `<Heading>`,
-`<Breadcrumb>`, and `<Button variant="neutral">` — so typography, colour and
-accessibility stay identical across every module, and a future restyle of those
-primitives flows through automatically.
+It's a thin composition over primitives you already use — `<Heading>` and
+`<Breadcrumb>` — so typography, colour and accessibility stay identical across
+every module, and a future restyle of those primitives flows through
+automatically.
+
+> The page's **Back** action belongs in the bottom
+> [`CtaTray`](?path=/docs/ui-ctatray-guide--docs), not in the title band.
 
 > All examples are plain JavaScript / JSX — your modules don't need TypeScript.
 
@@ -31,7 +33,7 @@ import { PageTitle } from "@ifmis/ui";
 
 <Canvas of={PageTitleStories.TitleOnly} />
 
-The full band — title, trail, and a back action — matches the Figma 1:1:
+The full band — title and trail — matches the Figma 1:1:
 
 ```jsx
 <PageTitle
@@ -40,7 +42,6 @@ The full band — title, trail, and a back action — matches the Figma 1:1:
     { label: "Breadcrumb 1", href: "/" },
     { label: "Breadcrumb 2" }, // last item = current page
   ]}
-  onBack={() => navigate(-1)}
 />
 ```
 
@@ -82,15 +83,16 @@ Need a custom separator or `aria-label`? Forward them with `breadcrumbProps`:
 
 ## Back button
 
-Provide `onBack` to render a neutral (grey) outlined **Back** button. It's the
-shared `<Button variant="neutral">`, so it inherits the library's focus ring,
-hover/press states and disabled handling. Customise the label with `backLabel`.
+The page's **Back** action is **not** part of `PageTitle` — it lives at the far
+left of the bottom [`CtaTray`](?path=/docs/ui-ctatray-guide--docs). Pass
+`onBack` to the tray to render it:
 
 ```jsx
-<PageTitle title="Create Voucher" onBack={() => navigate(-1)} backLabel="Back" />
+<CtaTray onBack={() => navigate(-1)}>
+  <SaveButton onClick={save} />
+  <ForwardButton onClick={next} />
+</CtaTray>
 ```
-
-<Canvas of={PageTitleStories.WithBack} />
 
 ---
 
@@ -115,8 +117,6 @@ when an adjacent element already carries the brand flourish).
 | `title`           | node                            | —             | The page heading. Rendered as an `<h1>` (24px).    |
 | `breadcrumbs`     | `BreadcrumbItem[]`              | —             | Trail, root → current. Omit to hide.               |
 | `breadcrumbProps` | `Omit<BreadcrumbProps,"items">` | —             | Extra props for the underlying `<Breadcrumb>`.     |
-| `onBack`          | `() => void`                    | —             | Renders the Back button. Omit to hide.             |
-| `backLabel`       | node                            | `"Back"`      | Back button label.                                 |
 | `hideDecoration`  | boolean                         | `false`       | Drop the diamond motif.                            |
 | `className`       | string                          | —             | Merged onto the card (layout/spacing overrides).   |
 
@@ -129,8 +129,8 @@ the card element.
 
 The band is **fluid width** (`w-full`) and **≥132px tall** (`min-h`), so it
 fills whatever column a module places it in and grows — rather than overflows —
-when a title wraps or a breadcrumb trail runs long. Title, breadcrumbs and back
-button stack in a left-aligned column with an 8px gap.
+when a title wraps or a breadcrumb trail runs long. Title and breadcrumbs stack
+in a left-aligned column with an 8px gap.
 
 Every colour is a design token, so theming "just works":
 
@@ -139,9 +139,8 @@ Every colour is a design token, so theming "just works":
 | Card surface | `surface-card`                 | `#FFFFFF`            |
 | Card border  | `surface-border-purple`        | `#A58FBC`            |
 | Title        | `purple-700`                   | `#56108A`            |
-| Back button  | `body-secondary` (text/border) | `#595959`            |
 
-Radius `24px` (card) / `12px` (back button). Title is `Header-24` —
+Radius `24px` (card). Title is `Header-24` —
 Google Sans Flex, 24px, weight 600.
 
 ---
@@ -152,7 +151,6 @@ Google Sans Flex, 24px, weight 600.
   screen-reader landmarks and document outline.
 - Breadcrumbs render inside a `<nav aria-label="Breadcrumb">` with the current
   crumb marked `aria-current="page"`.
-- The Back button is a native `<button>` with a visible keyboard focus ring.
 - The diamond motif is `aria-hidden` and never announced.
 
 ✅ Put exactly one `<PageTitle>` at the top of each screen.
@@ -172,8 +170,7 @@ legible down to mobile.
 <div className="w-full">
   <PageTitle
     title="Voucher verification"
-    breadcrumb={[{ label: "Home", href: "/" }, { label: "Vouchers" }]}
-    onBack={() => history.back()}
+    breadcrumbs={[{ label: "Home", href: "/" }, { label: "Vouchers" }]}
   />
 </div>
 ```

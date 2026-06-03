@@ -235,20 +235,24 @@ export {
 } from "./themes";
 export type { Theme, ThemeDefinition, ThemeMode } from "./themes";
 
-export {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-} from "./components/ui/Card";
-
 export { Label } from "./components/ui/Label";
 export type { LabelProps } from "./components/ui/Label";
 
-export { Input, inputVariants } from "./components/ui/Input";
-export type { InputProps } from "./components/ui/Input";
+export { Dropdown } from "./components/ui/Dropdown";
+export type { DropdownProps, DropdownOption } from "./components/ui/Dropdown";
+
+export { SearchField } from "./components/ui/SearchField";
+export type {
+  SearchFieldProps,
+  SearchSuggestion,
+} from "./components/ui/SearchField";
+
+export { HoverPill, HoverPillTip } from "./components/ui/HoverPill";
+export type {
+  HoverPillProps,
+  HoverPillTipProps,
+  HoverPillPlacement,
+} from "./components/ui/HoverPill";
 
 export { FormField, FieldIconBox, fieldStateClasses } from "./components/ui/FormField";
 export type {

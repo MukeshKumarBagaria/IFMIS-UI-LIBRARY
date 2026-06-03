@@ -16,11 +16,11 @@ readers announce the two together.
 ## Basic usage
 
 ```jsx
-import { Label, Input } from "@ifmis/ui";
+import { Label } from "@ifmis/ui";
 
 <div className="flex flex-col gap-1.5">
   <Label htmlFor="email">Email address</Label>
-  <Input id="email" type="email" />
+  <input id="email" type="email" />
 </div>
 ```
 
@@ -36,7 +36,7 @@ native `required` attribute:
 
 ```jsx
 <Label htmlFor="pan" required>PAN number</Label>
-<Input id="pan" required />
+<input id="pan" required />
 ```
 
 <Canvas of={LabelStories.Required} />
