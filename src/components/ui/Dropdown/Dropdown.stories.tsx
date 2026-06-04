@@ -40,6 +40,11 @@ const meta: Meta<typeof Dropdown> = {
           "- `value` / `onValueChange` are a `string` in single mode and a",
           "  `string[]` in multiple mode.",
           "- Controlled (`value`) or uncontrolled (`defaultValue`).",
+          "- **Multiple** mode shows the selection as removable chips; past",
+          "  `maxVisibleChips` (default 2) the rest collapse into `+N more` and",
+          "  the open popover gains a **Clear all** footer.",
+          "- The circular check indicator is multi-select only — single mode",
+          "  marks the chosen row with a plain check.",
           "- `previewSelection` lists the chosen labels under the closed field.",
           "- Full keyboard support: ↑/↓, Home/End, Enter/Space, Esc.",
         ].join("\n"),
@@ -55,6 +60,7 @@ const meta: Meta<typeof Dropdown> = {
   ],
   argTypes: {
     multiple: { control: "boolean" },
+    maxVisibleChips: { control: { type: "number", min: 1 } },
     disabled: { control: "boolean" },
     required: { control: "boolean" },
     previewSelection: { control: "boolean" },
@@ -72,6 +78,14 @@ const COUNTRIES: DropdownOption[] = [
   { value: "bt", label: "Bhutan" },
   { value: "bd", label: "Bangladesh" },
   { value: "lk", label: "Sri Lanka" },
+];
+
+const CHANNELS: DropdownOption[] = [
+  { value: "mobile", label: "Mobile Banking" },
+  { value: "internet", label: "Internet Banking" },
+  { value: "branch", label: "Branch" },
+  { value: "atm", label: "ATM" },
+  { value: "ussd", label: "USSD" },
 ];
 
 const baseArgs = {
@@ -116,6 +130,36 @@ export const Multiple: Story = {
     multiple: true,
     label: "Countries",
     defaultValue: ["in", "bt"],
+  },
+};
+
+/**
+ * Multi-select — Basic. Empty state: just the placeholder. Up to
+ * `maxVisibleChips` (2) chips show in the trigger; the rest collapse into
+ * `+N more`. Open it to see the circular check indicators and the **Clear all**
+ * footer.
+ */
+export const MultiSelectEmpty: Story = {
+  args: {
+    multiple: true,
+    label: "Channels",
+    placeholder: "Select channels",
+    options: CHANNELS,
+  },
+};
+
+/**
+ * Multi-select with overflow — five channels selected, so two chips render and
+ * the rest show as `+3 more`. Click `+3 more` (or anywhere on the field) to open
+ * the full list; each removable chip's × clears just that value.
+ */
+export const MultiSelectChips: Story = {
+  args: {
+    multiple: true,
+    label: "Channels",
+    placeholder: "Select channels",
+    options: CHANNELS,
+    defaultValue: ["ussd", "mobile", "internet", "branch", "atm"],
   },
 };
 

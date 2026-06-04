@@ -78,7 +78,7 @@ publish:
       fi
     # Auth to the GitLab Package Registry (token is a protected CI variable).
     - echo "@ifmis:registry=${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/npm/" > .npmrc
-    - echo "${CI_API_V4_URL#https:}/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=${NPM_PUBLISH_TOKEN}" >> .npmrc
+    - echo "${CI_API_V4_URL#http*:}/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=${NPM_PUBLISH_TOKEN}" >> .npmrc
   script:
     - npm publish
   environment:

@@ -9,7 +9,7 @@ import {
 } from "react";
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { CaretDown, CaretUp, Check } from "@phosphor-icons/react";
+import { CaretDown, CaretUp, Check, X } from "@phosphor-icons/react";
 import { cn } from "../../../lib/cn";
 import { useAnchoredPosition } from "../../../lib/useAnchoredPosition";
 import { FormField, FieldIconBox } from "../FormField";
@@ -23,11 +23,17 @@ import { FormField, FieldIconBox } from "../FormField";
  *   - default   → grey border (surface-border-grey), white, caret-down affix.
  *   - hover     → neutral-100 fill.
  *   - active    → open: 1.5px purple-500 border + a purple-bordered popover
- *                 (8px below the field). Each option is a 44px purple pill —
- *                 purple-100 when selected, purple-50 when not — with a
- *                 circular check indicator on the left.
- *   - selected  → the trigger swaps the muted placeholder for the chosen
- *                 label(s) in Header-16 (primary, semibold).
+ *                 (8px below the field). Each option is a 44px row that fills
+ *                 purple-100 only on hover (no fill at rest, no border). In
+ *                 **multiple** mode every row carries a circular check
+ *                 indicator on the right (filled when selected); single mode
+ *                 shows a plain check on the selected row only.
+ *   - selected  → single mode swaps the muted placeholder for the chosen label
+ *                 in Header-16 (primary, semibold). **Multiple** mode renders
+ *                 the selection as removable chips (× clears one); past
+ *                 `maxVisibleChips` (default 2) the rest collapse into a
+ *                 "+N more" affordance that opens the menu. The open popover
+ *                 grows a "Clear all" footer that empties the selection.
  *   - preview   → `previewSelection` renders the chosen labels in a muted
  *                 grey list under the closed field (the "Preview items" frame).
  *   - disabled  → grey-200 border, grey-bg, disabled text.
@@ -61,6 +67,11 @@ export interface DropdownProps {
   options: DropdownOption[];
   /** Allow more than one selection. Default `false`. */
   multiple?: boolean;
+  /**
+   * In `multiple` mode, how many selection chips the closed trigger shows
+   * before collapsing the rest into a "+N more" affordance. Default `2`.
+   */
+  maxVisibleChips?: number;
   /**
    * Controlled selection. `string` in single mode, `string[]` in multiple
    * mode. Pair with `onValueChange`. Omit for uncontrolled (`defaultValue`).
@@ -128,7 +139,7 @@ const enabledIndices = (options: DropdownOption[]): number[] =>
   }, []);
 
 /* -------------------------------------------------------------------------- */
-/* Selection indicator — the circular check on the left of each option        */
+/* Selection indicator — the circular check on the right of a multi-select row */
 /* -------------------------------------------------------------------------- */
 
 function SelectionIndicator({ selected }: { selected: boolean }) {
@@ -144,6 +155,42 @@ function SelectionIndicator({ selected }: { selected: boolean }) {
       aria-hidden="true"
       className="size-6 shrink-0 rounded-full border-2 border-purple-500"
     />
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Selection chip — a removable pill shown in the multi-select trigger         */
+/* -------------------------------------------------------------------------- */
+
+function SelectionChip({
+  label,
+  onRemove,
+}: {
+  label: ReactNode;
+  /** Remove just this value. Called on the × press. */
+  onRemove: () => void;
+}) {
+  return (
+    <span className="inline-flex max-w-[10rem] shrink-0 items-center gap-1 rounded-full bg-purple-50 py-0.5 pl-2.5 pr-1 text-body-xs font-medium text-purple-700">
+      <span className="truncate">{label}</span>
+      {/*
+        The chip lives inside the combobox <button>, so the × is a plain span
+        (not a nested <button>, which would be invalid). It's aria-hidden — AT
+        users remove a value by toggling it off in the list — and stops event
+        propagation so it never opens/closes the menu.
+      */}
+      <span
+        aria-hidden="true"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove();
+        }}
+        className="grid size-4 shrink-0 cursor-pointer place-items-center rounded-full text-purple-700 transition-colors hover:bg-purple-100"
+      >
+        <X weight="bold" className="size-3" />
+      </span>
+    </span>
   );
 }
 
@@ -186,6 +233,7 @@ export const Dropdown = forwardRef<HTMLButtonElement, DropdownProps>(
     {
       options,
       multiple = false,
+      maxVisibleChips = 2,
       value,
       defaultValue,
       onValueChange,
@@ -219,7 +267,7 @@ export const Dropdown = forwardRef<HTMLButtonElement, DropdownProps>(
 
     const rootRef = useRef<HTMLDivElement | null>(null);
     const triggerRef = useRef<HTMLButtonElement | null>(null);
-    const listRef = useRef<HTMLUListElement | null>(null);
+    const listRef = useRef<HTMLDivElement | null>(null);
     const optionRefs = useRef<(HTMLLIElement | null)[]>([]);
 
     // The listbox renders in a portal so it's never clipped by an ancestor's
@@ -299,6 +347,19 @@ export const Dropdown = forwardRef<HTMLButtonElement, DropdownProps>(
       },
       [multiple, selectedValues, commit, closeOnSelect, closeMenu],
     );
+
+    // Remove a single value (the × on a chip). Keeps the menu state untouched.
+    const removeValue = useCallback(
+      (value: string) => {
+        commit(selectedValues.filter((v) => v !== value));
+      },
+      [commit, selectedValues],
+    );
+
+    // Empty the whole selection (the "Clear all" footer button).
+    const clearAll = useCallback(() => {
+      commit([]);
+    }, [commit]);
 
     const moveActive = useCallback(
       (direction: 1 | -1 | "first" | "last") => {
@@ -453,21 +514,40 @@ export const Dropdown = forwardRef<HTMLButtonElement, DropdownProps>(
                 triggerClassName,
               )}
             >
-              <span
-                className={cn(
-                  "min-w-0 flex-1 truncate text-body-sm",
-                  valueTextClasses,
-                )}
-              >
-                {hasSelection
-                  ? selectedOptions.map((o, i) => (
-                      <span key={o.value}>
-                        {i > 0 ? ", " : ""}
-                        {o.label}
-                      </span>
-                    ))
-                  : placeholder}
-              </span>
+              {multiple && hasSelection ? (
+                // Multi-select: render the selection as removable chips, with a
+                // "+N more" affordance once it overflows `maxVisibleChips`.
+                <span className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
+                  {selectedOptions.slice(0, maxVisibleChips).map((o) => (
+                    <SelectionChip
+                      key={o.value}
+                      label={o.label}
+                      onRemove={() => removeValue(o.value)}
+                    />
+                  ))}
+                  {selectedOptions.length > maxVisibleChips && (
+                    <span className="shrink-0 text-body-xs font-medium text-body-secondary">
+                      +{selectedOptions.length - maxVisibleChips} more
+                    </span>
+                  )}
+                </span>
+              ) : (
+                <span
+                  className={cn(
+                    "min-w-0 flex-1 truncate text-body-sm",
+                    valueTextClasses,
+                  )}
+                >
+                  {hasSelection
+                    ? selectedOptions.map((o, i) => (
+                        <span key={o.value}>
+                          {i > 0 ? ", " : ""}
+                          {o.label}
+                        </span>
+                      ))
+                    : placeholder}
+                </span>
+              )}
               <FieldIconBox aria-hidden="true" className={cn(disabled && "opacity-60")}>
                 {open ? <CaretUp /> : <CaretDown />}
               </FieldIconBox>
@@ -476,66 +556,98 @@ export const Dropdown = forwardRef<HTMLButtonElement, DropdownProps>(
             {open &&
               coords &&
               createPortal(
-                <ul
+                <div
                   ref={listRef}
-                  id={listboxId}
-                  role="listbox"
-                  aria-multiselectable={multiple || undefined}
-                  aria-label={typeof label === "string" ? label : ariaLabel}
                   style={{
                     position: "fixed",
                     top: coords.top,
                     left: coords.left,
                     width: coords.width,
                   }}
-                  className={cn(
-                    "z-50 flex max-h-72 list-none flex-col gap-3 overflow-auto rounded-2xl border border-surface-border-purple bg-surface-card p-2 shadow-card",
-                    listboxClassName,
-                  )}
+                  className="z-50 flex max-h-72 flex-col overflow-hidden rounded-2xl border border-surface-border-purple bg-surface-card shadow-card"
                 >
-                  {options.length === 0 ? (
-                    <li className="px-3 py-2 text-body-sm text-body-secondary">
-                      No options
-                    </li>
-                  ) : (
-                    options.map((option, index) => {
-                      const selected = selectedValues.includes(option.value);
-                      const active = index === activeIndex;
-                      return (
-                        <li
-                          key={option.value}
-                          ref={(node) => {
-                            optionRefs.current[index] = node;
-                          }}
-                          id={optionId(index)}
-                          role="option"
-                          aria-selected={selected}
-                          aria-disabled={option.disabled || undefined}
-                          onClick={() => handleSelect(option)}
-                          onMouseEnter={() =>
-                            !option.disabled && setActiveIndex(index)
-                          }
-                          className={cn(
-                            "flex h-11 shrink-0 items-center gap-1.5 rounded-xl px-3 text-body-sm text-body-primary transition-colors",
-                            selected
-                              ? "bg-purple-100 font-semibold"
-                              : "bg-purple-50 font-medium",
-                            option.disabled
-                              ? "cursor-not-allowed opacity-50"
-                              : "cursor-pointer",
-                            active && !option.disabled &&
-                              "ring-1 ring-purple-300 ring-inset",
-                          )}
-                        >
-                          <SelectionIndicator selected={selected} />
-                          <span className="min-w-0 flex-1 truncate">
-                            {option.label}
-                          </span>
-                        </li>
-                      );
-                    })
+                  <ul
+                    id={listboxId}
+                    role="listbox"
+                    aria-multiselectable={multiple || undefined}
+                    aria-label={typeof label === "string" ? label : ariaLabel}
+                    className={cn(
+                      "flex min-h-0 flex-1 list-none flex-col gap-3 overflow-auto p-2",
+                      listboxClassName,
+                    )}
+                  >
+                    {options.length === 0 ? (
+                      <li className="px-3 py-2 text-body-sm text-body-secondary">
+                        No options
+                      </li>
+                    ) : (
+                      options.map((option, index) => {
+                        const selected = selectedValues.includes(option.value);
+                        const active = index === activeIndex;
+                        return (
+                          <li
+                            key={option.value}
+                            ref={(node) => {
+                              optionRefs.current[index] = node;
+                            }}
+                            id={optionId(index)}
+                            role="option"
+                            aria-selected={selected}
+                            aria-disabled={option.disabled || undefined}
+                            onClick={() => handleSelect(option)}
+                            onMouseEnter={() =>
+                              !option.disabled && setActiveIndex(index)
+                            }
+                            className={cn(
+                              "flex h-11 shrink-0 items-center gap-1.5 rounded-xl px-3 text-body-sm text-body-primary transition-colors",
+                              selected ? "font-semibold" : "font-medium",
+                              // No fill by default — only the hovered/active row
+                              // gets a purple fill, with no border.
+                              active && !option.disabled && "bg-purple-100",
+                              option.disabled
+                                ? "cursor-not-allowed opacity-50"
+                                : "cursor-pointer",
+                            )}
+                          >
+                            <span className="min-w-0 flex-1 truncate">
+                              {option.label}
+                            </span>
+                            {/*
+                              The circular check indicator is a multi-select
+                              affordance — single mode shows a plain check on the
+                              chosen row only.
+                            */}
+                            {multiple ? (
+                              <SelectionIndicator selected={selected} />
+                            ) : (
+                              selected && (
+                                <Check
+                                  aria-hidden="true"
+                                  weight="bold"
+                                  className="size-5 shrink-0 text-purple-500"
+                                />
+                              )
+                            )}
+                          </li>
+                        );
+                      })
+                    )}
+                  </ul>
+
+                  {/* Clear-all footer — multi-select only, shown with a selection. */}
+                  {multiple && hasSelection && (
+                    <div className="flex justify-end border-t border-surface-border-purple/40 px-2 py-1.5">
+                      <button
+                        type="button"
+                        onClick={clearAll}
+                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-body-xs font-semibold text-red-600 transition-colors hover:bg-red-50"
+                      >
+                        <X weight="bold" className="size-3.5" />
+                        Clear all
+                      </button>
+                    </div>
                   )}
-                </ul>,
+                </div>,
                 document.body,
               )}
 

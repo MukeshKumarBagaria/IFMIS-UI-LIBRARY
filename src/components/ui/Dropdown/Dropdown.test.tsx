@@ -71,7 +71,9 @@ describe("Dropdown", () => {
       "aria-selected",
       "true",
     );
-    expect(getTrigger()).toHaveTextContent("India, Bhutan");
+    // Multiple mode renders the selection as chips in the trigger.
+    expect(getTrigger()).toHaveTextContent("India");
+    expect(getTrigger()).toHaveTextContent("Bhutan");
   });
 
   it("toggles a selected value off in multiple mode", async () => {
@@ -88,6 +90,83 @@ describe("Dropdown", () => {
     await userEvent.click(getTrigger());
     await userEvent.click(screen.getByRole("option", { name: "India" }));
     expect(onValueChange).toHaveBeenLastCalledWith([]);
+  });
+
+  it("collapses chips past maxVisibleChips into a +N more affordance", () => {
+    render(
+      <Dropdown
+        multiple
+        maxVisibleChips={2}
+        label="Countries"
+        options={OPTIONS}
+        defaultValue={["in", "np", "bt"]}
+      />,
+    );
+    // Two chips visible, the third folded into "+1 more".
+    expect(getTrigger()).toHaveTextContent("India");
+    expect(getTrigger()).toHaveTextContent("Nepal");
+    expect(getTrigger()).toHaveTextContent("+1 more");
+    expect(getTrigger()).not.toHaveTextContent("Bhutan");
+  });
+
+  it("removes a single value via a chip's × without opening the menu", async () => {
+    const onValueChange = vi.fn();
+    render(
+      <Dropdown
+        multiple
+        label="Countries"
+        options={OPTIONS}
+        defaultValue={["in", "np"]}
+        onValueChange={onValueChange}
+      />,
+    );
+    // The chips render their × first; the trailing svg is the caret. The first
+    // svg therefore belongs to India's remove control.
+    const removeX = getTrigger().querySelectorAll("svg")[0]!
+      .parentElement as HTMLElement;
+    await userEvent.click(removeX);
+
+    expect(onValueChange).toHaveBeenLastCalledWith(["np"]);
+    // Removing a chip must not pop the listbox open.
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+  });
+
+  it("clears the whole selection from the popover footer", async () => {
+    const onValueChange = vi.fn();
+    render(
+      <Dropdown
+        multiple
+        label="Countries"
+        options={OPTIONS}
+        defaultValue={["in", "np"]}
+        onValueChange={onValueChange}
+      />,
+    );
+    await userEvent.click(getTrigger());
+    await userEvent.click(screen.getByRole("button", { name: /clear all/i }));
+    expect(onValueChange).toHaveBeenLastCalledWith([]);
+  });
+
+  it("shows the circular indicator only in multiple mode", async () => {
+    const { rerender } = render(
+      <Dropdown label="Country" options={OPTIONS} defaultValue="in" />,
+    );
+    await userEvent.click(getTrigger());
+    // Single mode: no outlined-circle indicator on unselected rows.
+    expect(
+      document.querySelector(".rounded-full.border-2"),
+    ).not.toBeInTheDocument();
+
+    rerender(
+      <Dropdown
+        multiple
+        label="Country"
+        options={OPTIONS}
+        defaultValue={["in"]}
+      />,
+    );
+    // Multiple mode: outlined circles appear for the unselected rows.
+    expect(document.querySelector(".rounded-full.border-2")).toBeInTheDocument();
   });
 
   it("is keyboard operable (arrow to open, navigate, Enter to select)", async () => {

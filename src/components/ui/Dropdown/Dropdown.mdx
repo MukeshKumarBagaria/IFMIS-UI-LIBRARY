@@ -67,9 +67,40 @@ and each option toggles. `value` / `onValueChange` switch from a `string` to a
 
 <Canvas of={DropdownStories.Multiple} />
 
-Both modes share the **same item visual**: a 44px purple pill — `purple-100`
-when selected, `purple-50` otherwise — with a circular check indicator on the
-left.
+### Item visual
+
+Each option is a **44px row** with no fill at rest. Hovering (or arrow-keying
+to) a row fills it `purple-100` — no border. The selection indicator differs by
+mode:
+
+- **Multiple** — every row carries a circular check on the **right**: a filled
+  purple disc when selected, an outlined circle when not.
+- **Single** — no circle; the chosen row simply shows a plain purple check.
+
+### Chips & "+N more"
+
+In `multiple` mode the closed trigger renders the selection as **removable
+chips**. Each chip's `×` clears just that value. Past `maxVisibleChips`
+(default `2`) the remainder collapse into a `+N more` affordance; clicking it —
+or anywhere on the field — opens the list.
+
+```jsx
+<Dropdown
+  multiple
+  label="Channels"
+  placeholder="Select channels"
+  maxVisibleChips={2}
+  defaultValue={["ussd", "mobile", "internet", "branch", "atm"]}
+  options={channels}
+/>
+```
+
+<Canvas of={DropdownStories.MultiSelectChips} />
+
+When the popover is open with at least one selection, a **Clear all** footer
+empties the whole selection in one click.
+
+<Canvas of={DropdownStories.MultiSelectEmpty} />
 
 ---
 
@@ -139,6 +170,7 @@ and blocks opening. Individual options can be `disabled` too.
 | ------------------ | ------------------------------------------ | ------------------ | ------------------------------------------------------ |
 | `options`          | `DropdownOption[]`                         | —                  | `{ value, label, disabled? }[]`.                       |
 | `multiple`         | `boolean`                                  | `false`            | Allow multiple selection.                              |
+| `maxVisibleChips`  | `number`                                   | `2`                | Chips shown before collapsing into `+N more` (multi).  |
 | `value`            | `string \| string[]`                       | —                  | Controlled selection (array in multiple mode).         |
 | `defaultValue`     | `string \| string[]`                       | —                  | Uncontrolled initial selection.                        |
 | `onValueChange`    | `(value: string \| string[]) => void`      | —                  | Fires on change (array in multiple mode).              |
@@ -170,8 +202,10 @@ Every colour is a design token, so theming "just works":
 | Open border          | `purple-500` (1.5px)                 | `#8B39C2`            |
 | Caret affix          | `grey-200` border / `surface-grey-bg`| `#E5E5E5` / `#F7F7F7`|
 | Popover border       | `surface-border-purple`              | `#A58FBC`            |
-| Option (selected)    | `purple-100`                         | `#E8D8F5`            |
-| Option (unselected)  | `purple-50`                          | `#F3ECFA`            |
+| Option hover fill    | `purple-100`                         | `#E8D8F5`            |
+| Indicator / chip text| `purple-500` / `purple-700`          | `#8B39C2` / `#56108A`|
+| Chip fill            | `purple-50`                          | `#F3ECFA`            |
+| Clear all            | `red-600` / `red-50` hover           | `#D92D20` / `#FEF3F2`|
 | Selected label text  | `body-primary` (Header-16, 600)      | `#2E2E2E`            |
 | Placeholder text     | `body-secondary` (Body, 500)         | `#595959`            |
 | Disabled border/fill | `grey-200` / `surface-grey-bg`       | `#E5E5E5` / `#F7F7F7`|

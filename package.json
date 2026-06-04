@@ -14,11 +14,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.example.com/ifmis/ui.git"
+    "url": "git+http://172.18.210.110/ifmis_ng/uiuxlib.git"
   },
-  "homepage": "https://gitlab.example.com/ifmis/ui#readme",
+  "homepage": "http://172.18.210.110/ifmis_ng/uiuxlib#readme",
   "bugs": {
-    "url": "https://gitlab.example.com/ifmis/ui/-/issues"
+    "url": "http://172.18.210.110/ifmis_ng/uiuxlib/-/issues"
   },
   "engines": {
     "node": ">=18"
@@ -66,23 +66,23 @@
     "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
     "@storybook/addon-essentials": "^8.4.0",
     "@storybook/addon-themes": "^8.4.0",
     "@storybook/react": "^8.4.0",
     "@storybook/react-vite": "^8.4.0",
+    "@tailwindcss/vite": "^4.0.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.0.1",
     "@testing-library/user-event": "^14.5.2",
     "@types/node": "^22.9.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
-    "@typescript-eslint/eslint-plugin": "^8.13.0",
-    "@typescript-eslint/parser": "^8.13.0",
-    "@tailwindcss/vite": "^4.0.0",
     "@vitejs/plugin-react": "^4.3.3",
-    "eslint": "^8.57.1",
+    "eslint": "^9.39.4",
     "eslint-plugin-react": "^7.37.2",
-    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^15.15.0",
     "jsdom": "^25.0.1",
     "prettier": "^3.3.3",
     "react": "^18.3.1",
@@ -90,11 +90,13 @@
     "storybook": "^8.4.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.6.3",
+    "typescript-eslint": "^8.60.1",
     "vite": "^5.4.10",
     "vite-plugin-dts": "^4.3.0",
     "vitest": "^2.1.4"
   },
   "publishConfig": {
+    "@ifmis:registry": "http://172.18.210.110/api/v4/projects/7/packages/npm/",
     "access": "restricted"
   }
 }
