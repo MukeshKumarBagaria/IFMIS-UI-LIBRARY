@@ -70,12 +70,13 @@ and each option toggles. `value` / `onValueChange` switch from a `string` to a
 ### Item visual
 
 Each option is a **44px row** with no fill at rest. Hovering (or arrow-keying
-to) a row fills it `purple-100` — no border. The selection indicator differs by
-mode:
+to) a row gives it a **light** `purple-50` fill — no border. The selection
+indicator differs by mode:
 
-- **Multiple** — every row carries a circular check on the **right**: a filled
-  purple disc when selected, an outlined circle when not.
-- **Single** — no circle; the chosen row simply shows a plain purple check.
+- **Multiple** — every row carries a small circular check on the **right**: a
+  filled purple disc when selected, an outlined circle when not.
+- **Single** — no circle. The selected row keeps a persistent `purple-100`
+  fill, with a small purple check as a subtle confirmation.
 
 ### Chips & "+N more"
 
@@ -115,6 +116,41 @@ the closed field (the Figma "Preview items" frame). It pairs naturally with
 ```
 
 <Canvas of={DropdownStories.PreviewSelection} />
+
+---
+
+## Searchable
+
+Add `searchable` to put a search box at the top of the popover that filters the
+options as you type. It opens focused, drives the list with `↑`/`↓` and `Enter`,
+and clears itself each time the menu closes. Works in single **and** multiple
+mode.
+
+```jsx
+<Dropdown searchable label="Country" options={countries} />
+```
+
+<Canvas of={DropdownStories.Searchable} />
+
+- `onSearchChange` reports the query on every keystroke — wire it to a
+  server-side search if your list is large.
+- `filterOption(option, query)` overrides the default match (case-insensitive
+  substring on a string `label`, falling back to `value`).
+- `noResultsText` customises the empty-search message.
+
+<Canvas of={DropdownStories.SearchableMultiple} />
+
+---
+
+## Positioning (auto-flip)
+
+The popover renders in a portal and is anchored to the field, so it's never
+clipped by an ancestor's `overflow`. When the field sits near the **bottom of
+the viewport**, the menu automatically opens **upward** instead of being cut
+off, and caps its height to the available space (scrolling inside). Pass
+`flip={false}` to always open downward.
+
+<Canvas of={DropdownStories.FlipWhenNearBottom} />
 
 ---
 
@@ -184,6 +220,12 @@ and blocks opening. Individual options can be `disabled` too.
 | `helperText`       | node                                       | —                  | Neutral helper subtext.                                |
 | `previewSelection` | boolean                                    | `false`            | List chosen labels below the closed field.             |
 | `closeOnSelect`    | boolean                                    | `!multiple`        | Close the popover after a selection.                   |
+| `searchable`       | boolean                                    | `false`            | Show a search box that filters the options.            |
+| `searchPlaceholder`| string                                     | `"Search…"`        | Placeholder for the search box.                        |
+| `onSearchChange`   | `(query: string) => void`                  | —                  | Fires with the search query on each keystroke.         |
+| `filterOption`     | `(opt, query) => boolean`                  | substring match    | Custom search matcher.                                 |
+| `noResultsText`    | node                                       | `"No results"`     | Empty-state when a search matches nothing.             |
+| `flip`             | boolean                                    | `true`             | Open upward when there's no room below.                |
 | `name`             | string                                     | —                  | Emit hidden inputs for form submission.                |
 | `className`        | string                                     | —                  | Classes for the outer `FormField`.                     |
 | `triggerClassName` | string                                     | —                  | Classes for the trigger button.                        |
@@ -202,7 +244,8 @@ Every colour is a design token, so theming "just works":
 | Open border          | `purple-500` (1.5px)                 | `#8B39C2`            |
 | Caret affix          | `grey-200` border / `surface-grey-bg`| `#E5E5E5` / `#F7F7F7`|
 | Popover border       | `surface-border-purple`              | `#A58FBC`            |
-| Option hover fill    | `purple-100`                         | `#E8D8F5`            |
+| Option hover fill    | `purple-50`                          | `#F3ECFA`            |
+| Single selected fill | `purple-100`                         | `#E8D8F5`            |
 | Indicator / chip text| `purple-500` / `purple-700`          | `#8B39C2` / `#56108A`|
 | Chip fill            | `purple-50`                          | `#F3ECFA`            |
 | Clear all            | `red-600` / `red-50` hover           | `#D92D20` / `#FEF3F2`|
@@ -210,8 +253,9 @@ Every colour is a design token, so theming "just works":
 | Placeholder text     | `body-secondary` (Body, 500)         | `#595959`            |
 | Disabled border/fill | `grey-200` / `surface-grey-bg`       | `#E5E5E5` / `#F7F7F7`|
 
-Field height `44px`. Radius: `16px` (field & popover) · `12px` (option) ·
-`8px` (caret affix). The popover sits **8px** below the field.
+Field height `44px`. Radius: `16px` (field & popover) · `8px` (option) ·
+`8px` (caret affix). The popover sits **8px** below the field (or above it when
+flipped).
 
 ---
 

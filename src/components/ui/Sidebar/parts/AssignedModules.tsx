@@ -11,6 +11,8 @@ import { MODULES, type ModuleDef, type ModuleId } from "../modules";
 interface ModuleCardProps {
   module: ModuleDef;
   onClick?: () => void;
+  /** Extra classes — used to attach the module-switch enter animation. */
+  className?: string;
 }
 
 /**
@@ -40,7 +42,7 @@ function ModuleIconBadge({
   );
 }
 
-export function ActiveModuleCard({ module, onClick }: ModuleCardProps) {
+export function ActiveModuleCard({ module, onClick, className }: ModuleCardProps) {
   const { Icon, label, gradient, textColor = "#4B3960" } = module;
   return (
     <button
@@ -51,6 +53,7 @@ export function ActiveModuleCard({ module, onClick }: ModuleCardProps) {
         "rounded-xl shadow-sm",
         "transition-transform hover:scale-[1.02] focus:outline-none",
         "focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2",
+        className,
       )}
       style={{ background: gradient, color: textColor }}
       aria-pressed="true"
@@ -66,7 +69,7 @@ export function ActiveModuleCard({ module, onClick }: ModuleCardProps) {
 /* Inactive (small) module card                                               */
 /* -------------------------------------------------------------------------- */
 
-export function InactiveModuleCard({ module, onClick }: ModuleCardProps) {
+export function InactiveModuleCard({ module, onClick, className }: ModuleCardProps) {
   const { Icon, label, gradient, textColor = "#4B3960" } = module;
   return (
     // Show the module name in a hover pill (above the icon). `decorative`
@@ -81,6 +84,7 @@ export function InactiveModuleCard({ module, onClick }: ModuleCardProps) {
           "rounded-xl",
           "transition-transform hover:scale-110 focus:outline-none",
           "focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2",
+          className,
         )}
         style={{ background: gradient, color: textColor }}
         aria-label={label}
@@ -249,16 +253,25 @@ export function AssignedModules({
       </h3>
 
       <div className="flex p-2 justify-between items-center gap-3 self-stretch rounded-2xl bg-purple-50">
-        <ActiveModuleCard module={active} />
+        {/* `key={activeId}` remounts the card on every switch, replaying the
+            fade-and-scale enter animation so the module change reads as a
+            smooth transition rather than an instant swap. */}
+        <ActiveModuleCard
+          key={activeId}
+          module={active}
+          className="animate-module-card-in motion-reduce:animate-none"
+        />
 
         {/* 2×2 grid: up to 3 inactive thumbnails + (when applicable) the
-            circular overflow chevron in the 4th slot. */}
+            circular overflow chevron in the 4th slot. Keying each thumbnail by
+            `activeId`+id re-animates the grid as it reshuffles on a switch. */}
         <div className="grid grid-cols-2 gap-1.5">
           {inline.map((m) => (
             <InactiveModuleCard
-              key={m.id}
+              key={`${activeId}-${m.id}`}
               module={m}
               onClick={() => onChange?.(m.id)}
+              className="animate-module-thumb-in motion-reduce:animate-none"
             />
           ))}
 

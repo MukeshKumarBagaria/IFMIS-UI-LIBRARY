@@ -277,6 +277,43 @@
 
   --text-body-xs: 0.875rem;    /* 14px */
   --text-body-xs--line-height: 1.3125rem; /* 21px */
+
+  /* =====================================================================
+   * Motion — named animations exposed as `animate-*` utilities
+   * ===================================================================== */
+
+  /* Sidebar module switch: the active card fades + scales in when the
+   * selected module changes; the inactive thumbnails settle in behind it
+   * with a lighter rise. Both are gated by `motion-reduce:animate-none`
+   * at the call site for users who prefer reduced motion. */
+  /* No `forwards`/`both` fill — the cards also carry a `hover:scale`
+   * transform, and a retained final keyframe would shadow it. With the
+   * default fill the transform reverts to none on completion, so hover
+   * keeps working; opacity/transform end states already match the base. */
+  --animate-module-card-in: module-card-in 0.28s ease-out;
+  --animate-module-thumb-in: module-thumb-in 0.24s ease-out;
+
+  @keyframes module-card-in {
+    from {
+      opacity: 0;
+      transform: scale(0.94) translateY(3px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes module-thumb-in {
+    from {
+      opacity: 0;
+      transform: scale(0.85);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
 }
 
 @layer base {

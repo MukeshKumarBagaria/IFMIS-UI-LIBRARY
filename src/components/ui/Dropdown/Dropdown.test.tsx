@@ -154,7 +154,7 @@ describe("Dropdown", () => {
     await userEvent.click(getTrigger());
     // Single mode: no outlined-circle indicator on unselected rows.
     expect(
-      document.querySelector(".rounded-full.border-2"),
+      document.querySelector(".rounded-full.border-purple-500"),
     ).not.toBeInTheDocument();
 
     rerender(
@@ -166,7 +166,9 @@ describe("Dropdown", () => {
       />,
     );
     // Multiple mode: outlined circles appear for the unselected rows.
-    expect(document.querySelector(".rounded-full.border-2")).toBeInTheDocument();
+    expect(
+      document.querySelector(".rounded-full.border-purple-500"),
+    ).toBeInTheDocument();
   });
 
   it("is keyboard operable (arrow to open, navigate, Enter to select)", async () => {
@@ -308,5 +310,71 @@ describe("Dropdown", () => {
       "in",
       "np",
     ]);
+  });
+
+  it("filters options via the search input and reports the query", async () => {
+    const onSearchChange = vi.fn();
+    render(
+      <Dropdown
+        searchable
+        label="Country"
+        options={OPTIONS}
+        onSearchChange={onSearchChange}
+      />,
+    );
+    await userEvent.click(getTrigger());
+    const search = screen.getByRole("searchbox");
+    expect(search).toHaveFocus();
+
+    await userEvent.type(search, "bh");
+    expect(onSearchChange).toHaveBeenLastCalledWith("bh");
+
+    const options = screen.getAllByRole("option");
+    expect(options).toHaveLength(1);
+    expect(options[0]).toHaveTextContent("Bhutan");
+  });
+
+  it("shows the no-results message when a search matches nothing", async () => {
+    render(
+      <Dropdown
+        searchable
+        label="Country"
+        options={OPTIONS}
+        noResultsText="Nothing here"
+      />,
+    );
+    await userEvent.click(getTrigger());
+    await userEvent.type(screen.getByRole("searchbox"), "zzz");
+    expect(screen.queryByRole("option")).not.toBeInTheDocument();
+    expect(screen.getByText("Nothing here")).toBeInTheDocument();
+  });
+
+  it("selects the active match with Enter from the search input", async () => {
+    const onValueChange = vi.fn();
+    render(
+      <Dropdown
+        searchable
+        label="Country"
+        options={OPTIONS}
+        onValueChange={onValueChange}
+      />,
+    );
+    await userEvent.click(getTrigger());
+    await userEvent.type(screen.getByRole("searchbox"), "nep");
+    await userEvent.keyboard("{Enter}");
+    expect(onValueChange).toHaveBeenCalledWith("np");
+  });
+
+  it("resets the search query when the menu closes", async () => {
+    render(<Dropdown searchable label="Country" options={OPTIONS} />);
+    await userEvent.click(getTrigger());
+    await userEvent.type(screen.getByRole("searchbox"), "bh");
+    expect(screen.getAllByRole("option")).toHaveLength(1);
+
+    await userEvent.keyboard("{Escape}");
+    // Reopen — the query is cleared, so all options return.
+    await userEvent.click(getTrigger());
+    expect(screen.getByRole("searchbox")).toHaveValue("");
+    expect(screen.getAllByRole("option")).toHaveLength(OPTIONS.length);
   });
 });

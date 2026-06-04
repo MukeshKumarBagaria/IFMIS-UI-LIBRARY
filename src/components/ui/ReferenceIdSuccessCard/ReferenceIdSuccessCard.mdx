@@ -1,0 +1,140 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as Stories from "./ReferenceIdSuccessCard.stories";
+
+<Meta of={Stories} title="UI/ReferenceIdSuccessCard/Guide" />
+
+# ReferenceIdSuccessCard
+
+The IFMIS **“Submitted Successfully”** confirmation card — a green-gradient
+surface with a success badge, a title, the reference id in a big **dashed
+pill**, a supporting line, and a one-click **Copy** button.
+
+Every piece of text is a prop, so the same card covers any _success + reference
+id_ moment: a grievance, a payment, a registration receipt, and so on.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## Quickstart
+
+Only `referenceId` is required; everything else has a sensible default.
+
+```jsx
+import { ReferenceIdSuccessCard } from "@ifmis/ui";
+
+<ReferenceIdSuccessCard
+  referenceId="SR - BM-BPL - 0001 - 000234"
+  onCopy={(id) => console.log("copied", id)}
+/>;
+```
+
+<Canvas of={Stories.Default} />
+
+---
+
+## Customising the text
+
+`title`, `description`, `copyLabel`, and `copiedLabel` are all props. Repoint
+them and the card becomes a payment receipt, a registration confirmation, or
+anything else.
+
+```jsx
+<ReferenceIdSuccessCard
+  title="Payment Successful!"
+  referenceId="TXN-2026-000912"
+  description="Your payment has been recorded in the IFMIS-Next Gen System"
+  copyLabel="Copy Transaction ID"
+/>
+```
+
+<Canvas of={Stories.Customised} />
+
+---
+
+## Copy to clipboard
+
+Clicking **Copy** writes `copyValue` to the clipboard, flips the button to its
+`copiedLabel` for `copiedDuration` ms (default `2000`), then fires `onCopy`.
+
+- `copyValue` defaults to `referenceId` when it's a string. If you pass a node
+  for `referenceId`, set `copyValue` explicitly so the right text is copied.
+- If the Clipboard API rejects (insecure context / denied permission), the card
+  still flips to the copied state and calls `onCopy`, so you can provide a
+  fallback (e.g. a toast).
+
+```jsx
+<ReferenceIdSuccessCard
+  referenceId={<strong>SR - 0001</strong>}
+  copyValue="SR-0001"
+  copiedLabel="Copied!"
+  onCopy={(id) => toast(`Copied ${id}`)}
+/>
+```
+
+---
+
+## Variations
+
+Hide the copy button for a read-only confirmation, or drop the icon entirely.
+
+<Canvas of={Stories.WithoutCopyButton} />
+<Canvas of={Stories.WithoutIcon} />
+
+A long id wraps cleanly inside the dashed pill:
+
+<Canvas of={Stories.LongReferenceId} />
+
+---
+
+## Props
+
+| Prop                  | Type                       | Default                              | Notes                                                  |
+| --------------------- | -------------------------- | ------------------------------------ | ------------------------------------------------------ |
+| `referenceId`         | node                       | — (required)                         | The id shown large in the dashed pill.                 |
+| `title`               | node                       | `"Grievance Submitted Successfully!"`| Success message title.                                 |
+| `description`         | node                       | IFMIS registration line              | Supporting line under the id.                          |
+| `icon`                | node \| `null`             | green check badge                    | `null` hides it; a node replaces it.                   |
+| `showCopyButton`      | boolean                    | `true`                               | Toggle the copy button.                                |
+| `copyLabel`           | node                       | `"Copy Grievance ID"`                | Resting copy-button label.                             |
+| `copiedLabel`         | node                       | `"Copied!"`                          | Label while in the copied state.                       |
+| `copyValue`           | string                     | `referenceId` (if string)            | Exact text written to the clipboard.                   |
+| `copiedDuration`      | number                     | `2000`                               | How long (ms) the copied state lasts.                  |
+| `onCopy`              | `(value: string) => void`  | —                                    | Fires after a copy.                                    |
+| `className`           | string                     | —                                    | Classes for the card root.                             |
+| `idClassName`         | string                     | —                                    | Classes for the dashed id pill.                        |
+| `copyButtonClassName` | string                     | —                                    | Classes for the copy button.                           |
+
+Also forwards a `ref` and any extra `<div>` attributes to the root.
+
+---
+
+## Tokens
+
+| Part            | Token                              | Value (green theme)                       |
+| --------------- | ---------------------------------- | ----------------------------------------- |
+| Card background | `--brand-gradient-green`           | `linear-gradient(90deg,#93ECBF,#BEF4D9)`  |
+| Success badge   | `green-600` / white                | `#14B862`                                 |
+| Title text      | `green-800` (Header-16, 600)       | `#0A5C31`                                 |
+| Id pill border  | `green-800` (1px dashed)           | `#0A5C31`                                 |
+| Id pill fill    | `green-100`                        | `#D1FAE5`                                 |
+| Id text         | `green-800` (Header-32, 600)       | `#0A5C31`                                 |
+| Subtext         | `green-800` (Medium-14, 500)       | `#0A5C31`                                 |
+| Copy button     | `green-800` border + text (Header-14, 600) | `#0A5C31`                         |
+
+Radius: `24px` (card) · `16px` (id pill) · full (copy button). Padding `16px`,
+gap `24px`.
+
+---
+
+## Responsive behaviour
+
+The card is **`width: 100%`** up to a `657px` max (the Figma reference width) —
+size it by constraining the parent. The id wraps inside its pill, so long
+references stay readable on small screens.
+
+```jsx
+<div className="max-w-[657px]">
+  <ReferenceIdSuccessCard referenceId="SR - BM-BPL - 0001 - 000234" />
+</div>
+```

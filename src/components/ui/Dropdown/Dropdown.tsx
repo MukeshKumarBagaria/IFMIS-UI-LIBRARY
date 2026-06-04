@@ -9,7 +9,13 @@ import {
 } from "react";
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { CaretDown, CaretUp, Check, X } from "@phosphor-icons/react";
+import {
+  CaretDown,
+  CaretUp,
+  Check,
+  MagnifyingGlass,
+  X,
+} from "@phosphor-icons/react";
 import { cn } from "../../../lib/cn";
 import { useAnchoredPosition } from "../../../lib/useAnchoredPosition";
 import { FormField, FieldIconBox } from "../FormField";
@@ -109,6 +115,29 @@ export interface DropdownProps {
    */
   closeOnSelect?: boolean;
 
+  /**
+   * Show a search input at the top of the popover that filters the options as
+   * you type. Default `false`.
+   */
+  searchable?: boolean;
+  /** Placeholder for the search input. Default `"Search…"`. */
+  searchPlaceholder?: string;
+  /** Fires with the search query on every keystroke (controlled or not). */
+  onSearchChange?: (query: string) => void;
+  /**
+   * Custom matcher for `searchable`. Receives an option and the lowercased
+   * query; return `true` to keep it. Defaults to a case-insensitive substring
+   * match on a string `label` (falling back to `value`).
+   */
+  filterOption?: (option: DropdownOption, query: string) => boolean;
+  /** Empty-state text shown when a search yields nothing. Default `"No results"`. */
+  noResultsText?: ReactNode;
+  /**
+   * Flip the popover **above** the field when there isn't room below it (near
+   * the bottom of the viewport). Default `true`.
+   */
+  flip?: boolean;
+
   /** Name for hidden form inputs (one per selected value). */
   name?: string;
   /** Explicit control id (otherwise auto-generated). */
@@ -146,14 +175,14 @@ function SelectionIndicator({ selected }: { selected: boolean }) {
   return selected ? (
     <span
       aria-hidden="true"
-      className="grid size-6 shrink-0 place-items-center rounded-full bg-purple-500 text-white"
+      className="grid size-5 shrink-0 place-items-center rounded-full bg-purple-500 text-white"
     >
-      <Check weight="bold" className="size-4" />
+      <Check weight="bold" className="size-3" />
     </span>
   ) : (
     <span
       aria-hidden="true"
-      className="size-6 shrink-0 rounded-full border-2 border-purple-500"
+      className="size-5 shrink-0 rounded-full border-[1.5px] border-purple-500"
     />
   );
 }
@@ -247,6 +276,12 @@ export const Dropdown = forwardRef<HTMLButtonElement, DropdownProps>(
       helperText,
       previewSelection = false,
       closeOnSelect = !multiple,
+      searchable = false,
+      searchPlaceholder = "Search…",
+      onSearchChange,
+      filterOption,
+      noResultsText = "No results",
+      flip = true,
       name,
       id,
       "aria-label": ariaLabel,
@@ -264,15 +299,31 @@ export const Dropdown = forwardRef<HTMLButtonElement, DropdownProps>(
 
     const [open, setOpen] = useState(false);
     const [activeIndex, setActiveIndex] = useState(-1);
+    const [query, setQuery] = useState("");
 
     const rootRef = useRef<HTMLDivElement | null>(null);
     const triggerRef = useRef<HTMLButtonElement | null>(null);
     const listRef = useRef<HTMLDivElement | null>(null);
+    const searchRef = useRef<HTMLInputElement | null>(null);
     const optionRefs = useRef<(HTMLLIElement | null)[]>([]);
 
     // The listbox renders in a portal so it's never clipped by an ancestor's
     // overflow (a scroll container, a table, the Storybook docs preview…).
-    const coords = useAnchoredPosition(triggerRef, open);
+    // `flip` lets it open upward when there's no room below.
+    const coords = useAnchoredPosition(triggerRef, open, { flip });
+
+    // ---- Searchable filtering ---------------------------------------------
+    const normalizedQuery = query.trim().toLowerCase();
+    const defaultFilter = (option: DropdownOption, q: string) => {
+      const text =
+        typeof option.label === "string" ? option.label : option.value;
+      return text.toLowerCase().includes(q);
+    };
+    const visibleOptions = useMemo(() => {
+      if (!searchable || !normalizedQuery) return options;
+      const match = filterOption ?? defaultFilter;
+      return options.filter((o) => match(o, normalizedQuery));
+    }, [options, searchable, normalizedQuery, filterOption]);
 
     const reactId = useId();
     const baseId = id ?? reactId;
@@ -363,7 +414,7 @@ export const Dropdown = forwardRef<HTMLButtonElement, DropdownProps>(
 
     const moveActive = useCallback(
       (direction: 1 | -1 | "first" | "last") => {
-        const enabled = enabledIndices(options);
+        const enabled = enabledIndices(visibleOptions);
         if (enabled.length === 0) return;
         if (direction === "first") {
           setActiveIndex(enabled[0]!);
@@ -382,7 +433,7 @@ export const Dropdown = forwardRef<HTMLButtonElement, DropdownProps>(
             : (pos + direction + enabled.length) % enabled.length;
         setActiveIndex(enabled[nextPos]!);
       },
-      [options, activeIndex],
+      [visibleOptions, activeIndex],
     );
 
     // Keep the active option scrolled into view (guarded — jsdom lacks it).
@@ -391,6 +442,30 @@ export const Dropdown = forwardRef<HTMLButtonElement, DropdownProps>(
         optionRefs.current[activeIndex]?.scrollIntoView?.({ block: "nearest" });
       }
     }, [open, activeIndex]);
+
+    // Clear the search query whenever the menu closes, so it reopens fresh.
+    useEffect(() => {
+      if (!open) setQuery("");
+    }, [open]);
+
+    // Callback ref: focus the search input the moment it mounts (i.e. when the
+    // searchable popover opens). A stable identity means React only runs this
+    // on mount/unmount, so it never steals focus mid-type on a reposition.
+    const setSearchRef = useCallback((node: HTMLInputElement | null) => {
+      searchRef.current = node;
+      node?.focus();
+    }, []);
+
+    // While actively filtering, keep the active option on the first match.
+    useEffect(() => {
+      if (!open || !searchable || !normalizedQuery) return;
+      setActiveIndex(enabledIndices(visibleOptions)[0] ?? -1);
+    }, [open, searchable, normalizedQuery, visibleOptions]);
+
+    const updateQuery = (next: string) => {
+      setQuery(next);
+      onSearchChange?.(next);
+    };
 
     // Close on outside pointer-down.
     useEffect(() => {
@@ -447,7 +522,39 @@ export const Dropdown = forwardRef<HTMLButtonElement, DropdownProps>(
         case "Enter":
         case " ": {
           event.preventDefault();
-          const option = options[activeIndex];
+          const option = visibleOptions[activeIndex];
+          if (option) handleSelect(option);
+          break;
+        }
+        case "Escape":
+          event.preventDefault();
+          closeMenu();
+          break;
+        case "Tab":
+          setOpenState(false);
+          break;
+        default:
+          break;
+      }
+    };
+
+    // Keyboard handling for the search input: drive the list with the arrows /
+    // Enter / Escape, but leave typing (and Home/End cursor moves) to the input.
+    const handleSearchKeyDown = (
+      event: React.KeyboardEvent<HTMLInputElement>,
+    ) => {
+      switch (event.key) {
+        case "ArrowDown":
+          event.preventDefault();
+          moveActive(1);
+          break;
+        case "ArrowUp":
+          event.preventDefault();
+          moveActive(-1);
+          break;
+        case "Enter": {
+          event.preventDefault();
+          const option = visibleOptions[activeIndex];
           if (option) handleSelect(option);
           break;
         }
@@ -560,12 +667,40 @@ export const Dropdown = forwardRef<HTMLButtonElement, DropdownProps>(
                   ref={listRef}
                   style={{
                     position: "fixed",
-                    top: coords.top,
                     left: coords.left,
                     width: coords.width,
+                    // Pin to the bottom of the field, or to its top when flipped.
+                    ...(coords.placement === "top"
+                      ? { bottom: coords.bottom }
+                      : { top: coords.top }),
+                    maxHeight: Math.min(288, coords.maxHeight),
                   }}
-                  className="z-50 flex max-h-72 flex-col overflow-hidden rounded-2xl border border-surface-border-purple bg-surface-card shadow-card"
+                  className="z-50 flex flex-col overflow-hidden rounded-2xl border border-surface-border-purple bg-surface-card shadow-card"
                 >
+                  {/* Search input — filters the list as you type. */}
+                  {searchable && (
+                    <div className="flex items-center gap-2 border-b border-surface-border-purple/40 px-3 py-2">
+                      <MagnifyingGlass
+                        aria-hidden="true"
+                        className="size-4 shrink-0 text-body-secondary"
+                      />
+                      <input
+                        ref={setSearchRef}
+                        type="search"
+                        value={query}
+                        onChange={(e) => updateQuery(e.target.value)}
+                        onKeyDown={handleSearchKeyDown}
+                        placeholder={searchPlaceholder}
+                        aria-label={searchPlaceholder}
+                        aria-controls={listboxId}
+                        aria-activedescendant={
+                          activeIndex >= 0 ? optionId(activeIndex) : undefined
+                        }
+                        className="min-w-0 flex-1 bg-transparent text-body-sm text-body-primary outline-none placeholder:text-body-secondary/70"
+                      />
+                    </div>
+                  )}
+
                   <ul
                     id={listboxId}
                     role="listbox"
@@ -576,12 +711,14 @@ export const Dropdown = forwardRef<HTMLButtonElement, DropdownProps>(
                       listboxClassName,
                     )}
                   >
-                    {options.length === 0 ? (
+                    {visibleOptions.length === 0 ? (
                       <li className="px-3 py-2 text-body-sm text-body-secondary">
-                        No options
+                        {searchable && normalizedQuery
+                          ? noResultsText
+                          : "No options"}
                       </li>
                     ) : (
-                      options.map((option, index) => {
+                      visibleOptions.map((option, index) => {
                         const selected = selectedValues.includes(option.value);
                         const active = index === activeIndex;
                         return (
@@ -599,11 +736,13 @@ export const Dropdown = forwardRef<HTMLButtonElement, DropdownProps>(
                               !option.disabled && setActiveIndex(index)
                             }
                             className={cn(
-                              "flex h-11 shrink-0 items-center gap-1.5 rounded-xl px-3 text-body-sm text-body-primary transition-colors",
+                              "flex h-11 shrink-0 items-center gap-1.5 rounded-lg px-3 text-body-sm text-body-primary transition-colors",
                               selected ? "font-semibold" : "font-medium",
-                              // No fill by default — only the hovered/active row
-                              // gets a purple fill, with no border.
-                              active && !option.disabled && "bg-purple-100",
+                              // No fill at rest. Hover / keyboard highlight gets a
+                              // light fill; a single-select selection keeps a
+                              // slightly stronger persistent fill.
+                              active && !option.disabled && "bg-purple-50",
+                              !multiple && selected && "bg-purple-100",
                               option.disabled
                                 ? "cursor-not-allowed opacity-50"
                                 : "cursor-pointer",
@@ -614,8 +753,8 @@ export const Dropdown = forwardRef<HTMLButtonElement, DropdownProps>(
                             </span>
                             {/*
                               The circular check indicator is a multi-select
-                              affordance — single mode shows a plain check on the
-                              chosen row only.
+                              affordance. Single select leans on the row fill
+                              above; the check is a subtle confirmation.
                             */}
                             {multiple ? (
                               <SelectionIndicator selected={selected} />
@@ -624,7 +763,7 @@ export const Dropdown = forwardRef<HTMLButtonElement, DropdownProps>(
                                 <Check
                                   aria-hidden="true"
                                   weight="bold"
-                                  className="size-5 shrink-0 text-purple-500"
+                                  className="size-4 shrink-0 text-purple-500"
                                 />
                               )
                             )}

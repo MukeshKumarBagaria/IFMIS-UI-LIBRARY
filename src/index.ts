@@ -90,6 +90,9 @@ export type {
 export { StatCard } from "./components/ui/StatCard";
 export type { StatCardProps, StatCardTone } from "./components/ui/StatCard";
 
+export { ReferenceIdSuccessCard } from "./components/ui/ReferenceIdSuccessCard";
+export type { ReferenceIdSuccessCardProps } from "./components/ui/ReferenceIdSuccessCard";
+
 export { OtpInput } from "./components/ui/OtpInput";
 export type { OtpInputProps, OtpInputState } from "./components/ui/OtpInput";
 

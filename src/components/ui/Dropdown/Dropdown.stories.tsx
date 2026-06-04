@@ -61,11 +61,15 @@ const meta: Meta<typeof Dropdown> = {
   argTypes: {
     multiple: { control: "boolean" },
     maxVisibleChips: { control: { type: "number", min: 1 } },
+    searchable: { control: "boolean" },
+    searchPlaceholder: { control: "text" },
+    flip: { control: "boolean" },
     disabled: { control: "boolean" },
     required: { control: "boolean" },
     previewSelection: { control: "boolean" },
     options: { control: false },
     onValueChange: { action: "valueChange" },
+    onSearchChange: { action: "searchChange" },
   },
 };
 
@@ -175,6 +179,48 @@ export const PreviewSelection: Story = {
     label: "Countries",
     defaultValue: ["in", "np", "bt"],
   },
+};
+
+/**
+ * Searchable — a search box at the top of the popover filters the list as you
+ * type. Works in single and multiple mode; pair with `onSearchChange` to drive
+ * server-side search.
+ */
+export const Searchable: Story = {
+  args: {
+    ...baseArgs,
+    searchable: true,
+    label: "Country",
+    placeholder: "Select a country",
+  },
+};
+
+/** Searchable + multiple — filter, then toggle several with the circular check. */
+export const SearchableMultiple: Story = {
+  args: {
+    ...baseArgs,
+    multiple: true,
+    searchable: true,
+    label: "Countries",
+    defaultValue: ["in"],
+  },
+};
+
+/**
+ * Auto-flip — when the field sits near the bottom of the viewport the popover
+ * opens **upward** instead of being clipped. The spacer below pushes the field
+ * down so the menu has to flip; scroll so the field is low, then open it.
+ * (Set `flip={false}` to always open downward.)
+ */
+export const FlipWhenNearBottom: Story = {
+  args: { ...baseArgs, defaultValue: "in" },
+  decorators: [
+    (Story) => (
+      <div className="flex h-[120vh] max-w-sm flex-col justify-end">
+        <Story />
+      </div>
+    ),
+  ],
 };
 
 /** One disabled option (Bhutan) — visible but not selectable. */
