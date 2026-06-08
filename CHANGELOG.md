@@ -8,6 +8,8 @@ See [PUBLISHING.md](./PUBLISHING.md) for the release process.
 
 ## [Unreleased]
 
+## [0.1.0] — 2026-06-08
+
 ### Added
 
 - **`Toggle`** — accessible labelled on/off switch (`role="switch"`), controlled
