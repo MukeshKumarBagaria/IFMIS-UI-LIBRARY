@@ -1,0 +1,323 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as DataTableStories from "./DataTable.stories";
+
+<Meta of={DataTableStories} title="UI/DataTable/Guide" />
+
+# DataTable
+
+A generic, sortable **financial data grid** built on a semantic `<table>`. It
+renders the IFMIS table styling 1:1 — Purple-50 (`#F3ECFA`) header cells outlined
+in Surface/Borders-purple (`#A58FBC`), white rows, a 12px rounded frame — and
+layers on everything a real statement needs: sorting, sticky header / first
+column, footer totals, currency formatting, density, loading & empty states, a
+toolbar slot, and horizontal scrolling with the library `Scrollbar`.
+
+You bring two things: a typed `columns` array and a `data` array. Everything else
+is opt-in.
+
+> Examples are plain JavaScript / JSX — your modules don't need TypeScript. The
+> generics simply give you autocomplete when you do.
+
+---
+
+## Quickstart
+
+```jsx
+import { DataTable } from "@ifmis/ui";
+
+const columns = [
+  { id: "code", header: "Code", accessor: "code" },
+  { id: "account", header: "Account", accessor: "account" },
+  { id: "spent", header: "Spent", accessor: "spent", align: "right" },
+];
+
+<DataTable
+  aria-label="Budget ledger"
+  columns={columns}
+  data={rows}
+  getRowId={(row) => row.code}
+/>;
+```
+
+<Canvas of={DataTableStories.Default} />
+
+`accessor` reads the value from each row — a **key** (`"code"`) or a **function**
+(`(row) => row.budget - row.spent`). Always pass `getRowId` so React keys are
+stable across sorting and paging (it falls back to the row index otherwise).
+
+---
+
+## Columns
+
+Each column is a plain object. The only required fields are `id` and `header`.
+
+```jsx
+{
+  id: "budget",                    // stable id — also the sort + React key
+  header: "Budget",                // any node
+  accessor: "budget",              // key of the row, or (row) => value
+  cell: (row) => formatCurrency(row.budget),  // custom render (optional)
+  align: "right",                  // "left" (default) | "center" | "right"
+  sortable: true,
+  footer: formatCurrency(total),   // renders a <tfoot> row
+  sticky: true,                    // pin this column while scrolling
+  width: 120,                      // number → px, or any CSS length
+  minWidth: 90,
+  wrap: false,                     // allow text wrapping (default: no wrap)
+}
+```
+
+- **`cell` vs `accessor`** — `cell` controls what's *displayed*; `accessor` is
+  still what's *sorted*. Give a column a function `accessor` plus a `cell` to sort
+  on a computed value while rendering something richer (see the "Variance" column
+  in the Default story).
+- **Alignment** — right-align money and numbers, left-align text. The header
+  follows the column's `align`.
+
+---
+
+## Sorting
+
+Set `sortable: true` on a column and the header becomes a button that cycles
+**ascending → descending → unsorted**. The default comparator is
+numeric/date/locale-aware (so `100` sorts before `20` numerically, not
+lexically); override per column with `sortFn`.
+
+```jsx
+// Uncontrolled — the table remembers the sort:
+<DataTable columns={columns} data={rows} defaultSort={{ columnId: "spent", direction: "desc" }} />
+
+// Controlled — you own it (e.g. to drive a server query):
+const [sort, setSort] = useState({ columnId: "spent", direction: "desc" });
+<DataTable columns={columns} data={rows} sort={sort} onSortChange={setSort} />
+```
+
+For **server-side** sorting, add `manualSort` so the table reports the sort via
+`onSortChange` but doesn't reorder `data` itself.
+
+```jsx
+<DataTable manualSort columns={columns} data={pageFromServer} sort={sort} onSortChange={refetch} />
+```
+
+---
+
+## Footer totals
+
+Any column with a `footer` renders a sticky-styled `<tfoot>` row (Purple-50,
+semibold) — ideal for column totals on a statement.
+
+```jsx
+const columns = [
+  { id: "code", header: "Code", accessor: "code", footer: "Total" },
+  { id: "budget", header: "Budget", accessor: "budget", align: "right",
+    cell: (r) => inr(r.budget), footer: inr(totalBudget) },
+];
+```
+
+The Default story above shows a totals row.
+
+---
+
+## Sticky header & first column
+
+For tall statements, keep the header in view by capping the body height with
+`maxHeight` and setting `stickyHeader`:
+
+```jsx
+<DataTable columns={columns} data={rows} stickyHeader maxHeight={280} />
+```
+
+<Canvas of={DataTableStories.StickyHeader} />
+
+For wide statements, pin the identifier column with `sticky: true` on it so the
+row label stays visible while you scroll the figures horizontally:
+
+```jsx
+{ id: "code", header: "Code", accessor: "code", sticky: true }
+```
+
+---
+
+## Responsive & horizontal scrolling
+
+The grid is **full-width** and lives inside a rounded frame that scrolls
+horizontally when the columns are wider than the container — the standard
+strategy for wide financial tables on narrow screens. Cells default to
+`whitespace-nowrap`; give the columns `minWidth` so they don't squash.
+
+Opt into the synced library `Scrollbar` under the grid with `showScrollbar`:
+
+```jsx
+<DataTable columns={wideColumns} data={rows} showScrollbar />
+```
+
+<Canvas of={DataTableStories.WideWithScrollbar} />
+
+The scrollbar stays in sync with native scrolling (wheel / trackpad / drag) and
+disables itself when there's nothing to scroll. It re-measures on data changes,
+window resize, and web-font load, so it never gets stuck "disabled" after a
+reflow.
+
+---
+
+## States
+
+**Loading** — show a skeleton instead of rows (`skeletonRows` controls the
+count):
+
+```jsx
+<DataTable columns={columns} data={[]} loading skeletonRows={5} />
+```
+
+<Canvas of={DataTableStories.Loading} />
+
+**Empty** — a message when `data` is empty:
+
+```jsx
+<DataTable columns={columns} data={[]} emptyMessage="No transactions for this period." />
+```
+
+<Canvas of={DataTableStories.Empty} />
+
+---
+
+## Density
+
+`density="compact"` tightens row padding for dense data screens.
+
+<Canvas of={DataTableStories.CompactDensity} />
+
+---
+
+## Toolbar (filters)
+
+The `toolbar` slot renders above the grid, right-aligned — drop your filter chips
+or actions in here.
+
+```jsx
+<DataTable
+  columns={columns}
+  data={rows}
+  toolbar={
+    <>
+      <FilterChip>Department</FilterChip>
+      <FilterChip>Period</FilterChip>
+    </>
+  }
+/>
+```
+
+---
+
+## Pagination
+
+`DataTable` renders the rows you give it — pair it with `Pagination` and slice
+the data yourself:
+
+```jsx
+const PAGE_SIZE = 10;
+const [page, setPage] = useState(1);
+const pageCount = Math.ceil(rows.length / PAGE_SIZE);
+const slice = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+<>
+  <DataTable columns={columns} data={slice} getRowId={(r) => r.id} />
+  <Pagination count={pageCount} page={page} onPageChange={setPage} />
+</>;
+```
+
+<Canvas of={DataTableStories.WithPagination} />
+
+---
+
+## Row interaction
+
+Pass `onRowClick` to make rows focusable and clickable (mouse **and**
+`Enter`/`Space`). Style rows conditionally with `rowClassName`.
+
+```jsx
+<DataTable
+  columns={columns}
+  data={rows}
+  onRowClick={(row) => navigate(`/ledger/${row.code}`)}
+  rowClassName={(row) => (row.status === "danger" ? "bg-red-50" : "")}
+/>
+```
+
+---
+
+## Props
+
+### `DataTable<T>`
+
+| Prop            | Type                                        | Default         | Notes                                             |
+| --------------- | ------------------------------------------- | --------------- | ------------------------------------------------- |
+| `columns`       | `DataTableColumn<T>[]`                       | —               | Column definitions (required).                    |
+| `data`          | `T[]`                                        | —               | Row data (required).                              |
+| `getRowId`      | `(row, i) => string \| number`              | row index       | Stable React key per row.                         |
+| `sort`          | `{ columnId, direction } \| null`           | —               | Controlled sort. Pair with `onSortChange`.        |
+| `defaultSort`   | `{ columnId, direction } \| null`           | `null`          | Uncontrolled initial sort.                        |
+| `onSortChange`  | `(sort \| null) => void`                    | —               | Fires when a header toggles.                      |
+| `manualSort`    | boolean                                      | `false`         | Skip internal sorting (server-side).              |
+| `stickyHeader`  | boolean                                      | `false`         | Keep the header in view (needs `maxHeight`).      |
+| `maxHeight`     | number \| string                            | —               | Cap body height → vertical scroll.                |
+| `showScrollbar` | boolean                                      | `false`         | Render the synced library `Scrollbar`.            |
+| `density`       | `"comfortable" \| "compact"`                 | `"comfortable"` | Row padding.                                      |
+| `toolbar`       | node                                         | —               | Right-aligned slot above the grid.                |
+| `caption`       | node                                         | —               | `<caption>` above the grid.                       |
+| `loading`       | boolean                                      | `false`         | Show a skeleton.                                  |
+| `skeletonRows`  | number                                       | `5`             | Skeleton row count.                               |
+| `emptyMessage`  | node                                         | `"No data"`     | Shown when `data` is empty.                       |
+| `onRowClick`    | `(row, i) => void`                           | —               | Makes rows interactive.                           |
+| `rowClassName`  | string \| `(row, i) => string`               | —               | Extra classes per row.                            |
+| `className`     | string                                       | —               | Outer wrapper.                                    |
+| `tableClassName`| string                                       | —               | The `<table>`.                                    |
+| `aria-label`    | string                                       | —               | Accessible name for the grid.                     |
+
+### `DataTableColumn<T>`
+
+| Field            | Type                                  | Default  | Notes                                          |
+| ---------------- | ------------------------------------- | -------- | ---------------------------------------------- |
+| `id`             | string                                | —        | Stable id — sort + React key.                  |
+| `header`         | node                                  | —        | Header content.                                |
+| `accessor`       | `keyof T \| (row) => unknown`         | —        | Value for display fallback + sorting.          |
+| `cell`           | `(row, i) => node`                    | accessor | Custom cell render.                            |
+| `align`          | `"left" \| "center" \| "right"`       | `"left"` | Header + body alignment.                       |
+| `sortable`       | boolean                               | `false`  | Click-to-sort.                                 |
+| `sortFn`         | `(a, b) => number`                    | smart    | Custom ascending comparator.                   |
+| `footer`         | node                                  | —        | `<tfoot>` cell.                                |
+| `sticky`         | boolean                               | `false`  | Pin column to the left.                        |
+| `width`          | number \| string                      | —        | Fixed width (number → px).                     |
+| `minWidth`       | number \| string                      | —        | Minimum width.                                 |
+| `wrap`           | boolean                               | `false`  | Allow text wrapping.                           |
+| `headerClassName`| string                                | —        | Extra header-cell classes.                     |
+| `cellClassName`  | string \| `(row, i) => string`         | —        | Extra body-cell classes.                       |
+
+---
+
+## Accessibility
+
+- Renders a real `<table>` with `<thead>`/`<tbody>`/`<tfoot>`, `scope="col"`
+  headers, and a `<caption>` when `caption` is set. Pass `aria-label` (or
+  `caption`) to name the grid.
+- Sortable headers are `<button>`s inside the `<th>` and expose
+  `aria-sort="ascending" | "descending" | "none"`.
+- With `onRowClick`, rows become `tabIndex={0}` and respond to `Enter`/`Space`.
+- Decorative sort glyphs are `aria-hidden`.
+
+---
+
+## Usage best practices
+
+- **Always pass `getRowId`.** Stable keys keep selection, focus and animations
+  correct across sorting and paging.
+- **Right-align numbers, left-align text.** It makes columns of figures scan
+  cleanly and is the convention for financial statements.
+- **Format in `cell`, sort on `accessor`.** Keep the raw number in `accessor` so
+  sorting stays numeric; render the formatted currency in `cell`.
+- **Pin the identifier column** (`sticky`) on wide tables so the row label stays
+  visible while figures scroll.
+- **Page large datasets** with `Pagination` rather than rendering thousands of
+  rows; the table renders exactly the rows you pass.
+- **Reach for `manualSort`** once sorting/paging moves to the server — let the
+  backend order the data and use the table purely for presentation.

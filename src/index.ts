@@ -52,6 +52,24 @@ export type { BadgeProps, BadgeVariant } from "./components/ui/Badge";
 export { Toggle, toggleVariants } from "./components/ui/Toggle";
 export type { ToggleProps } from "./components/ui/Toggle";
 
+export { Scrollbar } from "./components/ui/Scrollbar";
+export type { ScrollbarProps } from "./components/ui/Scrollbar";
+
+export { Pagination, paginationRange } from "./components/ui/Pagination";
+export type {
+  PaginationProps,
+  PaginationItem,
+} from "./components/ui/Pagination";
+
+export { DataTable } from "./components/ui/DataTable";
+export type {
+  DataTableProps,
+  DataTableColumn,
+  DataTableAlign,
+  DataTableSort,
+  SortDirection,
+} from "./components/ui/DataTable";
+
 export {
   SelectionPill,
   selectionPillVariants,
