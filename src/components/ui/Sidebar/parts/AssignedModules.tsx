@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import { CaretRight, X } from "@phosphor-icons/react";
 import { cn } from "../../../../lib/cn";
 import { HoverPillTip } from "../../HoverPill";
 import { MODULES, type ModuleDef, type ModuleId } from "../modules";
+import { NoModuleIllustration } from "./NoModuleIllustration";
 
 /* -------------------------------------------------------------------------- */
 /* Active (large) module card                                                 */
@@ -101,7 +102,8 @@ export function InactiveModuleCard({ module, onClick, className }: ModuleCardPro
 
 interface OverflowPopoverProps {
   modules: ModuleDef[];
-  activeId: ModuleId;
+  /** The active module, or `null` when nothing is selected yet. */
+  activeId: ModuleId | null;
   onSelect: (id: ModuleId) => void;
   onClose: () => void;
   anchorRef: React.RefObject<HTMLButtonElement>;
@@ -203,6 +205,46 @@ function OverflowPopover({
 }
 
 /* -------------------------------------------------------------------------- */
+/* Empty state — shown when no module is selected                             */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The "no module selected" empty state: illustration + prompt + a
+ * "Select Module" pill. The button forwards a ref so the module-picker
+ * popover can anchor to it (and so outside-clicks don't immediately
+ * close the popover).
+ */
+const NoModuleSelected = forwardRef<
+  HTMLButtonElement,
+  { onSelect?: () => void; expanded?: boolean }
+>(({ onSelect, expanded }, ref) => {
+  return (
+    <div className="flex flex-col items-center gap-3 self-stretch rounded-2xl bg-purple-50 px-4 py-5">
+      <NoModuleIllustration className="h-[6.5rem] w-auto" />
+      <p className="text-h5 font-semibold text-heading">No module selected</p>
+      <button
+        ref={ref}
+        type="button"
+        onClick={onSelect}
+        aria-expanded={expanded}
+        className={cn(
+          "flex items-center justify-center gap-2 rounded-full border border-purple-700 bg-white py-2.5 pr-2.5 pl-5",
+          "text-purple-700 transition-colors hover:bg-purple-50",
+          "focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2",
+        )}
+      >
+        <span className="text-h6 font-semibold">Select Module</span>
+        <span className="flex h-5 w-5 items-center justify-center rounded-full border border-purple-700">
+          <CaretRight size={12} weight="bold" />
+        </span>
+      </button>
+    </div>
+  );
+});
+
+NoModuleSelected.displayName = "NoModuleSelected";
+
+/* -------------------------------------------------------------------------- */
 /* AssignedModules — title + active + (up to 3) inactive + overflow chevron   */
 /* -------------------------------------------------------------------------- */
 
@@ -214,8 +256,12 @@ export interface AssignedModulesProps {
    * triggers the right-side overflow popover.
    */
   assigned: ModuleId[];
-  /** Currently active module id. */
-  activeId: ModuleId;
+  /**
+   * Currently active module id, or `null`/`undefined` when none is
+   * selected — the section then renders the "No module selected" empty
+   * state, whose "Select Module" button opens the module picker.
+   */
+  activeId: ModuleId | null;
   /** Fires when the user clicks a different module — switch your app. */
   onChange?: (id: ModuleId) => void;
   /**
@@ -236,6 +282,11 @@ export function AssignedModules({
 }: AssignedModulesProps) {
   const [open, setOpen] = useState(false);
   const overflowRef = useRef<HTMLButtonElement>(null);
+  const selectRef = useRef<HTMLButtonElement>(null);
+
+  // No module selected → render the empty state. Its "Select Module" button
+  // opens the same picker popover used for module overflow.
+  const active = activeId != null ? MODULES[activeId] : undefined;
 
   const inactive = assigned.filter((id) => id !== activeId).map((id) => MODULES[id]);
   // Per Figma: inactive thumbnails sit in a 2-column grid (up to 4 visible).
@@ -244,56 +295,62 @@ export function AssignedModules({
   const inline = inactive.slice(0, maxInlineInactive);
   const hasOverflow = inactive.length > maxInlineInactive;
 
-  const active = MODULES[activeId];
-
   return (
     <div className="relative flex flex-col gap-2 self-stretch">
       <h3 className="text-heading text-base font-semibold leading-tight">
         Assigned Modules
       </h3>
 
-      <div className="flex p-2 justify-between items-center gap-3 self-stretch rounded-2xl bg-purple-50">
-        {/* `key={activeId}` remounts the card on every switch, replaying the
-            fade-and-scale enter animation so the module change reads as a
-            smooth transition rather than an instant swap. */}
-        <ActiveModuleCard
-          key={activeId}
-          module={active}
-          className="animate-module-card-in motion-reduce:animate-none"
-        />
+      {active ? (
+        <div className="flex p-2 justify-between items-center gap-3 self-stretch rounded-2xl bg-purple-50">
+          {/* `key={activeId}` remounts the card on every switch, replaying the
+              fade-and-scale enter animation so the module change reads as a
+              smooth transition rather than an instant swap. */}
+          <ActiveModuleCard
+            key={activeId}
+            module={active}
+            className="animate-module-card-in motion-reduce:animate-none"
+          />
 
-        {/* 2×2 grid: up to 3 inactive thumbnails + (when applicable) the
-            circular overflow chevron in the 4th slot. Keying each thumbnail by
-            `activeId`+id re-animates the grid as it reshuffles on a switch. */}
-        <div className="grid grid-cols-2 gap-1.5">
-          {inline.map((m) => (
-            <InactiveModuleCard
-              key={`${activeId}-${m.id}`}
-              module={m}
-              onClick={() => onChange?.(m.id)}
-              className="animate-module-thumb-in motion-reduce:animate-none"
-            />
-          ))}
+          {/* 2×2 grid: up to 3 inactive thumbnails + (when applicable) the
+              circular overflow chevron in the 4th slot. Keying each thumbnail by
+              `activeId`+id re-animates the grid as it reshuffles on a switch. */}
+          <div className="grid grid-cols-2 gap-1.5">
+            {inline.map((m) => (
+              <InactiveModuleCard
+                key={`${activeId}-${m.id}`}
+                module={m}
+                onClick={() => onChange?.(m.id)}
+                className="animate-module-thumb-in motion-reduce:animate-none"
+              />
+            ))}
 
-          {hasOverflow && (
-            <button
-              ref={overflowRef}
-              type="button"
-              onClick={() => setOpen((v) => !v)}
-              className={cn(
-                "flex w-10 h-10 items-center justify-center shrink-0",
-                "rounded-full border border-grey-400 bg-white text-heading",
-                "transition-colors hover:bg-grey-100",
-                "focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500",
-              )}
-              aria-label={`Show ${inactive.length - maxInlineInactive} more modules`}
-              aria-expanded={open}
-            >
-              <CaretRight size={16} weight="bold" />
-            </button>
-          )}
+            {hasOverflow && (
+              <button
+                ref={overflowRef}
+                type="button"
+                onClick={() => setOpen((v) => !v)}
+                className={cn(
+                  "flex w-10 h-10 items-center justify-center shrink-0",
+                  "rounded-full border border-grey-400 bg-white text-heading",
+                  "transition-colors hover:bg-grey-100",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500",
+                )}
+                aria-label={`Show ${inactive.length - maxInlineInactive} more modules`}
+                aria-expanded={open}
+              >
+                <CaretRight size={16} weight="bold" />
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <NoModuleSelected
+          ref={selectRef}
+          expanded={open}
+          onSelect={() => setOpen((v) => !v)}
+        />
+      )}
 
       {open && (
         <OverflowPopover
@@ -301,7 +358,7 @@ export function AssignedModules({
           activeId={activeId}
           onSelect={(id) => onChange?.(id)}
           onClose={() => setOpen(false)}
-          anchorRef={overflowRef}
+          anchorRef={active ? overflowRef : selectRef}
         />
       )}
     </div>

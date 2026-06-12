@@ -523,9 +523,29 @@ function CollapsedActiveModuleCard({
   moduleId,
   onClick,
 }: {
-  moduleId: ModuleId;
+  moduleId: ModuleId | null;
   onClick?: () => void;
 }) {
+  // No module selected → a dashed placeholder square that expands the rail.
+  if (moduleId == null) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        title="Select module"
+        aria-label="Select a module"
+        className={cn(
+          "flex w-10 h-10 items-center justify-center shrink-0",
+          "rounded-xl border border-dashed border-purple-300 bg-white text-purple-700",
+          "transition-colors hover:bg-purple-50",
+          "focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500",
+        )}
+      >
+        <RowsPlusTop size={16} weight="bold" />
+      </button>
+    );
+  }
+
   const { Icon, label, gradient } = MODULES[moduleId];
   return (
     <button

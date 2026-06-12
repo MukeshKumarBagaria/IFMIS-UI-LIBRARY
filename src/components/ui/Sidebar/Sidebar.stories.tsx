@@ -214,3 +214,34 @@ function CollapsedDemo() {
 export const Collapsed: Story = {
   render: () => <CollapsedDemo />,
 };
+
+/**
+ * No module selected yet. Passing `activeId: null` swaps the assigned-modules
+ * section for the empty state — an illustration, a prompt, and a "Select
+ * Module" button that opens the module picker. Pick one and the normal active
+ * card takes over.
+ */
+function NoModuleDemo() {
+  const [activeModule, setActiveModule] = useState<ModuleId | null>(null);
+  const [activeMenu, setActiveMenu] = useState("hrms.exit");
+  const [search, setSearch] = useState("");
+
+  return (
+    <div className="bg-grey-50 min-h-screen p-6">
+      <Sidebar
+        search={{ value: search, onChange: setSearch }}
+        worklist={{ count: 12, onClick: () => alert("open worklist") }}
+        modules={{
+          assigned: ASSIGNED,
+          activeId: activeModule,
+          onChange: setActiveModule,
+        }}
+        menu={{ items: MENU, activeId: activeMenu, onSelect: setActiveMenu }}
+      />
+    </div>
+  );
+}
+
+export const NoModuleSelected: Story = {
+  render: () => <NoModuleDemo />,
+};

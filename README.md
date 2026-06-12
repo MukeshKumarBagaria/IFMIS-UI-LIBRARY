@@ -21,36 +21,46 @@ trivial to adopt**.
 
 ## 1. Install
 
-`@ifmis/ui` is published to our **private GitLab Package Registry**, not the
-public npm registry. Two one-time steps for any consuming project.
+`@ifmis/ui` is served from the **internal IFMIS npm registry (Verdaccio)** at
+**`http://172.18.210.110:6379/`**. That registry does two jobs at once:
 
-### 1.1 Wire the `@ifmis` scope to the registry
+- it **hosts `@ifmis/ui`**, and
+- it **proxies the public npm registry**, so `react`, `@phosphor-icons/react`,
+  and every other dependency come from the same place.
+
+That means a consuming project needs **one registry**, and you must be on the
+**IFMIS network / VPN** to reach it. You do **not** need separate public-internet
+access — Verdaccio fetches and caches public packages for you.
+
+### 1.1 Point your project at the registry
 
 Create an `.npmrc` at the **root of your consuming project**:
 
 ```ini
-@ifmis:registry=http://172.18.210.110/api/v4/projects/45/packages/npm/
-//172.18.210.110/api/v4/projects/45/packages/npm/:_authToken=${IFMIS_NPM_TOKEN}
+registry=http://172.18.210.110:6379/
+//172.18.210.110:6379/:_authToken=${IFMIS_NPM_TOKEN}
 ```
 
-- This maps **only** the `@ifmis` scope to GitLab — every other package still
-  comes from your normal registry.
-- The `${IFMIS_NPM_TOKEN}` is expanded from an environment variable, so **the
-  token is never committed**. Export it in your shell / CI:
+> **`registry=`** (not `@ifmis:registry=`) is deliberate — it routes **all**
+> installs through Verdaccio, which is what lets one URL serve both `@ifmis/ui`
+> and its public dependencies.
 
-  ```bash
-  # macOS/Linux
-  export IFMIS_NPM_TOKEN=<your read token>
-  ```
-  ```powershell
-  # Windows PowerShell
-  $env:IFMIS_NPM_TOKEN = "<your read token>"
-  ```
+Set the token once (don't paste the literal token into a committed file):
 
-- The token is a GitLab token with **read** access to the package registry —
-  ask a maintainer for a *Deploy token* (`read_package_registry` scope) or a
-  project access token with `read_api`. **Do not** use a personal `api` token in
-  shared/CI environments.
+```bash
+# macOS/Linux
+export IFMIS_NPM_TOKEN=<your token>
+```
+```powershell
+# Windows PowerShell — set it permanently for your user:
+[Environment]::SetEnvironmentVariable("IFMIS_NPM_TOKEN", "<your token>", "User")
+# (open a new terminal afterwards)
+```
+
+- **Where the token comes from:** ask a maintainer for an internal registry
+  token. **Never commit a real token** — `.npmrc` with a literal token must be
+  in `.gitignore`; the `${IFMIS_NPM_TOKEN}` form above is safe to commit because
+  the secret lives in your environment, not the file.
 
 ### 1.2 Install
 
@@ -220,12 +230,13 @@ npm install @ifmis/ui@latest  # move to the newest
 
 ## 8. Troubleshooting installs
 
-| Symptom                                    | Cause                                            | Fix                                                              |
-| ------------------------------------------ | ------------------------------------------------ | --------------------------------------------------------------- |
-| `npm install` → `401 Unauthorized`         | Token missing / wrong scope / not exported.      | Set `IFMIS_NPM_TOKEN` to a token with registry **read** access. |
-| `npm install` → `404 Not Found`            | `.npmrc` scope/registry line wrong.              | Copy §1.1 exactly; confirm the `@ifmis` scope line.             |
-| `ETIMEDOUT` to `172.18.210.110`            | No network route to the GitLab host.             | You must be on the IFMIS network/VPN to reach the registry.     |
-| Styles look unthemed / default browser CSS | `styles.css` not imported, or no `ThemeProvider`.| Import `@ifmis/ui/styles.css` once; wrap the app in the provider.|
+| Symptom                                       | Cause                                              | Fix                                                                 |
+| --------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------- |
+| `npm install` → `401 Unauthorized`            | Token missing / expired / not exported.            | Set `IFMIS_NPM_TOKEN` to a valid registry token; open a new shell.  |
+| `npm install` → `404 Not Found`               | `.npmrc` `registry=` line wrong/missing.           | Copy §1.1 exactly — it must be `registry=` (not `@ifmis:registry=`).|
+| `ETIMEDOUT` to `172.18.210.110:6379`          | Not on the IFMIS network.                          | Connect to the IFMIS network / VPN, then retry.                     |
+| A **public** dep (e.g. `react`) fails to install | The registry isn't proxying public npm for you.  | Confirm `.npmrc` uses `registry=` (routes *all* installs via the registry); raise with a maintainer if it persists. |
+| Styles look unthemed / default browser CSS    | `styles.css` not imported, or no `ThemeProvider`.  | Import `@ifmis/ui/styles.css` once; wrap the app in the provider.   |
 
 ---
 
@@ -278,5 +289,5 @@ ComponentName/
 
 ## 10. License
 
-`UNLICENSED` — internal IFMIS use only. Published to a private GitLab registry;
-the source is not distributed externally.
+`UNLICENSED` — internal IFMIS use only. Published to the private internal npm
+registry; the source is not distributed externally.

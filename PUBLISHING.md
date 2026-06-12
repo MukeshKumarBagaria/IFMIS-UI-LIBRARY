@@ -4,11 +4,13 @@ This is the **single source of truth** for everyone who develops, releases, or
 maintains `@ifmis/ui`. If you just landed on this project, read sections 1–4
 before touching anything, then 6–8 before you cut a release.
 
-> **Status (kept current):** Releases are **published manually** from a
-> maintainer's workstation. The tag-driven GitLab CI pipeline is **written but
-> not yet operational** because the GitLab host is air-gapped — see
-> [§9](#9-the-automated-pipeline-future-goal). The first release, `v0.1.0`, went
-> out on **2026-06-08** via the manual flow in [§7](#7-cutting-a-release-the-manual-flow-current).
+> **Status (kept current):** Releases are **published manually** to the internal
+> **Verdaccio** registry (`http://172.18.210.110:6379/`) from a maintainer's
+> workstation — see [§7](#7-cutting-a-release-the-manual-flow-current). The
+> tag-driven GitLab CI pipeline is **written but not yet operational** because the
+> GitLab host is air-gapped ([§9](#9-the-automated-pipeline-future-goal)). History:
+> `v0.1.0` first went to the legacy GitLab registry on **2026-06-08**; current
+> releases (now at `0.1.3`) go to Verdaccio.
 
 ## Contents
 
@@ -31,26 +33,34 @@ before touching anything, then 6–8 before you cut a release.
 
 ## 1. The setup at a glance
 
+We publish to **and** install from one internal registry: a **Verdaccio** server
+on the GitLab VM. Verdaccio both **hosts `@ifmis/ui`** and **proxies the public
+npm registry**, so consumers get the library and its dependencies from a single
+URL over the IFMIS network.
+
 | Thing                   | Value                                                                 |
 | ----------------------- | --------------------------------------------------------------------- |
-| Package name            | `@ifmis/ui` (scoped, **restricted**)                                   |
-| GitLab host             | `http://172.18.210.110` (self-hosted, **HTTP**, on the internal LAN)   |
-| Project path            | `ifmis_ng/uiuxlib`                                                      |
-| **Project ID**          | **`45`** (Settings → General)                                          |
-| Package registry URL    | `http://172.18.210.110/api/v4/projects/45/packages/npm/`               |
+| Package name            | `@ifmis/ui` (scoped)                                                   |
+| **Registry (publish + install)** | **`http://172.18.210.110:6379/`** (Verdaccio)                |
+| Git project (source)    | `ifmis_ng/uiuxlib` at `http://172.18.210.110` (self-hosted GitLab)     |
 | Build output            | `dist/` only (`package.json#files = ["dist"]`)                         |
 | Git remotes             | `gitlab` → the GitLab repo; `origin` → a GitHub backup mirror          |
+
+> **Legacy:** the GitLab project-45 **Package Registry**
+> (`…/api/v4/projects/45/packages/npm/`) was the original target and still holds
+> `0.1.0`. It is **retired** — all publishing and installing now goes through
+> Verdaccio. Don't publish there anymore.
 
 ### What's already wired in the repo (don't re-do these)
 
 - **`package.json`**
-  - `name`, `version`, `repository`, `homepage`, `bugs` → all point at `172.18.210.110/ifmis_ng/uiuxlib`.
-  - `publishConfig.@ifmis:registry` → the project-45 registry. **This is what
-    makes `npm publish` target GitLab instead of public npm.**
-  - `publishConfig.access = "restricted"`, `files = ["dist"]`.
+  - `name`, `version`, `repository`, `homepage`, `bugs` → point at `172.18.210.110/ifmis_ng/uiuxlib`.
+  - `publishConfig.registry` → **`http://172.18.210.110:6379/`**. **This is what
+    makes `npm publish` target Verdaccio instead of public npm.**
+  - `files = ["dist"]`.
   - `exports` map: `.` (components), `./icons`, `./styles.css`.
-- **`.npmrc`** (committed, **no token**) — maps the `@ifmis` scope to the
-  project-45 registry so a stray `npm publish` can never hit public npm.
+- **`.npmrc`** (committed, **no token**) — sets `registry=` (and `@ifmis:registry=`)
+  to the Verdaccio URL so a stray `npm publish` can never hit public npm.
 - **`.gitlab-ci.yml`** — the future pipeline (see [§9](#9-the-automated-pipeline-future-goal)).
 - **`.gitlab/CODEOWNERS`**, **`.gitlab/merge_request_templates/default.md`**.
 
@@ -223,23 +233,20 @@ A released block looks like this (note the date, `YYYY-MM-DD`):
 
 > Until CI is unblocked ([§9](#9-the-automated-pipeline-future-goal)), a
 > maintainer publishes by hand from a workstation that is **on the IFMIS network**
-> (so it can reach `172.18.210.110`) **and** can reach public npm (so `npm install`
-> for deps works). Windows examples below; macOS/Linux is identical apart from
-> the env-var syntax.
+> (so it can reach the Verdaccio registry at `172.18.210.110:6379`). Verdaccio
+> proxies public npm, so you do **not** need separate public-internet access for
+> `npm install`. Windows examples below; macOS/Linux differs only in env-var syntax.
 
-### One-time per workstation: store a publish token
+### One-time per workstation: log in to Verdaccio
 
-1. In GitLab: **avatar → Edit profile → Access Tokens → Add new token**, scope
-   **`api`**, copy the `glpat-…` value.
-2. Save it into your **user** `~/.npmrc` (npm does this for you — never edit the
-   repo `.npmrc`):
+```bash
+npm login --registry http://172.18.210.110:6379/
+```
 
-   ```powershell
-   npm config set "//172.18.210.110/api/v4/projects/45/packages/npm/:_authToken" "glpat-XXXX"
-   ```
-
-   (`npm config get` on an `_authToken` returns "protected" — that's normal; the
-   value is still saved.)
+Enter your Verdaccio username/password. This writes an auth token for the
+`:6379` registry into your **user** `~/.npmrc` — never put a token in the repo
+`.npmrc`. (`npm config get` on an `_authToken` returns "protected"; that's
+normal — the value is saved.)
 
 ### Every release, in order
 
@@ -272,28 +279,32 @@ git tag -a vX.Y.Z -m "release: vX.Y.Z"
 # 5. Build the publishable artifact.
 npm run build            # produces dist/ (index.js, icons.js, styles.css, *.d.ts)
 
-# 6. Publish to the GitLab registry. NO arguments — publishConfig handles the target.
-npm publish
+# 6. (optional) Inspect exactly what will ship before publishing.
+npm pack --dry-run
 
-# 7. Push the commit and the tag to GitLab.
+# 7. Publish to Verdaccio. publishConfig.registry already points there, so plain
+#    `npm publish` is enough; the explicit flag below just makes the target obvious.
+npm publish --registry http://172.18.210.110:6379/
+
+# 8. Push the commit and the tag to GitLab.
 git push gitlab main --follow-tags
 ```
 
-> **First-release note.** For `v0.1.0` the version already matched `0.1.0`, so we
-> skipped `npm version` and tagged directly (`git tag -a v0.1.0`). Every release
-> after that uses `npm version` as above.
+> **You must bump the version every release.** Verdaccio rejects re-publishing an
+> existing version (`cannot publish over the previously published versions`).
+> Releases so far: `0.1.0` (originally to the legacy GitLab registry) → `0.1.3`
+> on Verdaccio. Step 2 (`npm version`) handles the bump.
 
-> **The tag triggers a pipeline that currently FAILS** at the Docker image-pull
-> step (air-gap). That red pipeline is **expected and harmless** — the package is
-> already published by step 6. If you want to avoid the noise, create the tag
+> **The tag triggers a GitLab pipeline that currently FAILS** at the Docker
+> image-pull step (air-gap). That red pipeline is **expected and harmless** — the
+> package is already published by step 7. To avoid the noise, create the tag
 > locally and don't push it until CI is fixed.
 
 ### Verify & announce
 
-1. GitLab → **Deploy → Package Registry** → the new version is listed.
-2. Sanity-check a consumer can resolve it (from an on-network machine with the
-   read token configured): `npm view @ifmis/ui version`.
-3. Announce in the team channel: version, one-line summary, CHANGELOG link.
+1. Confirm it's live: `npm view @ifmis/ui version --registry http://172.18.210.110:6379/`
+   (or browse the Verdaccio web UI).
+2. Announce in the team channel: version, one-line summary, CHANGELOG link.
 
 ---
 
@@ -313,7 +324,7 @@ Paste this into the release MR / notes:
 - [ ] `npm run build` produced a non-empty `dist/`
 - [ ] `npm publish` succeeded
 - [ ] Tag `vX.Y.Z` matches `package.json` version
-- [ ] Package visible in Deploy → Package Registry
+- [ ] Package visible in Verdaccio (`npm view @ifmis/ui version --registry http://172.18.210.110:6379/`)
 - [ ] Pushed `main --follow-tags`
 - [ ] Announced
 ```
@@ -322,7 +333,7 @@ Paste this into the release MR / notes:
 
 - **Tag ↔ version mismatch.** The tag must be `v` + the exact `package.json`
   version. The future CI enforces this; in the manual flow *you* enforce it.
-- **Never re-publish a version number.** npm/GitLab will reject it, and even if it
+- **Never re-publish a version number.** Verdaccio rejects it, and even if it
   didn't, consumers cache by version. Broken release → publish a new patch and
   deprecate the bad one ([§11](#11-deprecating-yanking--rollback)).
 - **`dist/` is all that ships.** If you add a new entry point, update
@@ -330,7 +341,7 @@ Paste this into the release MR / notes:
   what will be published.
 - **Two majors in one release** hide breakage — surface every breaking change in
   the CHANGELOG with migration notes.
-- **Network.** You must be on the IFMIS LAN/VPN to reach `172.18.210.110`. An
+- **Network.** You must be on the IFMIS LAN/VPN to reach `172.18.210.110:6379`. An
   `ETIMEDOUT` on publish/view means you're off-network, not that the package is broken.
 
 ---
@@ -345,26 +356,24 @@ Paste this into the release MR / notes:
   the tag matches `package.json`, using a `NPM_PUBLISH_TOKEN` CI variable.
 - **`pages`** to deploy Storybook on a tag.
 
-### Why it doesn't work yet
+### Why it doesn't work yet — and what's already solved
 
 The RHEL machine that runs GitLab (`172.18.210.110`) is **IP-whitelisted with no
 general outbound internet**. A GitLab Runner *is* installed and online (Docker
-executor, project-scoped to `uiuxlib`), but jobs fail because:
+executor, project-scoped to `uiuxlib`). Originally two things blocked it; one is
+now solved:
 
-1. The runner can't pull `node:20-alpine` from **Docker Hub** (`registry-1.docker.io` times out).
-2. Even with an image, `npm ci` can't reach the **public npm registry**.
+1. ❌ **Docker image pull** — the runner still can't pull `node:20-alpine` from
+   **Docker Hub** (`registry-1.docker.io` times out). *This is the one remaining blocker.*
+2. ✅ **npm dependencies** — solved by **Verdaccio**. It runs on the same VM and
+   proxies public npm, so a CI job that sets `registry=http://172.18.210.110:6379/`
+   can `npm ci` without public internet.
 
-IP-whitelisting your way out doesn't work — Docker Hub and npm are CDN-backed
-with many rotating IPs.
+### What still needs to be done (platform/network team)
 
-### What needs to be done (platform/network team)
+Only the image source is left. Pick one:
 
-Pick a path and make it real **before** relying on tag-driven releases:
-
-1. **Internal npm mirror** (Nexus/Artifactory) that the host *is* allowed to
-   reach, and set the default registry (in CI) to it so `npm ci` works.
-2. **Container image source without Docker Hub** — either a whitelisted internal
-   container registry, **or** pre-load the image on the runner host:
+1. **Pre-load the image on the runner host** (simplest):
 
    ```bash
    # on an internet-connected machine:
@@ -372,17 +381,23 @@ Pick a path and make it real **before** relying on tag-driven releases:
    # copy node20.tar to the runner host, then:
    docker load -i node20.tar
    ```
-   …and set the runner's `pull_policy = ["if-not-present"]` in
+   …and set `pull_policy = ["if-not-present"]` under `[runners.docker]` in
    `/etc/gitlab-runner/config.toml`.
-3. **Or** host the runner on a machine that has **both** internet and a LAN route
-   to `172.18.210.110`, instead of the locked-down GitLab box.
+2. **A whitelisted internal container registry** the runner can pull from.
+3. **Or** host the runner on a machine with both internet and a LAN route to
+   `172.18.210.110`.
 
-### One code fix to apply when CI is enabled
+### Changes to `.gitlab-ci.yml` when CI is enabled
 
-`.gitlab-ci.yml` builds the publish auth line with `${CI_API_V4_URL#https:}`.
-Because this host is **HTTP**, change it to `${CI_API_V4_URL#http*:}` (strips both
-`http:` and `https:`) — otherwise the npm auth line is malformed and `publish`
-returns `401`.
+The committed pipeline still targets the **legacy GitLab project-45 registry** —
+rewire it to Verdaccio:
+
+- In `before_script`, write `registry=http://172.18.210.110:6379/` into `.npmrc`
+  so both `npm ci` and `npm publish` use Verdaccio.
+- Authenticate with a **Verdaccio** token in a Protected + Masked CI variable, e.g.
+  `//172.18.210.110:6379/:_authToken=${VERDACCIO_TOKEN}`.
+- Delete the old GitLab-registry auth line (`${CI_API_V4_URL#https:}…`) — it's no
+  longer used.
 
 ### How a release works once CI is live
 
@@ -393,9 +408,8 @@ npm version minor -m "release: %s"   # bumps + tags
 git push gitlab main --follow-tags   # tag triggers verify → build → publish → pages
 ```
 
-Set the CI variables first: `NPM_PUBLISH_TOKEN` (publish, scope `api`) and
-`NPM_READ_TOKEN` (read, for consumers), both **Protected + Masked**; and protect
-`main` and `v*` tags (Settings → Repository).
+Set the CI variable first: `VERDACCIO_TOKEN` (a Verdaccio publish token),
+**Protected + Masked**; and protect `main` and `v*` tags (Settings → Repository).
 
 ---
 
@@ -434,10 +448,10 @@ the final — drop the suffix and publish a stable version once validated.
   then deprecate the broken one:
 
   ```bash
-  npm deprecate @ifmis/ui@0.2.1 "Broken — use >=0.2.2, see CHANGELOG"
+  npm deprecate @ifmis/ui@0.2.1 "Broken — use >=0.2.2, see CHANGELOG" --registry http://172.18.210.110:6379/
   ```
-  (Run with your `.npmrc` pointed at the project-45 registry.) Prefer deprecation
-  over deleting a version — deletion gives consumers a mysterious 404.
+  Prefer deprecation over deleting a version — deletion gives consumers a
+  mysterious 404.
 - **Consumer rollback.** `npm install @ifmis/ui@<last-good>`, pin, ship; unpin
   once the library is fixed.
 
@@ -446,13 +460,13 @@ the final — drop the suffix and publish a stable version once validated.
 ## 12. Security: tokens & secrets
 
 - **Never commit a token.** The repo `.npmrc` has the registry URL only. Auth
-  lives in your **user** `~/.npmrc` (via `npm config set`) or, in CI, in a
+  lives in your **user** `~/.npmrc` (written by `npm login`) or, in CI, in a
   **Protected + Masked** variable.
-- **Right scope for the job:** publishing needs **`api`**; consumers need only
-  **read** (a Deploy token with `read_package_registry`, or `read_api`). Don't
-  hand out `api` tokens to consumers.
+- **Least privilege:** give consumers a token that can only **read** from
+  Verdaccio; keep publish-capable tokens with maintainers. Configure who can
+  read/publish each scope in Verdaccio's `config.yaml` (`access` / `publish`).
 - **Rotate on exposure.** If a token is pasted into a chat, ticket, or log,
-  revoke it immediately (Access Tokens / Runners → Reset token) and mint a new one.
+  revoke it immediately and issue a new one.
 - **Token expiry.** Set expirations and calendar a rotation before they lapse, or
   releases silently start failing with `401`.
 
@@ -462,10 +476,11 @@ the final — drop the suffix and publish a stable version once validated.
 
 | Symptom                                                        | Cause                                               | Fix                                                            |
 | ------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------- |
-| `npm publish` → `401 Unauthorized`                            | Token missing/expired/wrong scope.                  | Re-store an `api` token (§7) via `npm config set`.            |
+| `npm publish` → `401 Unauthorized`                            | Not logged in / token expired.                      | `npm login --registry http://172.18.210.110:6379/` (§7).     |
 | `npm publish gitlab` → times out to `registry.npmjs.org`      | Passed a git remote name to npm.                    | Run `npm publish` with **no arguments**.                      |
-| `npm publish`/`view` → `ETIMEDOUT 172.18.210.110`             | Off the IFMIS network.                              | Connect to the LAN/VPN; retry.                                |
-| Publish `400 / version exists`                                | That version is already in the registry.            | Bump to a new version; never reuse a number.                  |
+| `npm publish`/`view` → `ETIMEDOUT 172.18.210.110:6379`        | Off the IFMIS network.                              | Connect to the LAN/VPN; retry.                                |
+| `cannot publish over previously published versions`           | That version already exists in Verdaccio.           | Bump the version (`npm version …`); never reuse a number.     |
+| A public dep won't install in CI/consumer                     | Registry not set to Verdaccio (no npm proxy).       | Ensure `.npmrc` has `registry=http://172.18.210.110:6379/`.  |
 | Published but `dist` is empty/missing files                   | `files`/`exports` regressed.                        | `npm pack --dry-run` before publishing; fix `package.json`.   |
 | `npm version` refuses                                         | Dirty working tree.                                 | Commit/stash first; `npm version` needs a clean tree.         |
 | CI job stuck "pending" forever                                | No runner picks it up (untagged/protected mismatch).| Runner must allow untagged jobs and not be "protected-only".  |
@@ -477,13 +492,15 @@ Add every new failure mode here as it's solved.
 
 ## 14. Glossary
 
-- **`@ifmis` scope** — npm name prefix mapped to the GitLab registry via `.npmrc`.
-- **Package registry** — GitLab's npm-compatible registry, per project
-  (`/api/v4/projects/45/packages/npm/`).
-- **`publishConfig`** — the `package.json` block that pins where `npm publish`
-  sends this package. Independent of git remotes.
-- **Project / personal access token (PAT)** — GitLab token; `api` = publish,
-  `read_api` / Deploy token `read_package_registry` = consume.
+- **`@ifmis` scope** — npm name prefix for our packages; resolved via the
+  Verdaccio registry in `.npmrc`.
+- **Verdaccio** — the internal npm registry at `http://172.18.210.110:6379/`. It
+  hosts `@ifmis/*` **and** proxy-caches the public npm registry, so it's the one
+  registry both publishing and installing use.
+- **`publishConfig`** — the `package.json` block (`registry` → Verdaccio) that
+  pins where `npm publish` sends this package. Independent of git remotes.
+- **Legacy GitLab Package Registry** — the original target
+  (`/api/v4/projects/45/packages/npm/`), now retired; holds only `0.1.0`.
 - **Protected / Masked variable** — CI variable visible only on protected
   refs / redacted from logs. Use both for any token.
 - **Build artifact** — the `dist/` directory (`files: ["dist"]`). The only thing

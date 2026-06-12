@@ -8,6 +8,23 @@ See [PUBLISHING.md](./PUBLISHING.md) for the release process.
 
 ## [Unreleased]
 
+## [0.1.3] — 2026-06-12
+
+### Changed
+
+- Registry/configuration only — **no API, component, or behaviour changes**.
+  Versions `0.1.1`–`0.1.3` were republishes while moving the publish target to the
+  internal **Verdaccio** registry (`.npmrc` / `publishConfig` retargeting). The
+  library code is identical to `0.1.0`. Consumers should use `0.1.3`.
+
+## [0.1.2] — 2026-06-12
+
+_Registry/config bump only — superseded by `0.1.3`._
+
+## [0.1.1] — 2026-06-12
+
+_Registry/config bump only — superseded by `0.1.3`._
+
 ## [0.1.0] — 2026-06-08
 
 ### Added

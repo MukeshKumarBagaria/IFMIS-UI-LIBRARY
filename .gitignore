@@ -4,6 +4,7 @@ storybook-static
 coverage
 .DS_Store
 *.log
+*.tgz
 .env
 .env.local
 .vscode

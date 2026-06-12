@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Sidebar } from "./Sidebar";
 
@@ -31,6 +31,37 @@ describe("Sidebar — module hover pills", () => {
     const onChange = vi.fn();
     render(<Sidebar modules={{ ...MODULES_CONFIG, onChange }} />);
     await userEvent.click(screen.getByRole("button", { name: "HRMS" }));
+    expect(onChange).toHaveBeenCalledWith("hrms");
+  });
+});
+
+describe("Sidebar — no module selected", () => {
+  it("renders the empty state when activeId is null", () => {
+    render(
+      <Sidebar
+        modules={{ assigned: ["deposit", "hrms"], activeId: null }}
+      />,
+    );
+    expect(screen.getByText("No module selected")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /select module/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("opens the module picker and selects a module", async () => {
+    const onChange = vi.fn();
+    render(
+      <Sidebar
+        modules={{ assigned: ["deposit", "hrms"], activeId: null, onChange }}
+      />,
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: /select module/i }),
+    );
+    // The picker dialog lists every assigned module.
+    const picker = screen.getByRole("dialog", { name: /assigned modules/i });
+    await userEvent.click(within(picker).getByRole("button", { name: "HRMS" }));
     expect(onChange).toHaveBeenCalledWith("hrms");
   });
 });
