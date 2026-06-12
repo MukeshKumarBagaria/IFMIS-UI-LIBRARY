@@ -96,7 +96,7 @@
     "vitest": "^2.1.4"
   },
   "publishConfig": {
-    "@ifmis:registry": "http://172.18.210.110/api/v4/projects/45/packages/npm/",
+    "@ifmis:registry": "http://localhost:6379",
     "access": "restricted"
   }
 }
