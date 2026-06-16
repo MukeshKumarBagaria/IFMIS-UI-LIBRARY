@@ -6,56 +6,56 @@ import * as SidebarStories from "./Sidebar.stories";
 # Sidebar
 
 The IFMIS primary navigation rail. One component composes three regions
-(search + worklist, assigned-modules, sub-modules menu) and stays purely
-presentational — every selection is driven by props you own.
+(search + worklist, assigned-modules, sub-modules menu) and stays **purely
+presentational** — every selection is driven by props you own.
 
 > **Rule of thumb:** the Sidebar never talks to the router, never persists
 > the active module, never owns search state. Wire those to your app's
-> store and pass the values down. This is the only way the same Sidebar
-> can ship inside every product without forking.
+> store and pass the values down.
 
 ---
 
 ## Anatomy
 
 ```
-┌──────────────────────────────┐
-│  ┌────────────────────────┐  │   ← top card (rounded, purple border)
-│  │  [ search ]  [ ⇆ ]    │  │     search + collapse button
-│  │  [ 💼 Worklist     12▸]│  │     worklist pill
-│  └────────────────────────┘  │
-│                              │
-│  Assigned Modules            │   ← section title
-│  ┌──────┬──┬──┐  ⊙           │     active card + 2×2 inactive grid + overflow
-│  │ HRMS │··│··│              │
-│  └──────┴──┴──┘              │
-│                              │
-│  Sub-Modules                 │   ← section title
-│  ┌──────────────────┐        │
-│  │ Dashboard        │        │
-│  │ HRMS           ▸ │ ─────→ │   ← clicking opens a right-side card
-│  │ Vouchers   12  ▸ │        │
-│  └──────────────────┘        │
-└──────────────────────────────┘
+┌───────────────────────────────────┐
+│  ┌─────────────────────────────┐  │  ← top card (rounded, purple border)
+│  │  [ 🔍 Search menu... ] [⇆] │  │    search input + collapse button
+│  │  [ 💼 Worklist        12 ▸ ]│  │    worklist pill (optional)
+│  └─────────────────────────────┘  │
+│                                   │
+│  ┌─────────────────────────────┐  │  ← body card (rounded, purple border)
+│  │  Assigned Modules           │  │    section title
+│  │  ┌──────┐  ┌──┐ ┌──┐       │  │    active card (large) + 2×2 inactive grid
+│  │  │ HRMS │  │··│ │··│       │  │    + overflow chevron when > maxInlineInactive
+│  │  └──────┘  └──┘ └──┘  [▸] │  │
+│  │─────────────────────────────│  │
+│  │  Sub-Modules                │  │    section title (customisable via menu.title)
+│  │  ┌──────────────────────┐   │  │
+│  │  │ Dashboard            │   │  │    leaf row
+│  │  │ HRMS              ▸  │ ──┼──┼──→ right-side card (cascades for nesting)
+│  │  │ Vouchers     [12] ▸  │   │  │    badge shown when MenuNode.badge is set
+│  │  └──────────────────────┘   │  │
+│  └─────────────────────────────┘  │
+│                                   │
+│  [footer — any ReactNode]         │  ← optional footer slot
+└───────────────────────────────────┘
 ```
 
-| Region              | Component                | Notes                                              |
-| ------------------- | ------------------------ | -------------------------------------------------- |
-| Frame               | `Sidebar`                | 279px column, gap-6                                |
-| Search              | `SidebarSearch`          | Pill input, controlled                             |
-| Collapse            | `SidebarCollapseButton`  | Circular purple button                             |
-| Worklist            | `WorklistButton`         | Orange pill + optional count badge                 |
-| Modules section     | `AssignedModules`        | Active card + 2×2 inactive grid + overflow popover |
-| Module cards        | `ActiveModuleCard` / `InactiveModuleCard` | Gradients + icons per module        |
-| Menu                | `SidebarMenu`            | Top-level pill rows                                |
-| Submenus            | (internal) `SubmenuCard` | Right-side floating cards, cascading               |
+| Region | Component | Notes |
+|---|---|---|
+| Frame | `Sidebar` | `279px` column, `24px` gap between cards |
+| Search | `SidebarSearch` | Pill input, controlled via `value`/`onChange` |
+| Collapse toggle | `SidebarCollapseButton` | Circular purple button |
+| Worklist pill | `WorklistButton` | Orange pill + optional count badge + custom label |
+| Modules section | `AssignedModules` | Active card + 2×2 inactive grid + overflow popover |
+| Module cards | `ActiveModuleCard` / `InactiveModuleCard` | Gradient + icon per module |
+| Menu | `SidebarMenu` | Top-level pill rows + cascading right-side cards |
+| Submenu cards | *(internal)* `SubmenuCard` | Floating right-side cards, cascade to any depth |
 
 ---
 
 ## Quickstart
-
-> Written in plain JavaScript / JSX — your modules don't need TypeScript.
-> Import the `Sidebar` component and pass plain objects and arrays.
 
 ```jsx
 import { useState } from "react";
@@ -67,7 +67,7 @@ const MENU = [
     id: "hrms",
     label: "HRMS",
     children: [
-      { id: "hrms.exit", label: "Exit Management" },
+      { id: "hrms.exit",  label: "Exit Management" },
       { id: "hrms.leave", label: "Leave Management" },
     ],
   },
@@ -99,15 +99,296 @@ function AppShell() {
 }
 ```
 
-That's the full integration. Three pieces of state, three slots.
+Three pieces of state, three slots. Every slot is optional — omit it to hide that section.
+
+---
+
+## Props reference
+
+### `<Sidebar>` — top-level props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `search` | `SidebarSearchProps` | — | Search input config. Omit to hide the input entirely. |
+| `worklist` | `WorklistButtonProps` | — | Worklist pill config. Omit to hide the pill. |
+| `modules` | `AssignedModulesProps` | — | Modules section config. Omit to hide the section. |
+| `menu` | `SidebarMenuProps` | — | Sub-modules menu config. Omit to hide the section. |
+| `collapsed` | `boolean` | `undefined` | Controlled collapse state. Omit to let the Sidebar self-manage. |
+| `onCollapseToggle` | `() => void` | — | Fired when the collapse circle is clicked. Pair with `collapsed`. |
+| `footer` | `ReactNode` | — | Extra content rendered below the body card. |
+| `className` | `string` | — | Extra CSS class added to the outer `<aside>`. |
+
+---
+
+### `search` — `SidebarSearchProps`
+
+The pill-shaped search input at the top of the rail.
+
+```ts
+interface SidebarSearchProps {
+  value?:       string;                    // controlled value
+  onChange?:    (value: string) => void;   // fires on every keystroke
+  placeholder?: string;                    // default: "Search menu..."
+}
+```
+
+- **Omit** the entire `search` prop to hide the input.
+- The value is **automatically forwarded** to the `menu` so it enters search mode. You can also override by setting `menu.searchValue` explicitly.
+- `placeholder` defaults to `"Search menu..."`.
+
+```jsx
+<Sidebar search={{ value: q, onChange: setQ }} ... />
+<Sidebar search={{ value: q, onChange: setQ, placeholder: "Search HRMS..." }} ... />
+```
+
+---
+
+### `worklist` — `WorklistButtonProps`
+
+The orange pill below the search row.
+
+```ts
+interface WorklistButtonProps {
+  count?:   number;        // badge shown on the right; omit to hide badge
+  onClick?: () => void;    // called when the pill is clicked
+  label?:   string;        // visible label; default: "Worklist"
+}
+```
+
+- **Omit** the entire `worklist` prop to hide the pill.
+- `count` is optional — pass it to show the badge, omit it to hide.
+- `label` defaults to `"Worklist"`.
+
+```jsx
+<Sidebar worklist={{ count: 12, onClick: openWorklist }} ... />
+<Sidebar worklist={{ onClick: openWorklist }} ... />                 // no badge
+<Sidebar worklist={{ label: "Pending Tasks", count: 7, onClick }} ... />  // custom label
+```
+
+---
+
+### `modules` — `AssignedModulesProps`
+
+The assigned-modules section with the active card, inactive thumbnails, and overflow popover.
+
+```ts
+interface AssignedModulesProps {
+  assigned:           ModuleId[];                    // ordered list of assigned module ids
+  activeId:           ModuleId | null;               // selected module, or null → empty state
+  onChange?:          (id: ModuleId) => void;        // called when the user switches modules
+  maxInlineInactive?: number;                        // default: 3
+}
+```
+
+**`assigned`** — Array of `ModuleId` strings. Usually fetched from your backend at sign-in.
+The Sidebar handles any length gracefully:
+- `0` modules → section is still rendered (pass modules only if you have at least one)
+- `1–4` modules → fills the 2×2 grid; no overflow
+- `5+` modules → shows `maxInlineInactive` thumbnails + a `▸` overflow button
+
+**`activeId`** — The currently selected module id, or `null`.
+- When `null`, the section renders the empty state (illustration + "Select Module" button).
+- Setting to `null` is the correct initial state when the user hasn't picked a module yet.
+
+**`onChange`** — Called when the user clicks an inactive thumbnail or selects from the overflow popover.
+
+**`maxInlineInactive`** (default `3`) — How many inactive thumbnails appear inline before the overflow chevron.
+- `3` → 3 thumbnails + overflow button in the 4th 2×2 slot (recommended for most cases)
+- `4` → fills all 4 slots; use when you know users have at most 4 modules
+
+```jsx
+// Server-driven assignment
+const { data: user } = useCurrentUser();
+
+<Sidebar
+  modules={{
+    assigned: user.assignedModules,
+    activeId: user.lastActiveModule,
+    onChange: persistActiveModule,
+  }}
+/>
+```
+
+---
+
+### `menu` — `SidebarMenuProps`
+
+The sub-modules menu with pill rows and cascading right-side cards.
+
+```ts
+interface SidebarMenuProps {
+  title?:               string;                    // default: "Sub-Modules"
+  items:                MenuNode[];                // the menu tree
+  activeId?:            string;                   // currently selected leaf id
+  onSelect?:            (id: string) => void;     // fired when a leaf is clicked
+  searchValue?:         string;                   // switches to search-results view when non-empty
+  searchResultsTitle?:  string;                   // default: "Search results"
+  searchEmptyTitle?:    string;                   // default: "No matches"
+}
+```
+
+**`title`** — Section heading above the menu. Defaults to `"Sub-Modules"`.
+
+**`items`** — Your `MenuNode[]` tree. See [Menu authoring](#menu-authoring) below.
+
+**`activeId`** — The id of the currently active leaf. Set this to your current route.
+A row is highlighted (purple) when its `id` matches `activeId` **or** its submenu card is open.
+
+**`onSelect`** — Called when the user clicks a leaf (a node with no children).
+
+**`searchValue`** — When non-empty the menu switches to a flat search-results view.
+The `<Sidebar>` parent wires this automatically from `search.value` — you only
+need to set it manually when using `<SidebarMenu>` in isolation.
+
+**`searchResultsTitle`** — Heading shown above the results list. Default: `"Search results"`.
+
+**`searchEmptyTitle`** — Heading shown when there are zero results. Default: `"No matches"`.
+
+---
+
+### `collapsed` / `onCollapseToggle`
+
+The Sidebar has two modes: **expanded** (`279px`) and **collapsed** (`120px`).
+
+**Uncontrolled** — omit both props; the Sidebar self-manages the toggle:
+
+```jsx
+<Sidebar ... />  // click the ⇆ circle to collapse/expand; state is internal
+```
+
+**Controlled** — pass both props to persist the state externally:
+
+```jsx
+const [collapsed, setCollapsed] = useLocalStorageState("sidebar.collapsed", false);
+
+<Sidebar
+  collapsed={collapsed}
+  onCollapseToggle={() => setCollapsed((v) => !v)}
+  ...
+/>
+```
+
+In the collapsed rail, every slot mirrors its expanded counterpart:
+- Search icon → expands sidebar and focuses the search input
+- Compact worklist button (icon + optional count)
+- "Assigned Modules" label + active module thumbnail + `▸` expand button
+- Sub-modules toggle (hamburger + chevron)
+
+---
+
+### `footer`
+
+Any `ReactNode` rendered below the body card.
+
+```jsx
+<Sidebar
+  ...
+  footer={
+    <div className="flex items-center gap-3 px-3 py-2 rounded-2xl border bg-white">
+      <Avatar initials="RK" />
+      <div>
+        <p className="font-semibold">Rajesh Kumar</p>
+        <p className="text-xs text-body-secondary">Senior Accountant</p>
+      </div>
+    </div>
+  }
+/>
+```
+
+The footer is not styled by the Sidebar — supply your own layout and classes.
+
+---
+
+## Menu authoring
+
+### `MenuNode` shape
+
+```ts
+interface MenuNode {
+  id:        string;            // stable key — use a route path if you have one
+  label:     string;            // visible text in the row
+  badge?:    string | number;   // optional counter; omit to hide
+  children?: MenuNode[];        // presence makes the row a parent (opens a right-side card)
+}
+```
+
+### Leaves vs. parents
+
+- **Leaf** (`children` absent or empty array) — clicking calls `onSelect(id)`.
+- **Parent** (`children` present) — clicking opens a floating right-side card; the row's id is still passed to `onSelect`.
+
+### Nesting depth
+
+Children can be nested to **unlimited depth**. Each level opens a card to the right of the previous one.
+
+```js
+{ id: "hrms", label: "HRMS", children: [
+  { id: "hrms.pay", label: "Pay Related", children: [
+    { id: "hrms.pay.salary",  label: "Salary"  },
+    { id: "hrms.pay.bonus",   label: "Bonus"   },
+    { id: "hrms.pay.arrears", label: "Arrears" },
+  ]},
+]}
+```
+
+### Badges
+
+Pass a `string` or `number` to `badge` for a counter. The pill colour inverts automatically
+based on the active state (purple-on-white inactive, white-on-purple active).
+
+```js
+{ id: "vouchers", label: "Vouchers", badge: 12, children: [
+  { id: "vouchers.pending", label: "Pending", badge: 8 },
+  { id: "vouchers.approved", label: "Approved" },
+]}
+```
+
+### Active state logic
+
+The **top-level** row is highlighted when:
+- its `id === activeId`, **or**
+- its submenu card is currently open
+
+Deep leaves inside submenu cards are highlighted when their `id === activeId`.
+
+You typically set `activeId` to the **leaf** the user navigated to — nothing else needs to be tracked.
+
+### Tip — use route paths as ids
+
+```js
+{ id: "/hrms/exit-management", label: "Exit Management" }
+```
+
+Then wire `onSelect` to your router and `activeId` to the current pathname:
+
+```jsx
+<Sidebar
+  menu={{
+    items: MENU,
+    activeId: pathname,
+    onSelect: (id) => navigate(id),
+  }}
+/>
+```
+
+---
+
+## Search behaviour
+
+The built-in search uses a **case-insensitive substring match** that walks the entire menu tree:
+- A query matching a **leaf label** → that leaf appears.
+- A query matching a **parent label** → every leaf under that parent appears.
+- Each result shows a breadcrumb of the ancestor path (e.g. `HRMS / Pay Related`).
+- The matched substring is highlighted inside the label.
+
+The search is scoped to the tree you pass in `menu.items` — it never searches across modules.
+When the user switches modules, update `menu.items` to the new module's tree.
 
 ---
 
 ## Wiring patterns
 
 ### 1. Bind selection to your router
-
-`onSelect` is a leaf-id callback — point it at your router and you're done.
 
 ```jsx
 import { useNavigate, useLocation } from "react-router-dom";
@@ -118,31 +399,21 @@ const { pathname } = useLocation();
 <Sidebar
   menu={{
     items: MENU,
-    activeId: pathname,            // use the path as the menu id
+    activeId: pathname,
     onSelect: (id) => navigate(id),
   }}
 />
 ```
 
-Tip: set each `MenuNode.id` to the **route path** (`"/hrms/exit-management"`)
-and the active highlight tracks the URL for free.
+### 2. Switch the menu when the module changes
 
-### 2. Switch the menu when the active module changes
-
-Each module gets its own menu tree. Keep them in a record and look up the
-tree at render time:
+Each module gets its own menu tree. Keep them in a record keyed by `ModuleId`:
 
 ```js
-const HRMS_MENU       = [/* ... */];
-const E_ACCOUNTS_MENU = [/* ... */];
-const BUDGET_MENU     = [/* ... */];
-
-// A plain object keyed by module id.
-export const MENUS = {
+const MENUS = {
   hrms:         HRMS_MENU,
   "e-accounts": E_ACCOUNTS_MENU,
   budget:       BUDGET_MENU,
-  /* ... */
 };
 ```
 
@@ -157,40 +428,48 @@ export const MENUS = {
 />
 ```
 
-This is the recommended layout for products that host several modules
-under one shell.
-
 ### 3. Server-driven module assignment
-
-`assigned` is just an array of module-id strings — fetch the list at
-sign-in and hand it to the Sidebar. The 2×2 grid + overflow popover handle
-any length gracefully (0, 4, 10, anything).
 
 ```jsx
 const { data: user } = useCurrentUser();
 
 <Sidebar
   modules={{
-    assigned: user.assignedModules,   // e.g. ["hrms", "budget", ...]
-    activeId: user.lastActiveModule,
+    assigned: user.assignedModules,   // ModuleId[]
+    activeId: user.lastActiveModule,  // ModuleId | null
     onChange: persistActiveModule,
   }}
 />
 ```
 
-### 4. Collapsing the rail
-
-`Sidebar` is collapsible. By default it owns the state — click the circle
-to toggle. To control it externally (e.g. persist across reloads), pass
-both `collapsed` and `onCollapseToggle`:
+### 4. Persist collapse state across reloads
 
 ```jsx
-const [collapsed, setCollapsed] = useLocalStorageState("sidebar.collapsed", false);
+const [collapsed, setCollapsed] = useState(
+  () => localStorage.getItem("sidebar.collapsed") === "true",
+);
 
 <Sidebar
   collapsed={collapsed}
+  onCollapseToggle={() => {
+    const next = !collapsed;
+    setCollapsed(next);
+    localStorage.setItem("sidebar.collapsed", String(next));
+  }}
+  ...
+/>
+```
+
+### 5. Auto-collapse on small viewports
+
+```jsx
+const isSmall = useMediaQuery("(max-width: 1024px)");
+const [collapsed, setCollapsed] = useState(false);
+
+<Sidebar
+  collapsed={isSmall || collapsed}
   onCollapseToggle={() => setCollapsed((v) => !v)}
-  /* ...rest */
+  ...
 />
 ```
 
@@ -198,128 +477,101 @@ const [collapsed, setCollapsed] = useLocalStorageState("sidebar.collapsed", fals
 
 ## The module catalogue
 
-`MODULES` and `MODULE_LIST` are the canonical source of truth for the
-IFMIS modules (icon + gradient + label). Read from them directly when you
-need the metadata outside the Sidebar — e.g. for breadcrumbs, page
-headers, or a module picker on the landing screen.
+`MODULES` and `MODULE_LIST` are the canonical source of truth for IFMIS module metadata
+(icon, gradient, label, text colour). Use them in product code whenever you need the same
+visuals outside the Sidebar — breadcrumbs, page headers, landing-screen module pickers.
 
 ```jsx
 import { MODULES, MODULE_LIST } from "@ifmis/ui";
 
-const { Icon, label, gradient } = MODULES["hrms"];
+// Look up a single module
+const { Icon, label, gradient, textColor } = MODULES["hrms"];
 
-// Or iterate them all:
-MODULE_LIST.map((m) => <li key={m.id}>{m.label}</li>);
+// Iterate all modules
+MODULE_LIST.map((m) => (
+  <li key={m.id} style={{ background: m.gradient, color: m.textColor }}>
+    <m.Icon size={24} />
+    {m.label}
+  </li>
+));
 ```
 
-> **Do not** redefine module gradients or icons in product code. If the
-> brand changes, this catalogue is the only place to update.
+### Available `ModuleId` values
+
+| id | Label |
+|---|---|
+| `"hrms"` | HRMS |
+| `"e-sanction"` | E-Sanction |
+| `"e-accounts"` | E-Accounts |
+| `"deposit"` | Deposit |
+| `"budget"` | Budget |
+| `"strong-room"` | Strong Room |
+| `"pension"` | Pension |
+| `"receipt"` | Receipt |
+| `"vendor"` | Vendor |
+| `"bsg"` | BSG |
+| `"internal-audit"` | Internal Audit |
+| `"lfa"` | LFA |
+| `"bookkeeping"` | Book Keeping |
+| `"dig"` | DIG |
+| `"cash-management"` | Cash Management |
+| `"purchase-inventory"` | Purchase & Inventory |
+| `"lms-ats"` | LMS \| ATS |
+
+> **Do not** redefine module gradients or icons in product code. If the brand
+> changes, `modules.ts` is the only file to update.
 
 ---
 
-## Menu authoring guide
+## Sub-components — standalone exports
 
-### Shape
+Every part of the Sidebar is individually exported from `@ifmis/ui` for use in
+bespoke layouts:
 
-Each menu item is a plain object — no class or type needed:
-
-```js
-{
-  id: "dashboard",        // required — stable, used by activeId + onSelect
-  label: "Dashboard",     // required — visible text
-  badge: 8,               // optional — counter (string or number)
-  children: [ /* nested items; presence ⇒ row opens a right-side card */ ],
-}
-```
-
-### Depth
-
-Children can be nested **without depth limits**. Top-level rows live
-inside the rail; everything else opens as a right-side card. Cards
-cascade: a row inside a card that itself has children opens *another*
-card to its right.
-
-```js
-{ id: "hrms", label: "HRMS", children: [
-  { id: "hrms.pay", label: "Pay Related", children: [
-    { id: "hrms.pay.salary", label: "Salary" },
-    { id: "hrms.pay.bonus",  label: "Bonus"  },
-  ]},
-]}
-```
-
-### Active state
-
-The top-level row is highlighted when its `id` matches `activeId` **or**
-its submenu card is currently open. Deep leaves highlight inside their
-card when their `id` matches `activeId`.
-
-You typically set `activeId` to the **leaf** the user navigated to —
-nothing else needs to be tracked.
-
-### Badges
-
-Pass a `string` or `number` to `MenuNode.badge` for a counter. The
-component picks the right colour for active vs. inactive automatically.
+| Export | Props | Use when |
+|---|---|---|
+| `SidebarSearch` | `value`, `onChange`, `placeholder` | Embedding the search pill in a custom header |
+| `SidebarCollapseButton` | `collapsed`, `onClick` | Custom app-shell that manages collapse outside a full Sidebar |
+| `WorklistButton` | `count`, `onClick`, `label` | Placing the worklist pill in a toolbar or top bar |
+| `AssignedModules` | `assigned`, `activeId`, `onChange`, `maxInlineInactive` | Module picker on a landing or settings screen |
+| `SidebarMenu` | `title`, `items`, `activeId`, `onSelect`, `searchValue`, `searchResultsTitle`, `searchEmptyTitle` | Embedding the menu tree without the full Sidebar frame |
+| `MODULES` | — | Reading icon/gradient metadata in page headers, breadcrumbs |
+| `MODULE_LIST` | — | Iterating all modules (e.g. a landing-screen module grid) |
 
 ---
 
 ## Accessibility
 
 - The Sidebar is wrapped in `<aside aria-label="Primary navigation">`.
-- Submenu rows declare `role="menuitem"` and the cards declare
-  `role="menu"`.
+- The collapsed rail uses `aria-label="Primary navigation (collapsed)"`.
+- Submenu rows carry `role="menuitem"` and cards carry `role="menu"`.
 - Submenu triggers expose `aria-expanded` and `aria-haspopup="menu"`.
-- All interactive elements are reachable via Tab and operable via
-  Enter / Space.
-- `Escape` closes the currently open submenu card.
+- All interactive elements are focusable via Tab and operable via Enter / Space.
+- `Escape` closes the currently open submenu card (both in expanded and collapsed states).
 - The active leaf carries `aria-current="page"`.
+- The collapse button exposes `aria-label="Collapse sidebar"` / `"Expand sidebar"` and `aria-pressed`.
+- Inactive module thumbnails carry an `aria-label` with the module name.
+- The overflow popover opens as a `role="dialog"` with `aria-label="All assigned modules"`.
 
 ---
 
-## What lives where
+## File map
 
-| File                                      | Owns                                              |
-| ----------------------------------------- | ------------------------------------------------- |
-| `Sidebar.tsx`                             | Frame, SidebarSearch, CollapseButton, Worklist    |
-| `parts/AssignedModules.tsx`               | Active card, inactive grid, overflow popover      |
-| `parts/SidebarMenu.tsx`                   | Top-level pill rows + cascading submenu cards     |
-| `modules.ts`                              | The ten-module catalogue (icon + gradient)        |
+| File | Owns |
+|---|---|
+| `Sidebar.tsx` | Frame, `SidebarSearch`, `SidebarCollapseButton`, `WorklistButton`, collapsed rail |
+| `parts/AssignedModules.tsx` | Active card, inactive grid, overflow popover, empty state |
+| `parts/SidebarMenu.tsx` | Top-level pill rows, `SubmenuCard`, `SubmenuRow`, search-results view |
+| `parts/searchMenu.ts` | `searchMenuTree()` — pure tree-walking function |
+| `modules.ts` | The 17-module catalogue (icon + gradient + label) |
 
 ---
 
 ## When **not** to use Sidebar
 
-- For a single-module product with no sub-navigation, render your own
-  top tabs instead — the rail will feel disproportionate.
-- For a dashboard with no concept of "modules", use just `<SidebarMenu/>`
-  on its own without the `modules` slot.
-
----
-
-See the `Default` story for a fully working integration with realistic
-data, then strip back to only the slots you need.
-
----
-
-## Responsive behaviour
-
-The rail has two widths built in — the **full** rail and the **collapsed**
-icon rail. Drive `collapsed` from a media query (and/or a user toggle) so the
-rail steps out of the way on smaller viewports, and persist the choice:
-
-```jsx
-const [collapsed, setCollapsed] = useState(
-  () => window.matchMedia("(max-width: 1024px)").matches,
-);
-
-<Sidebar
-  collapsed={collapsed}
-  onCollapseToggle={() => setCollapsed((v) => !v)}
-  …
-/>
-```
-
-On phones, prefer hiding the rail behind a drawer (your app owns the drawer
-shell) and rendering the **full** Sidebar inside it, rather than showing the
-collapsed rail permanently.
+- **Single-module product** — if there is only one module and no sub-navigation, render
+  your own top tabs or breadcrumbs. The full rail will feel disproportionate.
+- **Dashboard without modules** — use just `<SidebarMenu />` on its own, without the `modules` slot.
+- **Mobile / phone viewports** — prefer hiding the rail behind a drawer (your app owns the
+  drawer shell) and rendering the **full** Sidebar inside it, rather than showing the collapsed
+  rail permanently. The 120px collapsed width is still too wide for small phones.

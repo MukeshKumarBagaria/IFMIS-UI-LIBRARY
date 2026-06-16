@@ -71,6 +71,29 @@ npm install @ifmis/ui
 `react` and `react-dom` (`>=18`) are **peer dependencies** — they come from your
 app, not from this library.
 
+### 1.3 VPN is required — and the no-VPN fallback
+
+Because the `.npmrc` above routes **every** install through Verdaccio, you must be
+connected to the **IFMIS VPN** for `npm install` to work at all. This applies to
+**all** packages — not just `@ifmis/ui`, but every public dependency too
+(`react`, `chart.js`, …), which Verdaccio fetches and caches for you. Off VPN,
+`172.18.210.110:6379` is unreachable and installs hang, then time out.
+
+**If you are NOT on the VPN** and need to install something, temporarily
+**comment out** both lines in your `.npmrc`:
+
+```ini
+# registry=http://172.18.210.110:6379/
+# //172.18.210.110:6379/:_authToken=${IFMIS_NPM_TOKEN}
+```
+
+With both lines commented, npm falls back to the public registry directly, so
+ordinary public packages install normally.
+
+> ⚠️ **Remember to uncomment them and reconnect to the VPN before installing or
+> updating `@ifmis/ui`** — it lives **only** in Verdaccio, never on public npm, so
+> it can't be installed with the lines commented out.
+
 ---
 
 ## 2. Adopt — three steps
@@ -235,7 +258,7 @@ npm install @ifmis/ui@latest  # move to the newest
 | `npm install` → `401 Unauthorized`            | Token missing / expired / not exported.            | Set `IFMIS_NPM_TOKEN` to a valid registry token; open a new shell.  |
 | `npm install` → `404 Not Found`               | `.npmrc` `registry=` line wrong/missing.           | Copy §1.1 exactly — it must be `registry=` (not `@ifmis:registry=`).|
 | `ETIMEDOUT` to `172.18.210.110:6379`          | Not on the IFMIS network.                          | Connect to the IFMIS network / VPN, then retry.                     |
-| A **public** dep (e.g. `react`) fails to install | The registry isn't proxying public npm for you.  | Confirm `.npmrc` uses `registry=` (routes *all* installs via the registry); raise with a maintainer if it persists. |
+| **Any** install hangs then times out (incl. public deps like `chart.js`) | Off VPN, so Verdaccio is unreachable — and all installs route through it. | Connect to the VPN; or, to install **public** packages only, comment out the `.npmrc` lines per **§1.3**. |
 | Styles look unthemed / default browser CSS    | `styles.css` not imported, or no `ThemeProvider`.  | Import `@ifmis/ui/styles.css` once; wrap the app in the provider.   |
 
 ---
