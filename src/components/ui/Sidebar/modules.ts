@@ -65,6 +65,12 @@ export interface ModuleDef {
    * modules) when omitted; newer modules carry their own per-Figma tint.
    */
   textColor?: string;
+  /**
+   * Drop shadow for the circular icon badge — a soft tint of the module's
+   * own colour (per Figma). Identical in the active (large) and inactive
+   * (small) card variants.
+   */
+  shadow: string;
 }
 
 /**
@@ -85,60 +91,70 @@ export const MODULES: Record<ModuleId, ModuleDef> = {
     label: "E-Sanction",
     Icon: ShieldCheck,
     gradient: "linear-gradient(90deg, #F4BEC7 0%, #F0A8A8 100%)",
+    shadow: "0 1px 2px 0 rgba(132, 69, 69, 0.50)",
   },
   "e-accounts": {
     id: "e-accounts",
     label: "E-Accounts",
     Icon: UserList,
     gradient: "linear-gradient(90deg, #F4EBBE 0%, #C0F0A8 100%)",
+    shadow: "0 1px 2px 0 rgba(66, 82, 20, 0.50)",
   },
   hrms: {
     id: "hrms",
     label: "HRMS",
     Icon: UserCircle,
     gradient: "linear-gradient(90deg, #BED0F4 0%, #D1A8F0 100%)",
+    shadow: "0 1px 2px 0 rgba(55, 20, 82, 0.50)",
   },
   deposit: {
     id: "deposit",
     label: "Deposit",
     Icon: HandArrowDown,
     gradient: "linear-gradient(90deg, #F4BEBE 0%, #F0D8A8 100%)",
+    shadow: "0 1px 2px 0 rgba(130, 60, 23, 0.50)",
   },
   budget: {
     id: "budget",
     label: "Budget",
     Icon: Coins,
     gradient: "linear-gradient(90deg, #D0F4BE 0%, #A8F0F0 100%)",
+    shadow: "0 1px 2px 0 rgba(23, 130, 76, 0.50)",
   },
   "strong-room": {
     id: "strong-room",
     label: "Strong Room",
     Icon: Dresser,
     gradient: "linear-gradient(90deg, #F4D9BE 0%, #F0F0A8 100%)",
+    shadow: "0 1px 2px 0 rgba(130, 112, 23, 0.50)",
   },
   pension: {
     id: "pension",
     label: "Pension",
     Icon: HandDeposit,
     gradient: "linear-gradient(90deg, #BEF4F4 0%, #A8B4F0 100%)",
+    shadow: "0 1px 2px 0 rgba(23, 41, 130, 0.50)",
   },
   receipt: {
     id: "receipt",
     label: "Receipt",
     Icon: Receipt,
     gradient: "linear-gradient(90deg, #E2BEF4 0%, #F0A8F0 100%)",
+    shadow: "0 1px 2px 0 rgba(130, 23, 130, 0.50)",
   },
   vendor: {
     id: "vendor",
     label: "Vendor",
     Icon: Storefront,
     gradient: "linear-gradient(90deg, #BEF4F4 0%, #A8D8F0 100%)",
+    shadow: "0 1px 2px 0 rgba(23, 94, 130, 0.50)",
   },
   bsg: {
     id: "bsg",
     label: "BSG",
     Icon: UserSound,
     gradient: "linear-gradient(90deg, #F4BEBE 0%, #B4A8F0 100%)",
+    shadow: "0 1px 2px 0 rgba(41, 23, 130, 0.50)",
   },
   "internal-audit": {
     id: "internal-audit",
@@ -146,6 +162,7 @@ export const MODULES: Record<ModuleId, ModuleDef> = {
     Icon: FileMagnifyingGlass,
     gradient: "linear-gradient(90deg, #D1F6FA 0%, #7DA7E8 100%)",
     textColor: "#263B59",
+    shadow: "0 1px 2px 0 rgba(38, 59, 89, 0.50)",
   },
   lfa: {
     id: "lfa",
@@ -153,6 +170,7 @@ export const MODULES: Record<ModuleId, ModuleDef> = {
     Icon: ClipboardText,
     gradient: "linear-gradient(90deg, #FAD1D1 0%, #E88F7D 100%)",
     textColor: "#800000",
+    shadow: "0 1px 2px 0 rgba(128, 0, 0, 0.50)",
   },
   bookkeeping: {
     id: "bookkeeping",
@@ -160,6 +178,7 @@ export const MODULES: Record<ModuleId, ModuleDef> = {
     Icon: Notebook,
     gradient: "linear-gradient(90deg, #D1FADC 0%, #7DBBE8 100%)",
     textColor: "#0C4A74",
+    shadow: "0 1px 2px 0 rgba(12, 74, 116, 0.50)",
   },
   dig: {
     id: "dig",
@@ -167,6 +186,7 @@ export const MODULES: Record<ModuleId, ModuleDef> = {
     Icon: ChartBar,
     gradient: "linear-gradient(90deg, #F2D1FA 0%, #7DC9E8 100%)",
     textColor: "#13536C",
+    shadow: "0 1px 2px 0 rgba(19, 83, 108, 0.50)",
   },
   "cash-management": {
     id: "cash-management",
@@ -174,6 +194,7 @@ export const MODULES: Record<ModuleId, ModuleDef> = {
     Icon: Wallet,
     gradient: "linear-gradient(90deg, #E4FAD1 0%, #E8D67D 100%)",
     textColor: "#6C5E13",
+    shadow: "0 1px 2px 0 rgba(108, 94, 19, 0.50)",
   },
   "purchase-inventory": {
     id: "purchase-inventory",
@@ -181,6 +202,7 @@ export const MODULES: Record<ModuleId, ModuleDef> = {
     Icon: Package,
     gradient: "linear-gradient(90deg, #FAF3D1 0%, #E87D7D 100%)",
     textColor: "#6C1513",
+    shadow: "0 1px 2px 0 rgba(108, 21, 19, 0.50)",
   },
   "lms-ats": {
     id: "lms-ats",
@@ -188,6 +210,7 @@ export const MODULES: Record<ModuleId, ModuleDef> = {
     Icon: Video,
     gradient: "linear-gradient(90deg, #FAD1EC 0%, #E87DB2 100%)",
     textColor: "#6C1340",
+    shadow: "0 1px 2px 0 rgba(108, 19, 64, 0.50)",
   },
 };
 

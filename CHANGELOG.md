@@ -8,6 +8,40 @@ See [PUBLISHING.md](./PUBLISHING.md) for the release process.
 
 ## [Unreleased]
 
+### Added
+
+- **`Sidebar` — Help links.** New `help` prop renders "Help Desk" and "Help"
+  links pinned to the bottom of the body card (purple headset / blue question-mark
+  icon circles + label). Each link takes an optional `label` and an `onClick`; omit
+  a link to hide it. In the collapsed rail these render as icon-only circles.
+  Exposes a standalone `SidebarHelpLinks` component plus `SidebarHelpProps` /
+  `SidebarHelpItem` types.
+
+### Changed
+
+- **`Sidebar` modules — icon badge shadow.** Each module's circular icon badge now
+  carries a per-module drop shadow (a soft tint of the module's own colour, per
+  Figma), applied identically in the active (large), inactive (small), overflow
+  popover, and collapsed-rail variants. `ModuleDef` gains a required `shadow` field.
+- **`Sidebar` active module card — label.** The icon and label now share a single
+  centred container with an 8px gap (16px card padding), and the label renders at
+  18px / weight 600 / line-height normal for every module (per Figma).
+- **`Sidebar` collapsed rail — module section.** Fixed the expand chevron
+  overflowing the module container: the collapsed body card padding is now 8px
+  (per Figma), keeping the 40px thumbnail + chevron inside. The container is
+  restyled to match Figma — `border-radius: 16px`, `border: 1px solid #E8D8F5`
+  (purple-100), `background: #FAF7FD` (purple-25).
+
+### Docs
+
+- **`Sidebar` guide (`Sidebar.mdx`).** Documented the new `help` prop (with the
+  `SidebarHelpProps` / `SidebarHelpItem` shapes and the standalone
+  `SidebarHelpLinks` export), added the `...rest` passthrough to the props table,
+  expanded the module catalogue with the full `ModuleDef` shape (including
+  `shadow` + `textColor`) and a per-module table of icon, text colour, and badge
+  shadow, and refreshed the anatomy diagram, collapsed-rail notes, sub-component
+  list, and file map.
+
 ## [0.1.3] — 2026-06-12
 
 ### Changed

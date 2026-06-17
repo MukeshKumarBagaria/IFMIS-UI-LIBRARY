@@ -24,9 +24,12 @@ interface ModuleCardProps {
  */
 function ModuleIconBadge({
   Icon,
+  shadow,
   size = "md",
 }: {
   Icon: ModuleDef["Icon"];
+  /** Per-module drop shadow — a soft tint of the module's own colour. */
+  shadow?: string;
   size?: "sm" | "md";
 }) {
   const isSm = size === "sm";
@@ -36,7 +39,7 @@ function ModuleIconBadge({
         "flex items-center justify-center rounded-full shrink-0",
         isSm ? "w-6 h-6" : "w-10 h-10",
       )}
-      style={{ background: "rgba(255, 255, 255, 0.50)" }}
+      style={{ background: "rgba(255, 255, 255, 0.50)", boxShadow: shadow }}
     >
       <Icon size={isSm ? 14 : 22} weight="duotone" />
     </span>
@@ -44,13 +47,13 @@ function ModuleIconBadge({
 }
 
 export function ActiveModuleCard({ module, onClick, className }: ModuleCardProps) {
-  const { Icon, label, gradient, textColor = "#4B3960" } = module;
+  const { Icon, label, gradient, textColor = "#4B3960", shadow } = module;
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-[8.125rem] h-[5.75rem] p-4 flex-col justify-center items-center gap-1",
+        "flex w-[8.125rem] h-[5.75rem] p-4 flex-col justify-center items-center",
         "rounded-xl shadow-sm",
         "transition-transform hover:scale-[1.02] focus:outline-none",
         "focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2",
@@ -60,8 +63,12 @@ export function ActiveModuleCard({ module, onClick, className }: ModuleCardProps
       aria-pressed="true"
       aria-label={`${label} (active module)`}
     >
-      <ModuleIconBadge Icon={Icon} />
-      <span className="text-sm font-semibold leading-none">{label}</span>
+      {/* Icon + label share one centred container with an 8px gap (per Figma);
+          the 16px card padding comes from `p-4` on the button. */}
+      <span className="flex flex-col items-center gap-2">
+        <ModuleIconBadge Icon={Icon} shadow={shadow} />
+        <span className="text-[18px] font-semibold leading-[normal]">{label}</span>
+      </span>
     </button>
   );
 }
@@ -71,7 +78,7 @@ export function ActiveModuleCard({ module, onClick, className }: ModuleCardProps
 /* -------------------------------------------------------------------------- */
 
 export function InactiveModuleCard({ module, onClick, className }: ModuleCardProps) {
-  const { Icon, label, gradient, textColor = "#4B3960" } = module;
+  const { Icon, label, gradient, textColor = "#4B3960", shadow } = module;
   return (
     // Show the module name in a hover pill (above the icon). `decorative`
     // keeps it from being announced twice — the button already carries the
@@ -90,7 +97,7 @@ export function InactiveModuleCard({ module, onClick, className }: ModuleCardPro
         style={{ background: gradient, color: textColor }}
         aria-label={label}
       >
-        <ModuleIconBadge Icon={Icon} size="sm" />
+        <ModuleIconBadge Icon={Icon} shadow={shadow} size="sm" />
       </button>
     </HoverPillTip>
   );
@@ -192,7 +199,7 @@ function OverflowPopover({
               )}
               style={{ background: m.gradient, color: m.textColor ?? "#4B3960" }}
             >
-              <ModuleIconBadge Icon={m.Icon} />
+              <ModuleIconBadge Icon={m.Icon} shadow={m.shadow} />
               <span className="text-sm font-semibold leading-none">
                 {m.label}
               </span>

@@ -36,6 +36,9 @@ presentational** — every selection is driven by props you own.
 │  │  │ HRMS              ▸  │ ──┼──┼──→ right-side card (cascades for nesting)
 │  │  │ Vouchers     [12] ▸  │   │  │    badge shown when MenuNode.badge is set
 │  │  └──────────────────────┘   │  │
+│  │─────────────────────────────│  │
+│  │  (🎧) Help Desk             │  │    help links (optional, via `help`)
+│  │  (?)  Help                  │  │    pinned to the bottom of the body card
 │  └─────────────────────────────┘  │
 │                                   │
 │  [footer — any ReactNode]         │  ← optional footer slot
@@ -52,6 +55,7 @@ presentational** — every selection is driven by props you own.
 | Module cards | `ActiveModuleCard` / `InactiveModuleCard` | Gradient + icon per module |
 | Menu | `SidebarMenu` | Top-level pill rows + cascading right-side cards |
 | Submenu cards | *(internal)* `SubmenuCard` | Floating right-side cards, cascade to any depth |
+| Help links | `SidebarHelpLinks` | "Help Desk" / "Help" links at the bottom of the body card |
 
 ---
 
@@ -113,10 +117,12 @@ Three pieces of state, three slots. Every slot is optional — omit it to hide t
 | `worklist` | `WorklistButtonProps` | — | Worklist pill config. Omit to hide the pill. |
 | `modules` | `AssignedModulesProps` | — | Modules section config. Omit to hide the section. |
 | `menu` | `SidebarMenuProps` | — | Sub-modules menu config. Omit to hide the section. |
+| `help` | `SidebarHelpProps` | — | "Help Desk" / "Help" links pinned to the bottom of the body card. Omit to hide both. |
 | `collapsed` | `boolean` | `undefined` | Controlled collapse state. Omit to let the Sidebar self-manage. |
 | `onCollapseToggle` | `() => void` | — | Fired when the collapse circle is clicked. Pair with `collapsed`. |
 | `footer` | `ReactNode` | — | Extra content rendered below the body card. |
 | `className` | `string` | — | Extra CSS class added to the outer `<aside>`. |
+| `...rest` | `HTMLAttributes<HTMLElement>` | — | Any other valid `<aside>` attributes (e.g. `id`, `data-*`, `style`) are spread onto the root element. |
 
 ---
 
@@ -246,6 +252,50 @@ need to set it manually when using `<SidebarMenu>` in isolation.
 
 ---
 
+### `help` — `SidebarHelpProps`
+
+The two support links pinned to the bottom of the body card — a purple
+**Help Desk** (headset) link and a blue **Help** (question-mark) link.
+
+```ts
+interface SidebarHelpItem {
+  label?:   string;        // override the visible label
+  onClick?: () => void;    // open your help desk / help center
+}
+
+interface SidebarHelpProps {
+  helpDesk?: SidebarHelpItem;   // omit to hide just this link
+  help?:     SidebarHelpItem;   // omit to hide just this link
+}
+```
+
+- **Omit** the entire `help` prop to hide both links.
+- Omit one of `helpDesk` / `help` to hide only that link.
+- Each link defaults its label (`"Help Desk"` / `"Help"`); override via `label`.
+- In the **collapsed** rail these render as icon-only circles (no labels) at the
+  bottom of the body card, keeping the same purple / blue tones.
+
+```jsx
+<Sidebar
+  help={{
+    helpDesk: { onClick: openHelpDesk },
+    help:     { onClick: openHelpCenter },
+  }}
+/>
+
+// Custom labels
+<Sidebar
+  help={{
+    helpDesk: { label: "Support",       onClick: openSupport },
+    help:     { label: "Documentation", onClick: openDocs },
+  }}
+/>
+```
+
+> The links are also exported standalone as `SidebarHelpLinks` for bespoke layouts.
+
+---
+
 ### `collapsed` / `onCollapseToggle`
 
 The Sidebar has two modes: **expanded** (`279px`) and **collapsed** (`120px`).
@@ -273,6 +323,7 @@ In the collapsed rail, every slot mirrors its expanded counterpart:
 - Compact worklist button (icon + optional count)
 - "Assigned Modules" label + active module thumbnail + `▸` expand button
 - Sub-modules toggle (hamburger + chevron)
+- Help links → icon-only circles (purple headset / blue question mark)
 
 ---
 
@@ -478,48 +529,69 @@ const [collapsed, setCollapsed] = useState(false);
 ## The module catalogue
 
 `MODULES` and `MODULE_LIST` are the canonical source of truth for IFMIS module metadata
-(icon, gradient, label, text colour). Use them in product code whenever you need the same
-visuals outside the Sidebar — breadcrumbs, page headers, landing-screen module pickers.
+(icon, gradient, label, text colour, icon-badge shadow). Use them in product code whenever
+you need the same visuals outside the Sidebar — breadcrumbs, page headers, landing-screen
+module pickers.
+
+```ts
+interface ModuleDef {
+  id:         ModuleId;   // stable key used for selection / routing
+  label:      string;     // visible name shown on the active card
+  Icon:       Icon;       // Phosphor icon component
+  gradient:   string;     // linear-gradient used by the active + inactive cards
+  textColor?: string;     // label + icon colour; defaults to "#4B3960"
+  shadow:     string;     // icon-badge drop shadow — a soft tint of the module colour
+}
+```
 
 ```jsx
 import { MODULES, MODULE_LIST } from "@ifmis/ui";
 
 // Look up a single module
-const { Icon, label, gradient, textColor } = MODULES["hrms"];
+const { Icon, label, gradient, textColor, shadow } = MODULES["hrms"];
 
 // Iterate all modules
 MODULE_LIST.map((m) => (
   <li key={m.id} style={{ background: m.gradient, color: m.textColor }}>
-    <m.Icon size={24} />
+    <span style={{ boxShadow: m.shadow }}>
+      <m.Icon size={24} />
+    </span>
     {m.label}
   </li>
 ));
 ```
 
-### Available `ModuleId` values
+### Available modules
 
-| id | Label |
-|---|---|
-| `"hrms"` | HRMS |
-| `"e-sanction"` | E-Sanction |
-| `"e-accounts"` | E-Accounts |
-| `"deposit"` | Deposit |
-| `"budget"` | Budget |
-| `"strong-room"` | Strong Room |
-| `"pension"` | Pension |
-| `"receipt"` | Receipt |
-| `"vendor"` | Vendor |
-| `"bsg"` | BSG |
-| `"internal-audit"` | Internal Audit |
-| `"lfa"` | LFA |
-| `"bookkeeping"` | Book Keeping |
-| `"dig"` | DIG |
-| `"cash-management"` | Cash Management |
-| `"purchase-inventory"` | Purchase & Inventory |
-| `"lms-ats"` | LMS \| ATS |
+All 17 `ModuleId` values, with their visible label, Phosphor icon, label/icon
+text colour, and the icon-badge shadow accent.
 
-> **Do not** redefine module gradients or icons in product code. If the brand
-> changes, `modules.ts` is the only file to update.
+| id | Label | Icon | Text colour | Badge shadow |
+|---|---|---|---|---|
+| `"e-sanction"` | E-Sanction | `ShieldCheck` | `#4B3960` | `rgba(132, 69, 69, .5)` |
+| `"e-accounts"` | E-Accounts | `UserList` | `#4B3960` | `rgba(66, 82, 20, .5)` |
+| `"hrms"` | HRMS | `UserCircle` | `#4B3960` | `rgba(55, 20, 82, .5)` |
+| `"deposit"` | Deposit | `HandArrowDown` | `#4B3960` | `rgba(130, 60, 23, .5)` |
+| `"budget"` | Budget | `Coins` | `#4B3960` | `rgba(23, 130, 76, .5)` |
+| `"strong-room"` | Strong Room | `Dresser` | `#4B3960` | `rgba(130, 112, 23, .5)` |
+| `"pension"` | Pension | `HandDeposit` | `#4B3960` | `rgba(23, 41, 130, .5)` |
+| `"receipt"` | Receipt | `Receipt` | `#4B3960` | `rgba(130, 23, 130, .5)` |
+| `"vendor"` | Vendor | `Storefront` | `#4B3960` | `rgba(23, 94, 130, .5)` |
+| `"bsg"` | BSG | `UserSound` | `#4B3960` | `rgba(41, 23, 130, .5)` |
+| `"internal-audit"` | Internal Audit | `FileMagnifyingGlass` | `#263B59` | `rgba(38, 59, 89, .5)` |
+| `"lfa"` | LFA | `ClipboardText` | `#800000` | `rgba(128, 0, 0, .5)` |
+| `"bookkeeping"` | Book Keeping | `Notebook` | `#0C4A74` | `rgba(12, 74, 116, .5)` |
+| `"dig"` | DIG | `ChartBar` | `#13536C` | `rgba(19, 83, 108, .5)` |
+| `"cash-management"` | Cash Management | `Wallet` | `#6C5E13` | `rgba(108, 94, 19, .5)` |
+| `"purchase-inventory"` | Purchase & Inventory | `Package` | `#6C1513` | `rgba(108, 21, 19, .5)` |
+| `"lms-ats"` | LMS \| ATS | `Video` | `#6C1340` | `rgba(108, 19, 64, .5)` |
+
+> All shadows use the same `0 1px 2px 0` offset/blur — only the colour differs.
+> The badge shadow is applied identically in the active (large), inactive (small),
+> overflow-popover, and collapsed-rail variants.
+
+> **Do not** redefine module gradients, icons, or shadows in product code. If the
+> brand changes, `modules.ts` is the only file to update.
 
 ---
 
@@ -534,8 +606,11 @@ bespoke layouts:
 | `SidebarCollapseButton` | `collapsed`, `onClick` | Custom app-shell that manages collapse outside a full Sidebar |
 | `WorklistButton` | `count`, `onClick`, `label` | Placing the worklist pill in a toolbar or top bar |
 | `AssignedModules` | `assigned`, `activeId`, `onChange`, `maxInlineInactive` | Module picker on a landing or settings screen |
+| `ActiveModuleCard` / `InactiveModuleCard` | `module`, `onClick`, `className` | Rendering a single module card outside the grid |
 | `SidebarMenu` | `title`, `items`, `activeId`, `onSelect`, `searchValue`, `searchResultsTitle`, `searchEmptyTitle` | Embedding the menu tree without the full Sidebar frame |
-| `MODULES` | — | Reading icon/gradient metadata in page headers, breadcrumbs |
+| `SidebarHelpLinks` | `helpDesk`, `help` | Placing the Help Desk / Help links in a custom layout |
+| `searchMenuTree` | `(items, query)` | Reusing the menu search algorithm (returns `MenuSearchResult[]`) |
+| `MODULES` | — | Reading icon/gradient/shadow metadata in page headers, breadcrumbs |
 | `MODULE_LIST` | — | Iterating all modules (e.g. a landing-screen module grid) |
 
 ---
@@ -559,11 +634,11 @@ bespoke layouts:
 
 | File | Owns |
 |---|---|
-| `Sidebar.tsx` | Frame, `SidebarSearch`, `SidebarCollapseButton`, `WorklistButton`, collapsed rail |
+| `Sidebar.tsx` | Frame, `SidebarSearch`, `SidebarCollapseButton`, `WorklistButton`, `SidebarHelpLinks`, collapsed rail |
 | `parts/AssignedModules.tsx` | Active card, inactive grid, overflow popover, empty state |
 | `parts/SidebarMenu.tsx` | Top-level pill rows, `SubmenuCard`, `SubmenuRow`, search-results view |
 | `parts/searchMenu.ts` | `searchMenuTree()` — pure tree-walking function |
-| `modules.ts` | The 17-module catalogue (icon + gradient + label) |
+| `modules.ts` | The 17-module catalogue (icon + gradient + label + text colour + shadow) |
 
 ---
 

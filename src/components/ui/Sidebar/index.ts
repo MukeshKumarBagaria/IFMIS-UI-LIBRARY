@@ -15,12 +15,15 @@ export {
   SidebarSearch,
   SidebarCollapseButton,
   WorklistButton,
+  SidebarHelpLinks,
 } from "./Sidebar";
 export type {
   SidebarProps,
   SidebarSearchProps,
   SidebarCollapseButtonProps,
   WorklistButtonProps,
+  SidebarHelpProps,
+  SidebarHelpItem,
   MenuNode,
 } from "./Sidebar";
 

@@ -1,6 +1,12 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
-import { Sidebar, SidebarSearch, SidebarCollapseButton, WorklistButton } from "./Sidebar";
+import {
+  Sidebar,
+  SidebarSearch,
+  SidebarCollapseButton,
+  WorklistButton,
+  SidebarHelpLinks,
+} from "./Sidebar";
 import type { MenuNode } from "./Sidebar";
 import type { ModuleId } from "./modules";
 import { AssignedModules } from "./parts/AssignedModules";
@@ -226,6 +232,19 @@ function AppShell() {
       description: "Fires when the collapse circle is clicked. Pair with `collapsed`.",
       table: { type: { summary: "() => void" } },
     },
+    help: {
+      description:
+        "Help links pinned to the bottom of the body card. Pass `helpDesk` and/or " +
+        "`help`, each `{ label?, onClick? }`. Omit a link to hide it. In the collapsed " +
+        "rail these render as icon-only circles (purple headset / blue question mark).",
+      table: {
+        type: {
+          summary: "SidebarHelpProps",
+          detail:
+            "{ helpDesk?: { label?: string; onClick?: () => void }; help?: { label?: string; onClick?: () => void } }",
+        },
+      },
+    },
     footer: {
       description:
         "Optional ReactNode rendered below the body card. Useful for logout buttons, " +
@@ -276,6 +295,10 @@ function DefaultDemo() {
           items: MENU,
           activeId: activeMenu,
           onSelect: setActiveMenu,
+        }}
+        help={{
+          helpDesk: { onClick: () => alert("open help desk") },
+          help: { onClick: () => alert("open help") },
         }}
       />
     </StoryShell>
@@ -331,6 +354,10 @@ function CollapsedDemo() {
           items: MENU,
           activeId: activeMenu,
           onSelect: setActiveMenu,
+        }}
+        help={{
+          helpDesk: { onClick: () => alert("open help desk") },
+          help: { onClick: () => alert("open help") },
         }}
       />
     </StoryShell>
@@ -1237,6 +1264,49 @@ export const WithFooter: Story = {
 };
 
 /* ========================================================================== */
+/* 10b. HELP LINKS PROP                                                        */
+/* ========================================================================== */
+
+/**
+ * **Help links** — pass `help.helpDesk` and `help.help` to render the two
+ * support links pinned to the bottom of the body card. Each is a coloured icon
+ * circle (purple headset / blue question mark) with a label. Omit either to
+ * hide just that link.
+ */
+function HelpLinksDemo() {
+  const [activeMenu, setActiveMenu] = useState("dashboard");
+  const [search, setSearch] = useState("");
+
+  return (
+    <StoryShell>
+      <Sidebar
+        search={{ value: search, onChange: setSearch }}
+        menu={{ items: MENU, activeId: activeMenu, onSelect: setActiveMenu }}
+        help={{
+          helpDesk: { onClick: () => alert("open help desk") },
+          help: { onClick: () => alert("open help") },
+        }}
+      />
+    </StoryShell>
+  );
+}
+
+export const HelpLinks: Story = {
+  name: "Help Links — Help Desk & Help",
+  render: () => <HelpLinksDemo />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`help.helpDesk` and `help.help` render the support links at the bottom of the body card. " +
+          "Each link takes an optional `label` and an `onClick`. Omit one to hide it, or omit the whole " +
+          "`help` prop to hide both. When the rail is collapsed they become icon-only circles.",
+      },
+    },
+  },
+};
+
+/* ========================================================================== */
 /* 11. COLLAPSED RAIL VARIANTS                                                 */
 /* ========================================================================== */
 
@@ -1423,6 +1493,39 @@ export const SubWorklist: Story = {
         story:
           "`WorklistButton` is the orange pill. Three variants shown: with count badge, without badge, " +
           "and with a custom label. Exported from `@ifmis/ui` for standalone use in other layouts.",
+      },
+    },
+  },
+};
+
+/**
+ * **SidebarHelpLinks — standalone** — the "Help Desk" / "Help" links used at
+ * the bottom of the Sidebar. Exported for bespoke layouts that host the links
+ * without the full Sidebar frame.
+ *
+ * Props: `helpDesk`, `help` — each `{ label?, onClick? }`.
+ */
+export const SubHelpLinks: Story = {
+  name: "Sub-component — SidebarHelpLinks",
+  render: () => (
+    <div className="p-6 bg-grey-50 flex flex-col gap-6 items-start w-[15rem]">
+      <SidebarHelpLinks
+        helpDesk={{ onClick: () => alert("open help desk") }}
+        help={{ onClick: () => alert("open help") }}
+      />
+      <SidebarHelpLinks
+        helpDesk={{ label: "Support", onClick: () => alert("open support") }}
+        help={{ label: "Documentation", onClick: () => alert("open docs") }}
+      />
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`SidebarHelpLinks` renders the two support links — a purple headset (\"Help Desk\") and a " +
+          "blue question mark (\"Help\"). Both links are optional and accept a custom `label`. " +
+          "Exported from `@ifmis/ui` for standalone use.",
       },
     },
   },

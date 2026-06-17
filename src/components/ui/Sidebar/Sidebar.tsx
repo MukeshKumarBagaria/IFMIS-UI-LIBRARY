@@ -7,6 +7,8 @@ import {
   CaretRight,
   CaretDown,
   List,
+  Headset,
+  QuestionMark,
 } from "@phosphor-icons/react";
 import { cn } from "../../../lib/cn";
 import { AssignedModules } from "./parts/AssignedModules";
@@ -178,6 +180,134 @@ export function WorklistButton({
 }
 
 /* -------------------------------------------------------------------------- */
+/* Help links                                                                 */
+/* -------------------------------------------------------------------------- */
+
+export interface SidebarHelpItem {
+  /** Override the visible label. */
+  label?: string;
+  /** Fires when the link is clicked — open your help desk / help center here. */
+  onClick?: () => void;
+}
+
+export interface SidebarHelpProps {
+  /** "Help Desk" link config. Omit to hide the row. */
+  helpDesk?: SidebarHelpItem;
+  /** "Help" link config. Omit to hide the row. */
+  help?: SidebarHelpItem;
+}
+
+/** A single expanded help row — coloured icon circle + label. */
+function HelpLinkRow({
+  Icon,
+  label,
+  onClick,
+  tone,
+}: {
+  Icon: typeof Headset;
+  label: string;
+  onClick?: () => void;
+  tone: "purple" | "blue";
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-1.5 rounded-lg text-left transition-colors",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500",
+      )}
+    >
+      <span
+        className={cn(
+          "flex w-7 h-7 p-1 items-center justify-center shrink-0 rounded-full border",
+          tone === "purple"
+            ? "border-purple-300 bg-purple-50 text-purple-300"
+            : "border-blue-300 bg-blue-50 text-blue-300",
+        )}
+      >
+        <Icon size={20} />
+      </span>
+      <span className="text-sm font-medium text-body-secondary">{label}</span>
+    </button>
+  );
+}
+
+/**
+ * The "Help Desk" / "Help" links that sit at the bottom of the Sidebar.
+ *
+ * Each link is a coloured icon circle (purple headset / blue question mark)
+ * followed by its label. Both are optional — omit one to hide it.
+ *
+ * Usually you don't render this directly — pass `help` to `<Sidebar>` and it
+ * places this at the bottom of the body card (and renders icon-only circles
+ * in the collapsed rail). Use the standalone export only for bespoke layouts.
+ *
+ * @example
+ *   <Sidebar help={{ helpDesk: { onClick: openDesk }, help: { onClick: openHelp } }} />
+ */
+export function SidebarHelpLinks({ helpDesk, help }: SidebarHelpProps) {
+  return (
+    <div className="flex w-full items-center gap-4">
+      {helpDesk && (
+        <HelpLinkRow
+          Icon={Headset}
+          label={helpDesk.label ?? "Help Desk"}
+          onClick={helpDesk.onClick}
+          tone="purple"
+        />
+      )}
+      {help && (
+        <HelpLinkRow
+          Icon={QuestionMark}
+          label={help.label ?? "Help"}
+          onClick={help.onClick}
+          tone="blue"
+        />
+      )}
+    </div>
+  );
+}
+
+/** Icon-only help links for the collapsed rail. */
+function CollapsedHelpLinks({ helpDesk, help }: SidebarHelpProps) {
+  return (
+    <div className="flex items-center justify-center gap-3">
+      {helpDesk && (
+        <button
+          type="button"
+          onClick={helpDesk.onClick}
+          aria-label={helpDesk.label ?? "Help Desk"}
+          className={cn(
+            "flex w-10 h-10 items-center justify-center shrink-0 rounded-full border",
+            "border-purple-300 bg-purple-50 text-purple-300",
+            "transition-colors hover:bg-purple-100",
+            "focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500",
+          )}
+        >
+          <Headset size={24} />
+        </button>
+      )}
+      {help && (
+        <button
+          type="button"
+          onClick={help.onClick}
+          aria-label={help.label ?? "Help"}
+          className={cn(
+            "flex w-10 h-10 items-center justify-center shrink-0 rounded-full border",
+            "border-blue-300 bg-blue-50 text-blue-300",
+            "transition-colors hover:bg-blue-100",
+            "focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500",
+          )}
+        >
+          <QuestionMark size={24} />
+        </button>
+      )}
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
 /* Sidebar                                                                    */
 /* -------------------------------------------------------------------------- */
 
@@ -201,6 +331,13 @@ export interface SidebarProps
   search?: SidebarSearchProps;
   /** Worklist button config. Omit to hide the pill. */
   worklist?: WorklistButtonProps;
+  /**
+   * Help links pinned to the bottom of the body card — "Help Desk" and
+   * "Help". Pass `helpDesk` / `help` with an `onClick` (and optional
+   * `label`). Omit a link to hide it; omit the whole prop to hide both.
+   * In the collapsed rail these render as icon-only circles.
+   */
+  help?: SidebarHelpProps;
   /**
    * Collapse state — controlled. When omitted the Sidebar manages its
    * own collapse state internally; pass this only if you want to
@@ -248,6 +385,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
       menu,
       search,
       worklist,
+      help,
       collapsed: controlledCollapsed,
       onCollapseToggle,
       footer,
@@ -273,6 +411,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
           worklist={worklist}
           search={search}
           menu={menu}
+          help={help}
           {...props}
         />
       );
@@ -310,7 +449,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
             sub-modules menu in a single 279px-wide purple-bordered card
             (per Figma). `align-items: center` keeps the section content
             visually centred while children themselves stretch full-width. */}
-        {(modules || menu) && (
+        {(modules || menu || help) && (
           <div
             className={cn(
               "flex w-[17.4375rem] p-4 flex-col items-center gap-4 self-stretch",
@@ -334,6 +473,14 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
                 />
               </div>
             )}
+            {help && (help.helpDesk || help.help) && (
+              // `mt-auto` pins the help links to the bottom of the body card
+              // (matching Figma), while still sitting below the menu when the
+              // card is content-sized.
+              <div className="w-full mt-auto pt-2">
+                <SidebarHelpLinks {...help} />
+              </div>
+            )}
           </div>
         )}
 
@@ -355,6 +502,7 @@ interface CollapsedSidebarProps extends HTMLAttributes<HTMLElement> {
   worklist?: WorklistButtonProps;
   search?: SidebarSearchProps;
   menu?: SidebarMenuProps;
+  help?: SidebarHelpProps;
 }
 
 /**
@@ -373,7 +521,7 @@ interface CollapsedSidebarProps extends HTMLAttributes<HTMLElement> {
  */
 const CollapsedSidebar = forwardRef<HTMLElement, CollapsedSidebarProps>(
   (
-    { onExpand, modules, worklist, search: _search, menu, className, ...props },
+    { onExpand, modules, worklist, search: _search, menu, help, className, ...props },
     ref,
   ) => {
     return (
@@ -422,11 +570,13 @@ const CollapsedSidebar = forwardRef<HTMLElement, CollapsedSidebarProps>(
           {worklist && <CompactWorklistButton {...worklist} />}
         </div>
 
-        {/* Body card — modules + sub-modules toggle */}
-        {(modules || menu) && (
+        {/* Body card — modules + sub-modules toggle + help icons.
+            8px padding (per Figma collapsed spec) keeps the inner content
+            wide enough for the 40px module thumbnail + expand chevron. */}
+        {(modules || menu || help) && (
           <div
             className={cn(
-              "flex p-4 flex-col items-stretch gap-3 self-stretch",
+              "flex p-2 flex-col items-stretch gap-3 self-stretch",
               "rounded-3xl border border-surface-border-purple bg-white",
             )}
           >
@@ -437,7 +587,7 @@ const CollapsedSidebar = forwardRef<HTMLElement, CollapsedSidebarProps>(
                   <br />
                   Modules
                 </h3>
-                <div className="flex p-2 justify-between items-center gap-2 rounded-2xl bg-purple-50">
+                <div className="flex p-2 justify-between items-center rounded-2xl border border-purple-100 bg-purple-25">
                   <CollapsedActiveModuleCard
                     moduleId={modules.activeId}
                     onClick={onExpand}
@@ -474,6 +624,10 @@ const CollapsedSidebar = forwardRef<HTMLElement, CollapsedSidebarProps>(
                 <List size={18} weight="bold" />
                 <CaretDown size={14} weight="bold" />
               </button>
+            )}
+
+            {help && (help.helpDesk || help.help) && (
+              <CollapsedHelpLinks {...help} />
             )}
           </div>
         )}
@@ -546,7 +700,7 @@ function CollapsedActiveModuleCard({
     );
   }
 
-  const { Icon, label, gradient } = MODULES[moduleId];
+  const { Icon, label, gradient, shadow } = MODULES[moduleId];
   return (
     <button
       type="button"
@@ -562,7 +716,7 @@ function CollapsedActiveModuleCard({
     >
       <span
         className="flex w-6 h-6 items-center justify-center rounded-full"
-        style={{ background: "rgba(255, 255, 255, 0.50)" }}
+        style={{ background: "rgba(255, 255, 255, 0.50)", boxShadow: shadow }}
       >
         <Icon size={14} weight="duotone" />
       </span>
