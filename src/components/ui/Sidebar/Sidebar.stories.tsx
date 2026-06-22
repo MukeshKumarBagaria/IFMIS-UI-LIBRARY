@@ -5,6 +5,7 @@ import {
   SidebarSearch,
   SidebarCollapseButton,
   WorklistButton,
+  AdminButton,
   SidebarHelpLinks,
 } from "./Sidebar";
 import type { MenuNode } from "./Sidebar";
@@ -286,6 +287,7 @@ function DefaultDemo() {
       <Sidebar
         search={{ value: search, onChange: setSearch }}
         worklist={{ count: 12, onClick: () => alert("open worklist") }}
+        admin={{ onClick: () => alert("open admin") }}
         modules={{
           assigned: ALL_MODULES,
           activeId: activeModule,
@@ -683,6 +685,55 @@ export const WorklistCustomLabel: Story = {
           "`worklist.label` overrides the default `\"Worklist\"` text. Useful when the worklist " +
           "concept has a different name in your product (e.g. \"Pending Tasks\", \"Inbox\"). " +
           "The collapsed rail still reads this label in its `aria-label`.",
+      },
+    },
+  },
+};
+
+/* ========================================================================== */
+/* 6b. ADMIN BUTTON PROP                                                       */
+/* ========================================================================== */
+
+/**
+ * **Admin button** — pass `admin` to render the blue gradient "Admin" pill at
+ * the top of the body card. Provide an `onClick` (and optional `label`).
+ */
+function AdminButtonDemo() {
+  const [activeModule, setActiveModule] = useState<ModuleId>("e-sanction");
+  const [activeMenu, setActiveMenu] = useState("dashboard");
+  const [search, setSearch] = useState("");
+
+  return (
+    <StoryShell>
+      <Sidebar
+        search={{ value: search, onChange: setSearch }}
+        admin={{ onClick: () => alert("open admin") }}
+        modules={{
+          assigned: ["e-sanction", "e-accounts", "deposit", "budget", "hrms"],
+          activeId: activeModule,
+          onChange: setActiveModule,
+        }}
+        menu={{ items: MENU, activeId: activeMenu, onSelect: setActiveMenu }}
+        help={{
+          helpDesk: { onClick: () => alert("open help desk") },
+          help: { onClick: () => alert("open help") },
+        }}
+      />
+    </StoryShell>
+  );
+}
+
+export const Admin: Story = {
+  name: "Admin Button",
+  render: () => <AdminButtonDemo />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`admin` renders the blue gradient \"Admin\" pill (247×48, 16px radius) pinned to the top " +
+          "of the body card. Decorative white petals bleed off the left edge and the user-with-sync-arrows " +
+          "glyph precedes the label. Pass `onClick` to open your admin console and `label` to override the text. " +
+          "In the collapsed rail it becomes an icon-only gradient square.",
       },
     },
   },
@@ -1493,6 +1544,32 @@ export const SubWorklist: Story = {
         story:
           "`WorklistButton` is the orange pill. Three variants shown: with count badge, without badge, " +
           "and with a custom label. Exported from `@ifmis/ui` for standalone use in other layouts.",
+      },
+    },
+  },
+};
+
+/**
+ * **AdminButton — standalone** — the blue gradient "Admin" pill. Exported for
+ * use outside the full Sidebar frame.
+ *
+ * Props: `label`, `onClick`.
+ */
+export const SubAdminButton: Story = {
+  name: "Sub-component — AdminButton",
+  render: () => (
+    <div className="p-6 bg-grey-50 flex flex-col gap-4 items-start">
+      <AdminButton onClick={() => alert("open admin")} />
+      <AdminButton label="Administration" onClick={() => alert("open admin")} />
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`AdminButton` is the 247×48 blue gradient pill (`114deg, #3981E0 → #1FB9E4`, 16px radius) " +
+          "with decorative white petals and the user-with-sync-arrows glyph. " +
+          "Pass `onClick` and an optional `label`. Exported from `@ifmis/ui` for standalone use.",
       },
     },
   },

@@ -15,6 +15,7 @@ export {
   SidebarSearch,
   SidebarCollapseButton,
   WorklistButton,
+  AdminButton,
   SidebarHelpLinks,
 } from "./Sidebar";
 export type {
@@ -22,6 +23,7 @@ export type {
   SidebarSearchProps,
   SidebarCollapseButtonProps,
   WorklistButtonProps,
+  AdminButtonProps,
   SidebarHelpProps,
   SidebarHelpItem,
   MenuNode,

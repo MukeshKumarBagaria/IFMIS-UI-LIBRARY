@@ -180,6 +180,122 @@ export function WorklistButton({
 }
 
 /* -------------------------------------------------------------------------- */
+/* Admin button                                                               */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Decorative overlapping "petals" that bleed off the button's left edge.
+ * Purely cosmetic — `aria-hidden` and `pointer-events-none`. Sized and
+ * rotated per the Figma spec (73.5×72.5, rotated 15°); the button's
+ * `overflow-hidden` clips the parts that fall outside the 48px pill.
+ */
+function AdminButtonLeaves() {
+  return (
+    <span
+      aria-hidden="true"
+      className="pointer-events-none absolute left-0 bottom-0 origin-bottom-left"
+      style={{ width: "73.532px", height: "72.539px", transform: "rotate(15deg)" }}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="73.532"
+        height="72.539"
+        viewBox="0 0 66 48"
+        fill="none"
+        className="h-full w-full"
+        preserveAspectRatio="none"
+      >
+        <path
+          d="M59.5435 33.9209C52.3965 60.5942 24.9796 76.4234 -1.6937 69.2763C5.45339 42.603 32.8702 26.7738 59.5435 33.9209Z"
+          fill="white"
+          fillOpacity="0.5"
+        />
+        <path
+          d="M64.4734 15.522C57.3263 42.1953 29.9095 58.0244 3.23617 50.8773C10.3833 24.204 37.8001 8.37492 64.4734 15.522Z"
+          fill="white"
+          fillOpacity="0.55"
+        />
+        <path
+          d="M41.0012 5.61816C41.0012 33.2324 18.6155 55.6182 -8.99878 55.6182C-8.99878 28.0039 13.387 5.61816 41.0012 5.61816Z"
+          fill="white"
+          fillOpacity="0.55"
+        />
+      </svg>
+    </span>
+  );
+}
+
+/** The admin glyph (user with sync arrows) shown to the left of the label. */
+function AdminIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20.236"
+      height="19.485"
+      viewBox="0 0 21 20"
+      fill="none"
+      aria-hidden="true"
+      className="shrink-0"
+    >
+      <path
+        d="M5.4043 1.0752C7.24155 0.155647 9.32354 -0.156099 11.3496 0.18457C11.5313 0.216704 11.6933 0.319016 11.7998 0.469727C11.9063 0.620444 11.9494 0.80726 11.9189 0.989258C11.8885 1.17108 11.7872 1.33357 11.6377 1.44141C11.5254 1.5223 11.3922 1.56784 11.2559 1.57324L11.1191 1.56543C9.9291 1.36529 8.70973 1.42615 7.5459 1.74512C6.38201 2.06411 5.30162 2.63315 4.37988 3.41211C3.45811 4.19115 2.71656 5.16233 2.20801 6.25684C1.69962 7.3512 1.43553 8.54331 1.43457 9.75C1.43279 11.7816 2.17981 13.7427 3.53223 15.2588L3.5752 15.3066L3.61133 15.2539C4.15291 14.4685 4.8411 13.7945 5.6377 13.2695C5.69701 13.2303 5.76789 13.2121 5.83887 13.2168C5.89215 13.2204 5.94334 13.2368 5.98828 13.2646L6.03125 13.2959C7.05916 14.1853 8.37312 14.6748 9.73242 14.6748C11.0067 14.6748 12.2411 14.2447 13.2373 13.458L13.4336 13.2959C13.4872 13.2491 13.5549 13.2215 13.626 13.2168C13.697 13.2121 13.7679 13.2302 13.8271 13.2695C14.6246 13.7946 15.3137 14.4683 15.8564 15.2539L15.8926 15.3066L15.9346 15.2588C17.2881 13.7431 18.0362 11.7821 18.0352 9.75L18.0273 9.40234C18.0129 9.05495 17.9774 8.70838 17.9199 8.36523L17.9092 8.22754C17.9102 8.18165 17.9157 8.13584 17.9258 8.09082C17.946 8.00058 17.9838 7.9144 18.0371 7.83887C18.0904 7.76339 18.159 7.69954 18.2373 7.65039C18.3155 7.60131 18.403 7.56797 18.4941 7.55273C18.5852 7.53756 18.6787 7.54054 18.7686 7.56152C18.8585 7.58255 18.9436 7.62083 19.0186 7.6748C19.0935 7.72876 19.1567 7.79739 19.2051 7.87598C19.2535 7.95467 19.2864 8.04253 19.3008 8.13379V8.13477C19.6416 10.161 19.3298 12.2436 18.4102 14.0811C17.4905 15.9183 16.0107 17.4158 14.1846 18.3574C12.3582 19.299 10.2793 19.6359 8.24902 19.3193C6.21883 19.0027 4.34159 18.0486 2.88867 16.5957C1.43589 15.1428 0.482567 13.2655 0.166016 11.2354C-0.150454 9.20522 0.186368 7.127 1.12793 5.30078C2.06953 3.47458 3.56694 1.99484 5.4043 1.0752ZM9.73535 4.9248C10.5411 4.92487 11.329 5.16369 11.999 5.61133C12.6691 6.05908 13.1916 6.69585 13.5 7.44043C13.8084 8.18503 13.8887 9.00446 13.7314 9.79492C13.5742 10.5854 13.1861 11.3119 12.6162 11.8818C12.0464 12.4515 11.3205 12.8398 10.5303 12.9971C9.73984 13.1543 8.92036 13.073 8.17578 12.7646C7.43117 12.4562 6.79445 11.9338 6.34668 11.2637C5.89902 10.5936 5.66016 9.80586 5.66016 9C5.66016 7.91925 6.08931 6.88237 6.85352 6.11816C7.61771 5.35406 8.65468 4.92481 9.73535 4.9248ZM19.4854 0.799805C19.5772 0.799849 19.6681 0.817411 19.7529 0.852539C19.8379 0.887766 19.9155 0.939799 19.9805 1.00488C20.0455 1.06986 20.0966 1.14751 20.1318 1.23242C20.167 1.31732 20.1855 1.40811 20.1855 1.5C20.1855 1.59199 20.1671 1.68358 20.1318 1.76855C20.0966 1.85325 20.0453 1.93028 19.9805 1.99512L16.9805 4.99512C16.9155 5.0602 16.8379 5.11223 16.7529 5.14746C16.6681 5.18259 16.5772 5.20015 16.4854 5.2002C16.3934 5.2002 16.3018 5.18269 16.2168 5.14746C16.1319 5.11226 16.0552 5.06012 15.9902 4.99512H15.9893L14.4893 3.49512C14.4244 3.43014 14.373 3.35242 14.3379 3.26758C14.3028 3.18272 14.2842 3.09183 14.2842 3C14.2842 2.90816 14.3028 2.81729 14.3379 2.73242C14.373 2.64758 14.4244 2.56986 14.4893 2.50488C14.5543 2.43985 14.6318 2.38774 14.7168 2.35254C14.8018 2.31734 14.8934 2.2998 14.9854 2.2998C15.0771 2.29985 15.1681 2.31745 15.2529 2.35254C15.3379 2.38774 15.4154 2.43984 15.4805 2.50488L16.4492 3.47461L16.4854 3.51074L16.5205 3.47461L18.9893 1.00488H18.9902C19.0552 0.939885 19.1319 0.887738 19.2168 0.852539C19.3018 0.817312 19.3934 0.799805 19.4854 0.799805Z"
+        fill="#FFF"
+        stroke="#1D7AC8"
+        strokeWidth="0.1"
+      />
+    </svg>
+  );
+}
+
+export interface AdminButtonProps {
+  /** Override the visible label. Default: `"Admin"`. */
+  label?: string;
+  /** Fires when the button is pressed — open your admin console here. */
+  onClick?: () => void;
+}
+
+/**
+ * The blue gradient "Admin" button that sits at the top of the Sidebar body.
+ *
+ * A 247×48 pill with a 16px radius and the Figma sign-in gradient
+ * (`114deg, #3981E0 → #1FB9E4`). Decorative white "petals" bleed off the
+ * left edge (clipped by the pill), and the user-with-sync-arrows glyph
+ * precedes the centred label.
+ *
+ * Usually you don't render this directly — pass `admin` to `<Sidebar>` and
+ * it places this at the top of the body card. Use the standalone export
+ * only for bespoke layouts.
+ *
+ * @example
+ *   <Sidebar admin={{ onClick: openAdminConsole }} ... />
+ */
+export function AdminButton({ label = "Admin", onClick }: AdminButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className={cn(
+        "relative flex h-12 w-[247px] max-w-full items-center justify-center gap-2 self-stretch shrink-0",
+        "overflow-hidden rounded-2xl text-white",
+        "transition-[filter] hover:brightness-105",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2",
+      )}
+      style={{
+        background: "linear-gradient(114deg, #3981E0 23.67%, #1FB9E4 87.38%)",
+        boxShadow: "0 1px 2px 0 #365463",
+      }}
+    >
+      <AdminButtonLeaves />
+      <span className="relative flex items-center gap-2">
+        <AdminIcon />
+        <span className="text-lg font-semibold leading-normal">{label}</span>
+      </span>
+    </button>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
 /* Help links                                                                 */
 /* -------------------------------------------------------------------------- */
 
@@ -332,6 +448,12 @@ export interface SidebarProps
   /** Worklist button config. Omit to hide the pill. */
   worklist?: WorklistButtonProps;
   /**
+   * Admin button pinned to the top of the body card — the blue gradient
+   * "Admin" pill. Pass `onClick` (and optional `label`). Omit the whole
+   * prop to hide it.
+   */
+  admin?: AdminButtonProps;
+  /**
    * Help links pinned to the bottom of the body card — "Help Desk" and
    * "Help". Pass `helpDesk` / `help` with an `onClick` (and optional
    * `label`). Omit a link to hide it; omit the whole prop to hide both.
@@ -385,6 +507,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
       menu,
       search,
       worklist,
+      admin,
       help,
       collapsed: controlledCollapsed,
       onCollapseToggle,
@@ -411,6 +534,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
           worklist={worklist}
           search={search}
           menu={menu}
+          admin={admin}
           help={help}
           {...props}
         />
@@ -449,13 +573,18 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
             sub-modules menu in a single 279px-wide purple-bordered card
             (per Figma). `align-items: center` keeps the section content
             visually centred while children themselves stretch full-width. */}
-        {(modules || menu || help) && (
+        {(admin || modules || menu || help) && (
           <div
             className={cn(
               "flex w-[17.4375rem] p-4 flex-col items-center gap-4 self-stretch",
               "rounded-3xl border border-surface-border-purple bg-white",
             )}
           >
+            {admin && (
+              <div className="w-full">
+                <AdminButton {...admin} />
+              </div>
+            )}
             {modules && (
               <div className="w-full">
                 <AssignedModules {...modules} />
@@ -502,6 +631,7 @@ interface CollapsedSidebarProps extends HTMLAttributes<HTMLElement> {
   worklist?: WorklistButtonProps;
   search?: SidebarSearchProps;
   menu?: SidebarMenuProps;
+  admin?: AdminButtonProps;
   help?: SidebarHelpProps;
 }
 
@@ -521,7 +651,7 @@ interface CollapsedSidebarProps extends HTMLAttributes<HTMLElement> {
  */
 const CollapsedSidebar = forwardRef<HTMLElement, CollapsedSidebarProps>(
   (
-    { onExpand, modules, worklist, search: _search, menu, help, className, ...props },
+    { onExpand, modules, worklist, search: _search, menu, admin, help, className, ...props },
     ref,
   ) => {
     return (
@@ -573,13 +703,36 @@ const CollapsedSidebar = forwardRef<HTMLElement, CollapsedSidebarProps>(
         {/* Body card — modules + sub-modules toggle + help icons.
             8px padding (per Figma collapsed spec) keeps the inner content
             wide enough for the 40px module thumbnail + expand chevron. */}
-        {(modules || menu || help) && (
+        {(admin || modules || menu || help) && (
           <div
             className={cn(
               "flex p-2 flex-col items-stretch gap-3 self-stretch",
               "rounded-3xl border border-surface-border-purple bg-white",
             )}
           >
+            {admin && (
+              <button
+                type="button"
+                onClick={onExpand}
+                aria-label={admin.label ?? "Admin"}
+                className={cn(
+                  "relative flex h-12 items-center justify-center self-stretch shrink-0",
+                  "overflow-hidden rounded-2xl text-white",
+                  "transition-[filter] hover:brightness-105",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2",
+                )}
+                style={{
+                  background: "linear-gradient(114deg, #3981E0 23.67%, #1FB9E4 87.38%)",
+                  boxShadow: "0 1px 2px 0 #365463",
+                }}
+              >
+                <AdminButtonLeaves />
+                <span className="relative">
+                  <AdminIcon />
+                </span>
+              </button>
+            )}
+
             {modules && (
               <>
                 <h3 className="text-heading text-sm font-semibold leading-tight">
