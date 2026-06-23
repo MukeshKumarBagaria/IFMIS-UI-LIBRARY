@@ -1,7 +1,7 @@
 import { Meta, Canvas, Story, Source } from "@storybook/blocks";
 import * as TypographyStories from "./Typography.stories";
 
-<Meta of={TypographyStories} title="Foundations/Typography/Guide" />
+<Meta of={TypographyStories} name="Guide" />
 
 # Typography
 
@@ -175,6 +175,52 @@ These tokens come directly from the Figma design system. If Figma changes, this 
 | `Text/Body/Regular-18` / `Medium-18` | `--text-body-md` | `text-body-md` |
 | `Text/Body/Regular-16` / `Medium-16` | `--text-body-sm` | `text-body-sm` |
 | `Text/Body/Regular-14` / `Medium-14` | `--text-body-xs` | `text-body-xs` |
+
+---
+
+## Props
+
+### `<Heading>`
+
+| Prop        | Type                            | Default        | Notes                                              |
+| ----------- | ------------------------------- | -------------- | -------------------------------------------------- |
+| `level`     | `1 \| 2 \| 3 \| 4 \| 5 \| 6`    | `1`            | Visual size (maps to `text-h1`…`text-h6`).         |
+| `as`        | `ElementType`                   | `h{level}`     | Rendered tag — decouple semantics from appearance. |
+| `align`     | `left \| center \| right`       | `left`         | Text alignment.                                    |
+| `className` | `string`                        | —              | Merged onto the element.                           |
+| `children`  | node                            | —              | The heading text.                                  |
+
+### `<Text>`
+
+| Prop        | Type                                       | Default    | Notes                                          |
+| ----------- | ------------------------------------------ | ---------- | ---------------------------------------------- |
+| `size`      | `xs \| sm \| md \| lg`                     | `sm`       | 14 / 16 / 18 / 20px (line-height 1.5).         |
+| `weight`    | `regular \| medium \| semibold`            | `regular`  | 400 / 500 / 600.                               |
+| `color`     | `primary \| secondary \| muted \| inherit` | `primary`  | `inherit` keeps the surrounding colour.        |
+| `align`     | `left \| center \| right`                  | `left`     | Text alignment.                                |
+| `truncate`  | `boolean`                                  | `false`    | Single-line ellipsis overflow.                 |
+| `as`        | `ElementType`                              | `p`        | Use `"span"` for inline, `"label"` for fields. |
+| `className` | `string`                                   | —          | Merged onto the element.                        |
+| `children`  | node                                       | —          | The body copy.                                 |
+
+Both forward all native attributes of their rendered element (`id`, `aria-*`,
+`data-*`, `ref`, event handlers…). The CVA recipes are also exported as
+`headingVariants` / `textVariants` for composing class names elsewhere.
+
+---
+
+## Accessibility
+
+- **Keep the heading outline correct.** Pick `level` for looks, but set `as` so
+  the document's `h1`→`h6` order stays logical — screen-reader users navigate by
+  it. Never skip levels just to get a size.
+- Each page should have exactly one `h1` (`<Heading level={1}>` or
+  `<Heading as="h1">`).
+- For non-heading emphasis use `<Text as="span" weight="semibold">` rather than
+  a heading tag, so you don't pollute the outline.
+- Colour is decorative only — don't rely on `color="secondary"` / `"muted"`
+  alone to convey meaning, and check contrast when placing text on tinted
+  surfaces (the tokens meet AA on white).
 
 ---
 

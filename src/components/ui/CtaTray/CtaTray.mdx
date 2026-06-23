@@ -1,7 +1,7 @@
 import { Meta, Canvas } from "@storybook/blocks";
 import * as CtaTrayStories from "./CtaTray.stories";
 
-<Meta of={CtaTrayStories} title="UI/CtaTray/Guide" />
+<Meta of={CtaTrayStories} name="Guide" />
 
 # CTA Tray
 
@@ -191,6 +191,20 @@ The tray is a normal block — make it stick with your own layout classes:
 
 ❌ Don't rebuild the card/pill with raw Tailwind — compose `CtaTray`.
 ❌ Don't manage the tint manually unless you need controlled mode.
+
+---
+
+## Accessibility
+
+- The button pill is a `role="group"` named by `ariaLabel` (default
+  `"Form actions"`), so assistive tech announces the actions as a related set.
+- Children are real `<button>`s — each is keyboard-focusable with a visible
+  focus ring and is reached in DOM order, so order them the way you want them
+  read (primary action last / far right).
+- Inside a `<form>`, set `type="submit"` / `type="reset"` so the buttons drive
+  the form; otherwise they default to `type="button"`.
+- The tint is decorative — never rely on tone colour alone to convey state;
+  the button label must carry the meaning.
 
 ---
 

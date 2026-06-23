@@ -1,7 +1,7 @@
 import { Meta, Canvas } from "@storybook/blocks";
 import * as Stories from "./ReferenceIdSuccessCard.stories";
 
-<Meta of={Stories} title="UI/ReferenceIdSuccessCard/Guide" />
+<Meta of={Stories} name="Guide" />
 
 # ReferenceIdSuccessCard
 
@@ -124,6 +124,22 @@ Also forwards a `ref` and any extra `<div>` attributes to the root.
 
 Radius: `24px` (card) · `16px` (id pill) · full (copy button). Padding `16px`,
 gap `24px`.
+
+---
+
+## Accessibility
+
+- The copy control is a native `<button>` — keyboard-focusable, activates with
+  <kbd>Enter</kbd> / <kbd>Space</kbd>, and shows a visible focus ring
+  (`ring-green-800`).
+- It carries `aria-live="polite"`, so when the label flips to "Copied!" after a
+  successful copy, screen readers announce the confirmation.
+- The success badge and the copy/check icons are `aria-hidden` decoration; the
+  meaning lives in the visible text.
+- `navigator.clipboard` may be unavailable (insecure origin / older browser) —
+  `onCopy` still fires so you can surface a manual-copy fallback.
+- Colour is decorative; the title and id text carry the success message
+  independently of the green theme.
 
 ---
 

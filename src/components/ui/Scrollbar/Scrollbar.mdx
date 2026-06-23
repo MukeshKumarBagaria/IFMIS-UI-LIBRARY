@@ -1,0 +1,146 @@
+import { Meta, Canvas } from "@storybook/blocks";
+import * as ScrollbarStories from "./Scrollbar.stories";
+
+<Meta of={ScrollbarStories} name="Guide" />
+
+# Scrollbar
+
+A horizontal **scroll control** — a draggable thumb between two caret steppers.
+The caret you can still move toward stays *active* (white surface, dark caret);
+the end you've bottomed out against goes *disabled* (Grey-200, muted caret). The
+track carries evenly-spaced ruler ticks.
+
+It follows the ARIA **slider** pattern, so it's drag-, click- and
+keyboard-operable, and works **controlled** (`value` + `onValueChange`) or
+**uncontrolled** (`defaultValue`), mirroring the rest of the library.
+
+> All examples are plain JavaScript / JSX — your modules don't need TypeScript.
+
+---
+
+## Quickstart
+
+Give it a width — the track flexes to fill its container (min 200px).
+
+```jsx
+import { Scrollbar } from "@ifmis/ui";
+
+<div className="w-[420px]">
+  <Scrollbar defaultValue={0} onValueChange={(v) => console.log(v)} />
+</div>
+```
+
+<Canvas of={ScrollbarStories.Default} />
+
+---
+
+## Controlled vs uncontrolled
+
+**Uncontrolled** — pass `defaultValue`, read movement via `onValueChange`:
+
+```jsx
+<Scrollbar defaultValue={0} onValueChange={scrollTo} />
+```
+
+**Controlled** — you own `value` (e.g. it's synced to a scrolling element):
+
+```jsx
+const [pos, setPos] = useState(25);
+
+<Scrollbar value={pos} onValueChange={setPos} step={5} />;
+```
+
+<Canvas of={ScrollbarStories.Controlled} />
+
+---
+
+## Range & step
+
+`min` / `max` define the value range (default `0`–`100`); `step` is how far a
+caret click or arrow key nudges the thumb (default `10`).
+
+```jsx
+{/* 0–500, moving 25 at a time */}
+<Scrollbar defaultValue={0} max={500} step={25} onValueChange={scrollTo} />
+```
+
+The end states are reachable by pinning the value to either bound — the caret on
+that side disables automatically:
+
+<Canvas of={ScrollbarStories.MaxLeft} />
+<Canvas of={ScrollbarStories.MaxRight} />
+
+---
+
+## Thumb width & ticks
+
+`thumbWidth` sizes the draggable pill (default `64px`); set `showTicks={false}`
+for a plain track.
+
+```jsx
+<Scrollbar defaultValue={40} thumbWidth={96} />
+<Scrollbar defaultValue={40} showTicks={false} />
+```
+
+<Canvas of={ScrollbarStories.NoTicks} />
+
+---
+
+## Disabled
+
+`disabled` greys the control and blocks both carets and dragging.
+
+```jsx
+<Scrollbar defaultValue={30} disabled />
+```
+
+<Canvas of={ScrollbarStories.Disabled} />
+
+---
+
+## Props
+
+| Prop            | Type                      | Default    | Notes                                                  |
+| --------------- | ------------------------- | ---------- | ------------------------------------------------------ |
+| `value`         | `number`                  | —          | Controlled position. Pair with `onValueChange`.        |
+| `defaultValue`  | `number`                  | `min`      | Uncontrolled initial position.                         |
+| `onValueChange` | `(value: number) => void` | —          | Fires with the next position whenever the thumb moves. |
+| `min`           | `number`                  | `0`        | Lower bound of the range.                              |
+| `max`           | `number`                  | `100`      | Upper bound of the range.                              |
+| `step`          | `number`                  | `10`       | Distance a caret click / arrow key moves the thumb.    |
+| `thumbWidth`    | `number`                  | `64`       | Width of the draggable thumb, in pixels.               |
+| `showTicks`     | `boolean`                 | `true`     | Render ruler tick marks on the track.                  |
+| `disabled`      | `boolean`                 | `false`    | Disable both carets and dragging.                      |
+| `aria-label`    | `string`                  | `"Scroll"` | Accessible name for the slider.                        |
+| `className`     | `string`                  | —          | Merged onto the outer wrapper.                         |
+
+Other `<div>` attributes (`id`, `data-*`, `ref`…) are forwarded. The reported
+value is always clamped to `[min, max]`.
+
+---
+
+## Tokens
+
+| Part           | Surface                                   | Icon / detail        |
+| -------------- | ----------------------------------------- | -------------------- |
+| Caret active   | white (hover `grey-50`), round 32px       | `grey-900`           |
+| Caret disabled | `grey-200`                                | `grey-400`           |
+| Track          | `grey-300`, height 8px, fully rounded     | ticks `grey-500`     |
+| Thumb          | white, `surface-border-grey` outline, height 24px | grab cursor  |
+
+---
+
+## Accessibility
+
+- The track is `role="slider"` with `aria-orientation="horizontal"`,
+  `aria-valuemin` / `aria-valuemax` / `aria-valuenow`, and an `aria-label`
+  (default `"Scroll"`).
+- Keyboard support when the track is focused:
+  - <kbd>←</kbd> / <kbd>↓</kbd> — step down, <kbd>→</kbd> / <kbd>↑</kbd> — step up
+  - <kbd>Home</kbd> — jump to `min`, <kbd>End</kbd> — jump to `max`
+- The caret buttons are labelled `"Scroll left"` / `"Scroll right"` and use the
+  native `disabled` state at each bound.
+- When `disabled`, the track is removed from the tab order (`tabIndex={-1}`) and
+  marked `aria-disabled`.
+- A visible focus ring (`ring-ring`) is shown on keyboard focus for the track
+  and both carets.

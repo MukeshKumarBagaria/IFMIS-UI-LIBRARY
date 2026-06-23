@@ -184,26 +184,40 @@ export function WorklistButton({
 /* -------------------------------------------------------------------------- */
 
 /**
- * Decorative overlapping "petals" that bleed off the button's left edge.
- * Purely cosmetic — `aria-hidden` and `pointer-events-none`. Sized and
- * rotated per the Figma spec (73.5×72.5, rotated 15°); the button's
- * `overflow-hidden` clips the parts that fall outside the 48px pill.
+ * Decorative overlapping "petals" tucked into the button's bottom-left
+ * corner. Purely cosmetic — `aria-hidden` and `pointer-events-none`.
+ *
+ * Per the Figma spec the 73.5×72.5 leaf is rotated 15° about its own
+ * centre, with that centre placed at (20.48, 37.67) inside the 247×48
+ * pill. That makes the leaf bleed ~24px off the left edge and ~34px below
+ * the bottom edge; the button's `overflow-hidden` clips those parts so
+ * only the corner cluster shows. The offsets are anchored to the left/top
+ * (not width-derived) so the leaf stays put at any button width.
+ *
+ * In the collapsed rail the pill is much narrower and shares space with the
+ * label, so `collapsed` nudges the leaf further down-left (more of it clipped)
+ * to keep it a subtle accent rather than a distraction.
  */
-function AdminButtonLeaves() {
+function AdminButtonLeaves({ collapsed = false }: { collapsed?: boolean }) {
   return (
     <span
       aria-hidden="true"
-      className="pointer-events-none absolute left-0 bottom-0 origin-bottom-left"
-      style={{ width: "73.532px", height: "72.539px", transform: "rotate(15deg)" }}
+      className="pointer-events-none absolute"
+      style={{
+        left: collapsed ? "-30px" : "-16.29px",
+        top: collapsed ? "14px" : "1.4px",
+        width: "73.532px",
+        height: "72.539px",
+        transform: "rotate(15deg)",
+      }}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="73.532"
         height="72.539"
-        viewBox="0 0 66 48"
+        viewBox="-9 4 73.532 72.539"
         fill="none"
         className="h-full w-full"
-        preserveAspectRatio="none"
       >
         <path
           d="M59.5435 33.9209C52.3965 60.5942 24.9796 76.4234 -1.6937 69.2763C5.45339 42.603 32.8702 26.7738 59.5435 33.9209Z"
@@ -726,9 +740,12 @@ const CollapsedSidebar = forwardRef<HTMLElement, CollapsedSidebarProps>(
                   boxShadow: "0 1px 2px 0 #365463",
                 }}
               >
-                <AdminButtonLeaves />
-                <span className="relative">
+                <AdminButtonLeaves collapsed />
+                <span className="relative flex items-center gap-2">
                   <AdminIcon />
+                  <span className="text-lg font-semibold leading-normal">
+                    {admin.label ?? "Admin"}
+                  </span>
                 </span>
               </button>
             )}
