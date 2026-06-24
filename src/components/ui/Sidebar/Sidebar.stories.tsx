@@ -1048,6 +1048,100 @@ export const MenuDeepNesting: Story = {
 };
 
 /**
+ * **Menu — long list (scrollable)** — when the rail's content is taller than
+ * the viewport, **only the sub-modules list scrolls**. The top card, the
+ * assigned-modules header and the help footer stay pinned. Submodule rows with
+ * a `▸` still open their floating cards correctly (they use `position: fixed`,
+ * so the scroll container doesn't clip them).
+ *
+ * This is automatic — the rail caps itself at the viewport height
+ * (`max-h-screen`). Here we host it in a fixed `h-screen` column so the effect
+ * is obvious in the docs canvas.
+ */
+function LongMenuDemo() {
+  const [activeModule, setActiveModule] = useState<ModuleId>("budget");
+  const [activeMenu, setActiveMenu] = useState("budget.dashboard");
+  const [search, setSearch] = useState("");
+
+  // A Budget-module menu long enough to overflow the viewport, mirroring a
+  // real IFMIS module with many sub-modules.
+  const longMenu: MenuNode[] = [
+    { id: "budget.dashboard", label: "Dashboard" },
+    { id: "budget.notifications", label: "Notification and Alert" },
+    {
+      id: "budget.expenditure",
+      label: "Budget Expenditure (Estimates)",
+      children: [
+        { id: "budget.expenditure.capital", label: "Capital" },
+        { id: "budget.expenditure.revenue", label: "Revenue" },
+      ],
+    },
+    { id: "budget.supplementary", label: "Supplementary Budget" },
+    {
+      id: "budget.bco",
+      label: "BCO Code Master",
+      children: [
+        { id: "budget.bco.create", label: "Create Code" },
+        { id: "budget.bco.list", label: "Code List" },
+      ],
+    },
+    { id: "budget.ceiling", label: "Ceiling Limitation" },
+    { id: "budget.receipt", label: "Receipt Budget" },
+    {
+      id: "budget.public",
+      label: "Public Account",
+      children: [
+        { id: "budget.public.deposits", label: "Deposits" },
+        { id: "budget.public.advances", label: "Advances" },
+      ],
+    },
+    { id: "budget.scheme", label: "Scheme Creation" },
+    { id: "budget.reports", label: "Download Reports" },
+    { id: "budget.claims", label: "Post Retirement Claims" },
+    { id: "budget.eprofile", label: "e-Profile" },
+    { id: "budget.tracking", label: "Request Status Tracking System" },
+    { id: "budget.audit", label: "Audit" },
+  ];
+
+  return (
+    <div className="flex h-screen bg-grey-50 p-6">
+      <Sidebar
+        search={{ value: search, onChange: setSearch }}
+        worklist={{ count: 12, onClick: () => alert("open worklist") }}
+        modules={{
+          assigned: ALL_MODULES,
+          activeId: activeModule,
+          onChange: setActiveModule,
+        }}
+        menu={{ items: longMenu, activeId: activeMenu, onSelect: setActiveMenu }}
+        help={{
+          helpDesk: { onClick: () => alert("open help desk") },
+          help: { onClick: () => alert("open help") },
+        }}
+      />
+    </div>
+  );
+}
+
+export const MenuScrollable: Story = {
+  name: "Menu — Long List (Scrollable)",
+  parameters: {
+    layout: "fullscreen",
+    docs: {
+      description: {
+        story:
+          "When the rail can't fit everything in the viewport, **only the sub-modules list scrolls** — " +
+          "the top card, assigned-modules header and help footer stay pinned. The rail self-caps at " +
+          "`max-h-screen`; drop it in a flex/grid column with a definite height (here `h-screen`) and the " +
+          "list takes over the overflow. Rows with children still open their floating cards correctly because " +
+          "those cards are `position: fixed`, escaping the scroll container's clipping.",
+      },
+    },
+  },
+  render: () => <LongMenuDemo />,
+};
+
+/**
  * **Menu — custom search result titles** — `menu.searchResultsTitle` and
  * `menu.searchEmptyTitle` let you override the heading shown above search
  * results and the empty state.

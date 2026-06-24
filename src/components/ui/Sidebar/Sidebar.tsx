@@ -559,7 +559,12 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
       <aside
         ref={ref}
         className={cn(
-          "flex w-[279px] flex-col items-start gap-6",
+          // `max-h-screen` caps the rail at the viewport so an over-long
+          // sub-modules list scrolls instead of pushing the help footer
+          // off-screen. When placed in a flex/grid parent with a definite
+          // height the rail stretches to that height instead. `min-h-0`
+          // lets it shrink as a flex child.
+          "flex w-[279px] flex-col items-start gap-6 max-h-screen min-h-0",
           "text-heading",
           className,
         )}
@@ -569,7 +574,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
         {/* Top card */}
         <div
           className={cn(
-            "flex p-4 flex-col justify-center items-end gap-4 self-stretch",
+            "flex p-4 flex-col justify-center items-end gap-4 self-stretch shrink-0",
             "rounded-3xl border border-surface-border-purple bg-white",
           )}
         >
@@ -590,22 +595,31 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
         {(admin || modules || menu || help) && (
           <div
             className={cn(
-              "flex w-[17.4375rem] p-4 flex-col items-center gap-4 self-stretch",
+              // `min-h-0` lets the card shrink below its content height when
+              // the rail is height-capped, so the sub-modules list (the only
+              // `overflow-y-auto` child) absorbs the overflow and scrolls
+              // while the admin/modules header and help footer stay put.
+              "flex w-[17.4375rem] p-4 flex-col items-center gap-4 self-stretch min-h-0",
               "rounded-3xl border border-surface-border-purple bg-white",
             )}
           >
             {admin && (
-              <div className="w-full">
+              <div className="w-full shrink-0">
                 <AdminButton {...admin} />
               </div>
             )}
             {modules && (
-              <div className="w-full">
+              <div className="w-full shrink-0">
                 <AssignedModules {...modules} />
               </div>
             )}
             {menu && (
-              <div className="w-full">
+              // The sub-modules list is the single scroll region: it shrinks
+              // and scrolls vertically when the rail can't fit everything,
+              // keeping the header and help footer fixed. The floating
+              // submenu cards use `position: fixed` so they escape this
+              // container's overflow clipping.
+              <div className="w-full min-h-0 overflow-y-auto sidebar-scroll">
                 {/* Wire the search input's current value into the menu so it
                     can switch to the search-results view automatically.
                     Consumers can still override per-instance by setting
@@ -617,17 +631,16 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
               </div>
             )}
             {help && (help.helpDesk || help.help) && (
-              // `mt-auto` pins the help links to the bottom of the body card
-              // (matching Figma), while still sitting below the menu when the
-              // card is content-sized.
-              <div className="w-full mt-auto pt-2">
+              // The help links are the pinned footer — `shrink-0` keeps them
+              // visible at the bottom of the card while the menu above scrolls.
+              <div className="w-full shrink-0 pt-2">
                 <SidebarHelpLinks {...help} />
               </div>
             )}
           </div>
         )}
 
-        {footer}
+        {footer && <div className="w-full shrink-0">{footer}</div>}
       </aside>
     );
   },

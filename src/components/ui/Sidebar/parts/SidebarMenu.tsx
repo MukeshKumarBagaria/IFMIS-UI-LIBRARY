@@ -111,8 +111,16 @@ export function SidebarMenu({
 
   if (inSearchMode) {
     return (
-      <div className="flex flex-col gap-2 self-stretch">
-        <h3 className="text-heading text-sm font-semibold leading-tight">
+      <div className="flex flex-col self-stretch">
+        <h3
+          className={cn(
+            // Sticks to the top of the scrollable list so the heading stays
+            // visible while results scroll under it. `bg-white` + `z-10`
+            // mask the rows; `pb-2` replaces the removed container gap.
+            "sticky top-0 z-10 bg-white pb-2",
+            "text-heading text-sm font-semibold leading-tight",
+          )}
+        >
           {results.length === 0 ? searchEmptyTitle : searchResultsTitle}
         </h3>
         {results.length === 0 ? (
@@ -135,9 +143,17 @@ export function SidebarMenu({
   }
 
   return (
-    <div className="flex flex-col gap-2 self-stretch">
+    <div className="flex flex-col self-stretch">
       {title && (
-        <h3 className="text-heading text-sm font-semibold leading-tight">
+        <h3
+          className={cn(
+            // Sticks to the top of the scrollable list so "Sub-Modules" stays
+            // visible while the rows scroll under it. `bg-white` + `z-10` mask
+            // the rows; `pb-2` replaces the removed container gap.
+            "sticky top-0 z-10 bg-white pb-2",
+            "text-heading text-sm font-semibold leading-tight",
+          )}
+        >
           {title}
         </h3>
       )}
@@ -292,6 +308,9 @@ function TopLevelItem({ node, activeId, onSelect }: TopLevelItemProps) {
   const hasChildren = !!node.children?.length;
   const ref = useRef<HTMLLIElement>(null);
   const [open, setOpen] = useState(false);
+  const [coords, setCoords] = useState<{ top: number; left: number } | null>(
+    null,
+  );
 
   // Close on outside click / Escape
   useEffect(() => {
@@ -307,6 +326,36 @@ function TopLevelItem({ node, activeId, onSelect }: TopLevelItemProps) {
       document.removeEventListener("keydown", onKey);
     };
   }, [open]);
+
+  // The sub-modules list is vertically scrollable, so the floating card
+  // can't be an `absolute` child of that (clipping) container — it would be
+  // cut off. Instead we anchor it with `position: fixed` to this row's
+  // on-screen rect and keep it glued to the row as the page/list scrolls or
+  // the window resizes.
+  useEffect(() => {
+    if (!open || !hasChildren) return;
+    const update = () => {
+      const el = ref.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      // Anchor the 12px gap to the rail's *outer* edge, not the row's right
+      // edge: once the list scrolls, its scrollbar shrinks the row's content
+      // width, which would otherwise drag the card left over the rail.
+      // Fall back to the row + the body card's 16px right padding when the
+      // menu is used standalone (no enclosing rail).
+      const rail = el.closest("aside");
+      const anchorRight = rail ? rail.getBoundingClientRect().right : r.right + 16;
+      setCoords({ top: r.top, left: anchorRight + 12 });
+    };
+    update();
+    // Capture phase so we also catch scrolls inside the sub-modules list.
+    window.addEventListener("scroll", update, true);
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update, true);
+      window.removeEventListener("resize", update);
+    };
+  }, [open, hasChildren]);
 
   // A row is "active" (purple) when it is the currently selected one
   // — either because its id literally matches `activeId`, or because
@@ -365,12 +414,13 @@ function TopLevelItem({ node, activeId, onSelect }: TopLevelItemProps) {
         </span>
       </button>
 
-      {hasChildren && open && (
+      {hasChildren && open && coords && (
         <SubmenuCard
           items={node.children!}
           activeId={activeId}
           onSelect={onSelect}
           onLeafSelect={() => setOpen(false)}
+          fixedCoords={coords}
         />
       )}
     </li>
@@ -395,6 +445,15 @@ interface SubmenuCardProps {
    *  the card just outside the 279px sidebar). Nested cards override this to
    *  sit immediately to the right of their parent row. */
   anchor?: "sidebar" | "row";
+  /**
+   * When set, the card is positioned with `position: fixed` at these
+   * viewport coordinates instead of `absolute`. The top-level rail uses
+   * this so the card escapes the sub-modules list's `overflow-y-auto`
+   * clipping (a scrollable container would otherwise cut it off). Nested
+   * cards live inside the already-escaped top-level card and stay
+   * `absolute`.
+   */
+  fixedCoords?: { top: number; left: number } | null;
 }
 
 function SubmenuCard({
@@ -403,12 +462,14 @@ function SubmenuCard({
   onSelect,
   onLeafSelect,
   anchor = "sidebar",
+  fixedCoords,
 }: SubmenuCardProps) {
+  const fixed = fixedCoords != null;
   return (
     <div
       role="menu"
       className={cn(
-        "absolute top-0 z-50",
+        fixed ? "fixed z-50" : "absolute top-0 z-50",
         // Width = 17.4375rem; padding 0.5rem; gap 0.75rem; rounded-3xl;
         // border + the soft Figma card shadow.
         "flex w-[17.4375rem] p-2 flex-col items-start gap-3",
@@ -416,15 +477,23 @@ function SubmenuCard({
       )}
       style={{
         boxShadow: "0 0 50px 0 rgba(0, 0, 0, 0.10)",
-        // Both top-level and nested submenu cards float **12px outside**
-        // their anchor. The top-level offset adds the body card's 16px
-        // right padding (16 + 12 = 28px = 1.75rem) so the gap is measured
-        // from the rail's outer edge — matching the Figma reference.
-        // Nested cards anchor directly to the parent row, so the row's
-        // 8px right padding plus the 12px gap nets the same 12px visual
-        // gap from the parent card's right edge.
-        left:
-          anchor === "sidebar" ? "calc(100% + 1.75rem)" : "calc(100% + 1.25rem)",
+        ...(fixed
+          ? // Pinned to the row's on-screen rect (computed by the parent),
+            // so the card floats free of the scrolling list.
+            { top: fixedCoords!.top, left: fixedCoords!.left }
+          : // Both top-level and nested submenu cards float **12px outside**
+            // their anchor. The top-level offset adds the body card's 16px
+            // right padding (16 + 12 = 28px = 1.75rem) so the gap is measured
+            // from the rail's outer edge — matching the Figma reference.
+            // Nested cards anchor directly to the parent row, so the row's
+            // 8px right padding plus the 12px gap nets the same 12px visual
+            // gap from the parent card's right edge.
+            {
+              left:
+                anchor === "sidebar"
+                  ? "calc(100% + 1.75rem)"
+                  : "calc(100% + 1.25rem)",
+            }),
       }}
     >
       {items.map((child) => (

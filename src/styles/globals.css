@@ -333,3 +333,27 @@
     -moz-osx-font-smoothing: grayscale;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * `sidebar-scroll` — the thin scrollbar used by the Sidebar's scrollable
+ * sub-modules list. A grey-200 thumb on a transparent track, expressed in
+ * both the standard (`scrollbar-*`, Firefox + Chromium 121+) and the WebKit
+ * (`::-webkit-scrollbar`, Safari + older Chromium) models so the bar looks
+ * the same everywhere.
+ * ------------------------------------------------------------------------- */
+@utility sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-grey-200) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--color-grey-200);
+    border-radius: 9999px;
+  }
+}
