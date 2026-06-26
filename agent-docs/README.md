@@ -15,7 +15,7 @@ These hold across **every** component — they are not repeated in full in each 
   import { Button, TextField, Dropdown /* … */ } from "@ifmis/ui";
   import "@ifmis/ui/styles.css";   // required once at app root (fonts + tokens)
   ```
-  Icons (sub-path): `import { … } from "@ifmis/ui/icons";` — components also accept any icon node from `@phosphor-icons/react`.
+  Icons (sub-path): `import { … } from "@ifmis/ui/icons";` — components also accept any icon node from `@phosphor-icons/react`. See [Icons](Icons.md) for sizing/colour/weight conventions.
 - **Plain JS/JSX works** — TypeScript is optional. Types are exported for autocomplete (e.g. `ButtonProps`).
 - **Controlled vs uncontrolled:** stateful components support both. Controlled = the `value`/`checked`/`selected`/`page`/etc. prop + its `on*Change` callback; uncontrolled = the `default*` prop. This mirrors React conventions across the whole library.
 - **`className` is merged**, not replaced, via the project's tailwind-merge (`cn`) — your classes win on conflict. `cn` is exported for your own composition.
@@ -28,6 +28,7 @@ These hold across **every** component — they are not repeated in full in each 
 
 ## Foundations
 - [Colors](Colors.md) — full colour token reference (brand ramps, theme palettes, semantic tokens, gradients, StatCard tints, theming).
+- [Icons](Icons.md) — Phosphor Icons usage: import paths, sizing/colour patterns, weight conventions.
 
 ## Components
 

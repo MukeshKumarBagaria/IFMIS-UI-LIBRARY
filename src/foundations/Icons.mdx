@@ -1,0 +1,228 @@
+import { Meta } from "@storybook/blocks";
+import { CheckCircle, FloppyDisk, Trophy } from "@phosphor-icons/react";
+
+<Meta title="Foundations/Icons" />
+
+# Icons
+
+`@ifmis/ui` uses [**Phosphor Icons**](https://phosphoricons.com)
+(`@phosphor-icons/react`) as its only icon set. Every `icon` / `leftIcon` /
+`rightIcon` prop across the library accepts a Phosphor icon element — there's
+no icon font, no name-string API, and no built-in fallback set.
+
+> Every icon below is rendered live from the real package — if a weight ever
+> looks wrong here, it's wrong in the components too.
+
+---
+
+## Quick start
+
+```jsx
+import { FloppyDisk } from "@phosphor-icons/react";
+import { Button } from "@ifmis/ui";
+
+<Button leftIcon={<FloppyDisk weight="bold" />}>Save</Button>
+```
+
+`@phosphor-icons/react` is a regular `dependency` of `@ifmis/ui` (not a
+`peerDependency`), so it's already available in `node_modules` once
+`@ifmis/ui` is installed. If you'd rather not add it to your own
+`package.json` directly, the library re-exports the entire set from a
+sub-path instead — same icons, same types:
+
+```jsx
+import { FloppyDisk } from "@ifmis/ui/icons";
+```
+
+---
+
+## Weight gallery
+
+Phosphor ships six weights. The library uses four of them deliberately and
+leaves two unused — see the table below for which weight to reach for.
+
+export const weightCardStyle = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: 8,
+  padding: 16,
+  borderRadius: 12,
+  border: "1px solid var(--color-grey-200, #e5e5e5)",
+  minWidth: 96,
+};
+
+<div
+  style={{
+    display: "flex",
+    gap: 32,
+    flexWrap: "wrap",
+    margin: "16px 0",
+    alignItems: "flex-start",
+  }}
+>
+  <div style={weightCardStyle}>
+    <CheckCircle size={32} weight="thin" />
+    <code style={{ fontSize: 12 }}>thin</code>
+  </div>
+  <div style={weightCardStyle}>
+    <CheckCircle size={32} weight="light" />
+    <code style={{ fontSize: 12 }}>light</code>
+  </div>
+  <div style={weightCardStyle}>
+    <CheckCircle size={32} weight="regular" />
+    <code style={{ fontSize: 12 }}>regular</code>
+  </div>
+  <div style={weightCardStyle}>
+    <CheckCircle size={32} weight="bold" />
+    <code style={{ fontSize: 12 }}>bold</code>
+  </div>
+  <div style={weightCardStyle}>
+    <CheckCircle size={32} weight="fill" />
+    <code style={{ fontSize: 12 }}>fill</code>
+  </div>
+  <div style={weightCardStyle}>
+    <CheckCircle size={32} weight="duotone" />
+    <code style={{ fontSize: 12 }}>duotone</code>
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr><th>Weight</th><th>Used for</th><th>Examples</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>fill</code></td>
+      <td>Semantic/status icons — success, danger, warning, info, "done" states.</td>
+      <td><code>Badge</code>, <code>Banner</code> default icons, <code>ActionCard</code> check</td>
+    </tr>
+    <tr>
+      <td><code>bold</code></td>
+      <td>Small UI chrome — carets, chevrons, close (<code>X</code>), check, minus.</td>
+      <td><code>Dropdown</code>, <code>Accordion</code>, <code>Pagination</code>, <code>Breadcrumb</code></td>
+    </tr>
+    <tr>
+      <td><code>regular</code></td>
+      <td>Neutral, non-status contexts.</td>
+      <td><code>Header</code> actions, <code>SearchField</code></td>
+    </tr>
+    <tr>
+      <td><code>duotone</code></td>
+      <td>Reserved for <code>Sidebar</code> module/category icons only.</td>
+      <td><code>Sidebar</code> modules</td>
+    </tr>
+    <tr>
+      <td><code>thin</code> / <code>light</code></td>
+      <td><strong>Not used anywhere in the library.</strong> Avoid introducing them without a Figma reference.</td>
+      <td>—</td>
+    </tr>
+  </tbody>
+</table>
+
+The library never leaves `weight` unset — even though Phosphor defaults to
+`"regular"`, every usage sets it explicitly so the choice is intentional and
+visible in the code.
+
+---
+
+## Sizing & colour — two patterns
+
+Phosphor's `<Icon>` defaults to `size="1em"`, `weight="regular"`,
+`color="currentColor"`, and renders `width` / `height` / `fill` as plain SVG
+attributes — not inline styles. That detail is what makes pattern A possible:
+a CSS class always beats a presentational attribute.
+
+### A. Auto-sized slots (`Button`, `FormButton`, …)
+
+These wrap their children with a Tailwind arbitrary-variant rule —
+`[&_svg]:size-6`, `[&_svg]:size-5`, etc. — that force-sizes **any** descendant
+`<svg>`, no matter what `size` you did or didn't pass to the icon. Colour
+comes free too, since the icon's `fill` defaults to `currentColor` and the
+button sets its own text colour.
+
+<div style={{ display: "flex", gap: 12, margin: "16px 0", alignItems: "center" }}>
+  <button
+    className="inline-flex h-11 items-center justify-center gap-1.5 rounded-2xl bg-purple-600 px-3 font-semibold text-white [&_svg]:size-6"
+  >
+    <FloppyDisk />
+    Save
+  </button>
+  <span style={{ fontSize: 13, color: "var(--color-body-secondary, #595959)" }}>
+    ← icon passed with no `size` prop at all; the button forces it to 24px.
+  </span>
+</div>
+
+```jsx
+{/* You never size or colour the icon yourself here */}
+<Button leftIcon={<FloppyDisk />}>Save</Button>
+```
+
+### B. Manual-sized slots (a custom `icon` override on `Banner`, `ConfirmationPopup`, …)
+
+These render whatever node you pass **as-is** inside a fixed box — nothing
+force-resizes the SVG. You set `size` / `weight` / colour yourself, matching
+whatever the component's own default icon uses.
+
+<div style={{ display: "flex", flexDirection: "column", gap: 8, margin: "16px 0" }}>
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      padding: "10px 14px",
+      borderRadius: 12,
+      background: "#E8FCF2",
+      color: "#0A5C31",
+    }}
+  >
+    <Trophy size={20} weight="fill" />
+    <span style={{ fontSize: 14 }}>size={"{20}"} — matches Banner's own default icon size.</span>
+  </div>
+</div>
+
+```jsx
+{/* Banner's own default renders <Icon size={20} weight="fill" /> */}
+<Banner variant="success" icon={<Trophy size={20} weight="fill" />}>
+  Done
+</Banner>
+```
+
+When unsure which pattern a slot uses, check the component's own default icon
+and match its `size`/`weight` exactly.
+
+### Colour: never hardcode it
+
+```jsx
+// good — themeable, inherits/declares via a token class
+<Warning weight="fill" className="text-red-600" aria-hidden="true" />
+
+// avoid — breaks theming, same rule as every other colour in this system
+<Warning weight="fill" color="#B81414" aria-hidden="true" />
+```
+
+See [Foundations → Colors](?path=/docs/foundations-colors--docs) for the full
+token reference.
+
+---
+
+## Best practices
+
+- **Never hardcode `color` on an icon** — use a `text-*` token class or rely
+  on inherited `currentColor`.
+- **Always set `weight` explicitly** — match the table above.
+- **Match the slot's sizing pattern** before deciding whether to set `size`
+  yourself (auto-sized vs. manual).
+- **Pair `shrink-0`** on icons inside flex rows that sit next to text that
+  might wrap or truncate.
+- **Icon props are nodes, not names** — always `<FloppyDisk />`, never an
+  icon-name string.
+
+## Versioning
+
+The choice of Phosphor as the icon set, and which weights map to which
+meaning, is part of the public design language — changing a component's
+*default* icon or its weight is a visual change worth a CHANGELOG entry, even
+though it's rarely a breaking one. See
+[PUBLISHING.md](https://gitlab.example.com/ifmis/ui/-/blob/main/PUBLISHING.md)
+for the SemVer policy.
