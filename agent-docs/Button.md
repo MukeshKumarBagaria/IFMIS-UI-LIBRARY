@@ -51,6 +51,8 @@ Icons scale with the size automatically (24px standard / 20px small).
 
 Hover/pressed/focused/disabled are **not props** — they map to `:hover`, `:active`, `:focus-visible` (keyboard-only ring), and `:disabled`. You only choose variant/size and wire `onClick`.
 
+The cursor follows enabled/disabled automatically: `pointer` while the button is interactive, falling back to the platform `default` arrow on `:disabled` (no `not-allowed` glyph). Nothing to configure — it's baked into `buttonVariants`.
+
 ## Props
 
 | Prop | Type | Default | Notes |

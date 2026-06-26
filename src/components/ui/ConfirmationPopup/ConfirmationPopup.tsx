@@ -167,7 +167,7 @@ export const ConfirmationPopup = forwardRef<
             onClick={onCancel}
             disabled={disabled}
             className={cn(
-              "inline-flex h-11 w-[150px] items-center justify-center rounded-2xl px-3",
+              "inline-flex h-11 w-full max-w-[150px] flex-1 items-center justify-center rounded-2xl px-3",
               "border-[1.5px] border-orange-600 bg-transparent",
               "text-base font-semibold text-orange-600",
               "transition-colors select-none whitespace-nowrap",
@@ -184,7 +184,7 @@ export const ConfirmationPopup = forwardRef<
             onClick={onConfirm}
             disabled={disabled}
             className={cn(
-              "inline-flex h-11 w-[150px] items-center justify-center rounded-2xl px-3",
+              "inline-flex h-11 w-full max-w-[150px] flex-1 items-center justify-center rounded-2xl px-3",
               "border-[1.5px] border-transparent bg-orange-600",
               "text-base font-semibold text-white",
               "transition-colors select-none whitespace-nowrap",

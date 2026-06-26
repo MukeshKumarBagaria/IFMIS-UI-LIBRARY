@@ -8,17 +8,41 @@ See [PUBLISHING.md](./PUBLISHING.md) for the release process.
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-06-26
+
 ### Added
 
+- **`ProgressTracker`** — the IFMIS workflow tracker: a stage bar (Creator →
+  Verifier → Approver pills on a connector rail), a stage timeline (a dotted
+  vertical list of every actor with status badge + timestamp), and an Activity
+  Log panel (Remarks / Comments / Files tab switcher). Works controlled
+  (`activeTab` + `onTabChange`) or uncontrolled (`defaultTab`).
+- **`PreviewWindow`** — the file/format preview shell: a header row (file name,
+  a "Print" chip, expand and close actions) over a content slot for the actual
+  preview (PDF canvas, iframe, image…); shows a placeholder frame when no
+  `children` are passed.
+- **`Sidebar` — Admin button.** New `admin` prop renders an "Admin" pill action
+  above the module list. Exposes a standalone `AdminButton` component plus
+  `AdminButtonProps` (`label`, `onClick`). Renders as an icon-only circle in
+  the collapsed rail.
 - **`Sidebar` — Help links.** New `help` prop renders "Help Desk" and "Help"
   links pinned to the bottom of the body card (purple headset / blue question-mark
   icon circles + label). Each link takes an optional `label` and an `onClick`; omit
   a link to hide it. In the collapsed rail these render as icon-only circles.
   Exposes a standalone `SidebarHelpLinks` component plus `SidebarHelpProps` /
   `SidebarHelpItem` types.
+- **`Badge` — `default` variant.** New grey "draft/unscheduled" tone; it's now
+  the default `variant`.
 
 ### Changed
 
+- **`Badge` — `info` is blue again.** `info` no longer shares the grey
+  "default/draft" look it had picked up; it renders blue. Anything relying on
+  `info` for a neutral/grey badge should switch to the new `default` variant
+  (pre-1.0 breaking change — see the [pre-1.0 caveat](./PUBLISHING.md#5-versioning-policy-semver)).
+- **`Button` / `FormButton` — cursor.** The cursor is `pointer` while the
+  button is enabled, falling back to the platform `default` arrow on
+  `:disabled` (was `not-allowed`).
 - **`Sidebar` modules — icon badge shadow.** Each module's circular icon badge now
   carries a per-module drop shadow (a soft tint of the module's own colour, per
   Figma), applied identically in the active (large), inactive (small), overflow
@@ -32,6 +56,21 @@ See [PUBLISHING.md](./PUBLISHING.md) for the release process.
   restyled to match Figma — `border-radius: 16px`, `border: 1px solid #E8D8F5`
   (purple-100), `background: #FAF7FD` (purple-25).
 
+### Fixed
+
+- **`Checkbox` / `CheckboxCard` — hidden input positioning.** The visually-hidden
+  native `<input>` is now `position: relative` (kept in normal flow) instead of
+  `absolute`, so it can no longer be clipped or repositioned out of the
+  `<label>` by an ancestor that clips/repositions absolutely-positioned
+  descendants.
+- **Responsive overflow fixes** across `CtaTray`, `ActionCard`,
+  `ConfirmationPopup`, and `Upload`: the `CtaTray` action pill now wraps onto a
+  second line instead of overflowing on narrow viewports; long `ActionCard`
+  titles wrap instead of forcing the card wider; `ConfirmationPopup`'s
+  confirm/cancel buttons shrink to fit instead of overflowing; and `Upload`
+  file names truncate with an ellipsis instead of pushing the preview/delete
+  actions outside the container.
+
 ### Docs
 
 - **`Sidebar` guide (`Sidebar.mdx`).** Documented the new `help` prop (with the
@@ -41,6 +80,8 @@ See [PUBLISHING.md](./PUBLISHING.md) for the release process.
   `shadow` + `textColor`) and a per-module table of icon, text colour, and badge
   shadow, and refreshed the anatomy diagram, collapsed-rail notes, sub-component
   list, and file map.
+- **`agent-docs/`** updated for `Badge`, `Button`, `FormButton`, `Checkbox`,
+  `CheckboxCard`, and `CtaTray` to reflect the changes above.
 
 ## [0.1.3] — 2026-06-12
 

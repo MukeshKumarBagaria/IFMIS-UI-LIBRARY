@@ -7,7 +7,7 @@ import { cn } from "../../../lib/cn";
 /* ===========================================================================
  * Badge — a small, pill-shaped status indicator (icon + label).
  *
- * Four semantic variants mapped 1:1 to the IFMIS brand scales. Each variant
+ * Five semantic variants mapped 1:1 to the IFMIS brand scales. Each variant
  * pairs a tinted surface + border + label colour with a default icon in its
  * own accent colour (note: `pending` deliberately uses an orange icon on a
  * yellow chip, per the design system):
@@ -15,7 +15,13 @@ import { cn } from "../../../lib/cn";
  *   - success → green-100 / green-400 / green-800,  CheckCircle (green-600)
  *   - danger  → red-100   / red-400   / red-800,    Warning     (red-600)
  *   - pending → yellow-100/ yellow-400/ yellow-800, Spinner     (orange-600)
- *   - info    → grey-100  / grey-400  / grey-800,   Info        (grey-600)
+ *   - info    → blue-100  / blue-400  / blue-800,   Info        (blue-600)
+ *   - default → grey-100  / grey-400  / grey-800,   Info        (grey-600)
+ *
+ * `info` is for genuinely informational call-outs; `default` (the fallback
+ * when no `variant` is passed) is the neutral grey used for draft/untouched/
+ * not-yet-started states — the two were merged under "info" before, which
+ * made every draft badge render blue. Keep them apart going forward.
  *
  * The icon is fully dynamic: omit it for the variant default, pass any node to
  * override, or pass `null` for a text-only badge. Whatever icon is rendered
@@ -36,10 +42,11 @@ export const badgeVariants = cva(
         success: "border-green-400 bg-green-100 text-green-800 [&_svg]:text-green-600",
         danger: "border-red-400 bg-red-100 text-red-800 [&_svg]:text-red-600",
         pending: "border-yellow-400 bg-yellow-100 text-yellow-800 [&_svg]:text-orange-600",
-        info: "border-grey-400 bg-grey-100 text-grey-800 [&_svg]:text-grey-600",
+        info: "border-blue-400 bg-blue-100 text-blue-800 [&_svg]:text-blue-600",
+        default: "border-grey-400 bg-grey-100 text-grey-800 [&_svg]:text-grey-600",
       },
     },
-    defaultVariants: { variant: "info" },
+    defaultVariants: { variant: "default" },
   },
 );
 
@@ -54,6 +61,7 @@ const DEFAULT_ICON: Record<BadgeVariant, ReactNode> = {
   danger: <Warning weight="fill" aria-hidden="true" />,
   pending: <Spinner weight="bold" aria-hidden="true" />,
   info: <Info weight="fill" aria-hidden="true" />,
+  default: <Info weight="fill" aria-hidden="true" />,
 };
 
 export interface BadgeProps
@@ -76,12 +84,13 @@ export interface BadgeProps
  * @example
  *   <Badge variant="success">Complete</Badge>
  *   <Badge variant="danger">3 errors</Badge>
- *   <Badge variant="info" icon={null}>Draft</Badge>
+ *   <Badge variant="info">FYI</Badge>
+ *   <Badge icon={null}>Draft</Badge>
  *   <Badge variant="pending" icon={<Clock />}>Awaiting</Badge>
  */
 export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
-  ({ variant = "info", icon, className, children, ...props }, ref) => {
-    const resolvedVariant: BadgeVariant = variant ?? "info";
+  ({ variant = "default", icon, className, children, ...props }, ref) => {
+    const resolvedVariant: BadgeVariant = variant ?? "default";
     const resolvedIcon = icon === undefined ? DEFAULT_ICON[resolvedVariant] : icon;
     return (
       <span

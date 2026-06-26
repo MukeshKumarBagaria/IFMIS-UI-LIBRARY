@@ -25,7 +25,7 @@ const meta: Meta<typeof Badge> = {
   argTypes: {
     variant: {
       control: "select",
-      options: ["success", "danger", "pending", "info"],
+      options: ["success", "danger", "pending", "info", "default"],
     },
   },
 };
@@ -45,11 +45,17 @@ export const Pending: Story = {
   args: { variant: "pending", children: "Pending" },
 };
 
+/** Genuinely informational call-out — blue, not grey. */
 export const Info: Story = {
   args: { variant: "info", children: "Info" },
 };
 
-/** All four side by side. */
+/** The fallback when `variant` is omitted — neutral grey for draft/not-started states. */
+export const Default: Story = {
+  args: { children: "Draft" },
+};
+
+/** All five side by side. */
 export const AllVariants: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-3">
@@ -57,6 +63,7 @@ export const AllVariants: Story = {
       <Badge variant="danger">Danger</Badge>
       <Badge variant="pending">Pending</Badge>
       <Badge variant="info">Info</Badge>
+      <Badge variant="default">Draft</Badge>
     </div>
   ),
 };
@@ -65,7 +72,7 @@ export const AllVariants: Story = {
 export const IconOptions: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-3">
-      <Badge variant="info" icon={null}>
+      <Badge variant="default" icon={null}>
         Draft
       </Badge>
       <Badge variant="pending" icon={<Clock weight="fill" />}>

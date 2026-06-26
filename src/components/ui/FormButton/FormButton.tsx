@@ -25,15 +25,16 @@ import { cn } from "../../../lib/cn";
  *   - `danger`  — Red-200 → 300,    red-800 label (Reject)
  *
  * Hover / focus / disabled are native pseudo-class states — you never pass
- * them as props, you just style is handled for you.
+ * them as props, you just style is handled for you. The cursor is `pointer`
+ * while enabled and falls back to the platform `default` arrow on `:disabled`.
  */
 export const formButtonVariants = cva(
   [
     "inline-flex h-11 w-[150px] items-center justify-center gap-1.5 px-4",
     "rounded-2xl text-base font-semibold leading-none whitespace-nowrap",
-    "transition-colors select-none",
+    "transition-colors select-none cursor-pointer",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2",
-    "disabled:pointer-events-none disabled:opacity-50",
+    "disabled:pointer-events-none disabled:cursor-default disabled:opacity-50",
     // Normalise any icon (Phosphor / custom SVG) to 20px and stop it shrinking.
     "[&_svg]:size-5 [&_svg]:shrink-0",
   ].join(" "),

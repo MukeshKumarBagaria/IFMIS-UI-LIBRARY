@@ -122,6 +122,7 @@ const someChecked = values.some(Boolean);
 - For a bare box, pass `aria-label`.
 - Indeterminate sets `input.indeterminate` and `aria-checked="mixed"`.
 - Visible focus ring on keyboard focus.
+- The native input is visually hidden (clipped to 1px, no visible paint) but kept `position: relative` — i.e. **in normal flow** rather than taken out of it like Tailwind's `sr-only` (`position: absolute`). It won't escape the `<label>` if you wrap `Checkbox` in an ancestor that clips or repositions absolutely-positioned descendants; click/focus targeting stays correct in those embeddings. No change needed on your end — it's an internal implementation detail, not a styling hook.
 
 ## Related components
 

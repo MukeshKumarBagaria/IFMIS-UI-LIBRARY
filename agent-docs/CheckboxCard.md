@@ -124,6 +124,7 @@ const [picked, setPicked] = useState(new Set(["analytics"]));
 - The `<label>` wraps input + card; the visible **title** is the accessible name.
 - Visible focus ring traces the card surface on keyboard focus.
 - The decorative indicator is `aria-hidden`.
+- The native input is visually hidden (clipped to 1px) but `position: relative` rather than `absolute` — it stays in normal flow, so it can't escape the `<label>` inside an ancestor that clips/repositions absolutely-positioned descendants. Internal detail; not a styling hook. Same convention as [`Checkbox`](Checkbox.md).
 
 ## Related components
 

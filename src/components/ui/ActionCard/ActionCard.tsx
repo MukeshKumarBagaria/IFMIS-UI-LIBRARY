@@ -127,7 +127,7 @@ export const ActionCardHeader = forwardRef<HTMLDivElement, ActionCardHeaderProps
         {children != null && (
           <p
             className={cn(
-              "text-h3 whitespace-nowrap [word-break:break-word]",
+              "min-w-0 text-h3 [word-break:break-word]",
               TONE[tone].title,
             )}
           >

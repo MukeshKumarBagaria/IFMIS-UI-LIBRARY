@@ -564,7 +564,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
           // off-screen. When placed in a flex/grid parent with a definite
           // height the rail stretches to that height instead. `min-h-0`
           // lets it shrink as a flex child.
-          "flex w-[279px] flex-col items-start gap-6 max-h-screen min-h-0",
+          "flex w-[279px] max-w-full flex-col items-start gap-6 max-h-screen min-h-0",
           "text-heading",
           className,
         )}

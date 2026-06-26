@@ -294,4 +294,20 @@ export type { TextFieldProps } from "./components/ui/TextField";
 export { Textarea } from "./components/ui/Textarea";
 export type { TextareaProps } from "./components/ui/Textarea";
 
+export { PreviewWindow } from "./components/ui/PreviewWindow";
+export type { PreviewWindowProps } from "./components/ui/PreviewWindow";
+
+export { ProgressTracker } from "./components/ui/ProgressTracker";
+export type {
+  ProgressTrackerProps,
+  ProgressTrackerStage,
+  ProgressTrackerStageStatus,
+  ProgressTrackerTimelineItem,
+  ProgressTrackerTab,
+  ProgressTrackerTabId,
+  ActivityEntry,
+  ActivityEntryTone,
+  ActivityFile,
+} from "./components/ui/ProgressTracker";
+
 export { cn } from "./lib/cn";

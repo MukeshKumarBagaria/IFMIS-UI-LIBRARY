@@ -188,11 +188,12 @@ export const CheckboxCard = forwardRef<HTMLInputElement, CheckboxCardProps>(
         data-state={isChecked ? "checked" : "unchecked"}
         className="inline-flex"
       >
+        {/* Visually hidden like `sr-only`, but `relative` — see Checkbox.tsx. */}
         <input
           ref={ref}
           id={inputId}
           type="checkbox"
-          className="peer sr-only"
+          className="peer relative h-px w-px -m-px overflow-hidden whitespace-nowrap border-0 p-0 [clip:rect(0,0,0,0)]"
           checked={isChecked}
           disabled={disabled}
           onChange={handleChange}

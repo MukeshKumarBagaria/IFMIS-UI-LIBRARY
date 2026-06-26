@@ -132,6 +132,22 @@ export const MultipleFiles: Story = {
   args: { state: "uploaded", files: FILES, defaultExpanded: true },
 };
 
+/**
+ * Long file names must truncate with an ellipsis — they should never push the
+ * preview/delete actions outside the rounded container (regression guard for
+ * the reported overflow bug).
+ */
+export const LongFileNames: Story = {
+  args: {
+    state: "uploaded",
+    defaultExpanded: true,
+    files: [
+      { id: "1", name: "Cyber Treasury.pdf" },
+      { id: "2", name: "Challan_Report_20260528_103919.pdf" },
+    ],
+  },
+};
+
 /** Override any label or icon — the control adapts to your module. */
 export const CustomLabelsAndIcons: Story = {
   args: {

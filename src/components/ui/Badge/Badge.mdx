@@ -5,7 +5,7 @@ import * as BadgeStories from "./Badge.stories";
 
 # Badge
 
-A small, pill-shaped **status indicator** — an icon plus a short label. Four
+A small, pill-shaped **status indicator** — an icon plus a short label. Five
 semantic variants mapped to the IFMIS brand scales. Use it for list flags,
 counts, and section status (the `Accordion` header uses it for completion
 state).
@@ -23,12 +23,19 @@ import { Badge } from "@ifmis/ui";
 <Badge variant="danger">Danger</Badge>
 <Badge variant="pending">Pending</Badge>
 <Badge variant="info">Info</Badge>
+<Badge variant="default">Draft</Badge>   {/* or just omit `variant` */}
 ```
 
 <Canvas of={BadgeStories.AllVariants} />
 
 Each variant ships a default icon: `success` → check, `danger` → warning,
-`pending` → spinner, `info` → info.
+`pending` → spinner, `info`/`default` → info.
+
+> **`info` vs `default`:** `info` is **blue** — use it for a genuinely
+> informational call-out. `default` (the fallback when you omit `variant`) is
+> **grey** — use it for draft / not-started / neutral states. These used to
+> be the same variant (rendered grey under the name `info`), which made every
+> draft badge look blue; they're separate now so each colour means one thing.
 
 ---
 
@@ -44,7 +51,7 @@ The icon is a slot:
 ```jsx
 import { Clock } from "@phosphor-icons/react";
 
-<Badge variant="info" icon={null}>Draft</Badge>
+<Badge variant="default" icon={null}>Draft</Badge>
 <Badge variant="pending" icon={<Clock weight="fill" />}>Awaiting review</Badge>
 ```
 
@@ -56,7 +63,7 @@ import { Clock } from "@phosphor-icons/react";
 
 | Prop        | Type                               | Default  | Notes                                  |
 | ----------- | ---------------------------------- | -------- | -------------------------------------- |
-| `variant`   | `success \| danger \| pending \| info` | `info` | Colour + default icon.                 |
+| `variant`   | `success \| danger \| pending \| info \| default` | `default` | Colour + default icon.   |
 | `icon`      | node \| `null`                     | default  | Override the glyph, or hide with `null`. |
 | `children`  | node                               | —        | The label.                            |
 | `className` | string                             | —        | Merged onto the pill.                  |
@@ -72,7 +79,8 @@ Other `<span>` attributes (`id`, `data-*`, `title`, `ref`…) are forwarded.
 | `success` | green-100   | green-400   | green-800   | green-600     |
 | `danger`  | red-100     | red-400     | red-800     | red-600       |
 | `pending` | yellow-100  | yellow-400  | yellow-800  | **orange-600** |
-| `info`    | grey-100    | grey-400    | grey-800    | grey-600      |
+| `info`    | blue-100    | blue-400    | blue-800    | blue-600      |
+| `default` | grey-100    | grey-400    | grey-800    | grey-600      |
 
 Pill: `padding 4px 12px`, `radius 16px`, `gap 6px`, label 14px / 600.
 
@@ -91,7 +99,8 @@ render a badge with **no text**, add an accessible name yourself (e.g.
 - **Let the label carry the meaning.** Keep it to one or two words ("Complete",
   "3 errors") — the colour is reinforcement, not the message.
 - **Match the variant to status semantics**, not to decoration: `success` for
-  done, `danger` for blocking, `pending` for in-progress, `info` for neutral.
+  done, `danger` for blocking, `pending` for in-progress, `info` for a genuine
+  call-out, `default` (or omit `variant`) for draft/not-started/neutral.
 - **Don't use a Badge as a button.** It's a static indicator — for a clickable
   chip use `SelectionPill`.
 

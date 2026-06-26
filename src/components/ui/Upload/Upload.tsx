@@ -245,10 +245,10 @@ function FileChip({
   onToggle?: () => void;
 }) {
   return (
-    <div className="flex h-11 w-full items-center justify-between rounded-2xl border border-surface-border-grey bg-white px-3">
-      <span className="flex items-center gap-1.5 text-body-secondary">
+    <div className="flex h-11 w-full items-center justify-between gap-2 rounded-2xl border border-surface-border-grey bg-white px-3">
+      <span className="flex min-w-0 items-center gap-1.5 text-body-secondary">
         <IconSlot sizeClass="[&>svg]:size-6">{icon}</IconSlot>
-        <span className="whitespace-nowrap text-base font-semibold leading-none">
+        <span className="truncate text-base font-semibold leading-none">
           {name}
         </span>
       </span>
@@ -258,7 +258,7 @@ function FileChip({
         aria-label={expanded ? "Collapse files" : "Expand files"}
         aria-expanded={expanded}
         className={cn(
-          "flex items-center rounded-lg border border-grey-200 bg-surface-grey-bg px-1.5 py-1",
+          "flex shrink-0 items-center rounded-lg border border-grey-200 bg-surface-grey-bg px-1.5 py-1",
           "transition-colors hover:bg-grey-100 focus-visible:outline-none",
           "focus-visible:ring-2 focus-visible:ring-blue-400",
         )}
@@ -295,14 +295,14 @@ function FileRow({
 }) {
   return (
     <div className="flex h-11 w-full items-center rounded-xl px-3 transition-colors hover:bg-purple-25">
-      <div className="flex w-full items-center justify-between">
-        <span className="flex items-center gap-1.5 text-heading">
+      <div className="flex w-full min-w-0 items-center justify-between gap-2">
+        <span className="flex min-w-0 items-center gap-1.5 text-heading">
           <IconSlot sizeClass="[&>svg]:size-6">{file.icon ?? fileIcon}</IconSlot>
-          <span className="whitespace-nowrap text-base font-medium leading-6">
+          <span className="truncate text-base font-medium leading-6">
             {file.name}
           </span>
         </span>
-        <span className="flex items-center gap-2">
+        <span className="flex shrink-0 items-center gap-2">
           <button
             type="button"
             onClick={() => onPreview?.(file)}
@@ -451,7 +451,7 @@ export const Upload = forwardRef<HTMLDivElement, UploadProps>(
     return (
       <div
         ref={ref}
-        className={cn("flex w-[300px] flex-col gap-3", className)}
+        className={cn("flex w-full max-w-[300px] flex-col gap-3", className)}
         aria-labelledby={labelId}
         {...props}
       >

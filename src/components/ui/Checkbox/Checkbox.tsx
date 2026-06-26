@@ -203,11 +203,17 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           className,
         )}
       >
+        {/*
+          Visually hidden like Tailwind's `sr-only`, but `relative` instead of
+          `absolute` — an absolutely positioned hidden input can escape this
+          label when an ancestor without its own positioning context clips or
+          reflows it, breaking click/focus targeting in some embeddings.
+        */}
         <input
           ref={setRefs}
           id={inputId}
           type="checkbox"
-          className="peer sr-only"
+          className="peer relative h-px w-px -m-px overflow-hidden whitespace-nowrap border-0 p-0 [clip:rect(0,0,0,0)]"
           checked={isChecked}
           disabled={disabled}
           aria-checked={indeterminate ? "mixed" : isChecked}

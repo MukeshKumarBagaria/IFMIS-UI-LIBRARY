@@ -1,13 +1,13 @@
 # Badge
 
-> A small, pill-shaped **status indicator** — an icon plus a short label. Four semantic variants. Static (non-interactive) by design.
+> A small, pill-shaped **status indicator** — an icon plus a short label. Five semantic variants. Static (non-interactive) by design.
 
 ```jsx
 import { Badge, badgeVariants } from "@ifmis/ui";
 ```
 
 - **Type:** Status pill (`<span>`).
-- **Types:** `BadgeProps`, `BadgeVariant` (`"success" | "danger" | "pending" | "info"`).
+- **Types:** `BadgeProps`, `BadgeVariant` (`"success" | "danger" | "pending" | "info" | "default"`).
 - `badgeVariants` is the exported CVA class generator.
 
 ---
@@ -33,13 +33,21 @@ Communicate a status, flag, or count at a glance — section completion, list fl
 | `success` | green | filled CheckCircle (green) |
 | `danger` | red | filled Warning (red) |
 | `pending` | yellow | Spinner (**orange** icon, by design) |
-| `info` (default) | grey | filled Info (grey) |
+| `info` | **blue** | filled Info (blue) |
+| `default` (default) | grey | filled Info (grey) |
+
+> **`info` vs `default` — don't conflate them.** `info` is blue and means a
+> genuine informational call-out. `default` (what you get when you omit
+> `variant`) is grey and means draft / not-started / neutral. They used to be
+> merged under `info` rendered grey, which made every draft badge look blue —
+> they're separate variants now, so pick the one that matches the semantics,
+> not just "whatever looked grey before."
 
 ## Props
 
 | Prop | Type | Default | Notes |
 | --- | --- | --- | --- |
-| `variant` | `"success" \| "danger" \| "pending" \| "info"` | `"info"` | Colour + default icon. |
+| `variant` | `"success" \| "danger" \| "pending" \| "info" \| "default"` | `"default"` | Colour + default icon. |
 | `icon` | `ReactNode \| null` | variant default | Omit = default; `null` = text-only; node = custom (inherits variant colour, sized to 16px). |
 | `children` | `ReactNode` | — | The label. |
 | `className` | `string` | — | Merged onto the pill. |
@@ -55,7 +63,8 @@ import { Clock } from "@phosphor-icons/react";
 <Badge variant="success">Complete</Badge>
 <Badge variant="danger">3 errors</Badge>
 <Badge variant="pending">Awaiting review</Badge>
-<Badge variant="info" icon={null}>Draft</Badge>             {/* text-only */}
+<Badge variant="info">FYI</Badge>                          {/* genuine call-out, blue */}
+<Badge icon={null}>Draft</Badge>                            {/* default variant, grey, text-only */}
 <Badge variant="pending" icon={<Clock weight="fill" />}>Awaiting</Badge>
 ```
 
@@ -72,11 +81,12 @@ import { Clock } from "@phosphor-icons/react";
 ## Best practices
 
 - Let the **label** carry the meaning; keep it to one or two words. Colour is reinforcement, not the message.
-- Match the variant to semantics: `success` = done, `danger` = blocking, `pending` = in-progress, `info` = neutral.
+- Match the variant to semantics: `success` = done, `danger` = blocking, `pending` = in-progress, `info` = genuine call-out (blue), `default`/omit = draft, not-started, neutral (grey).
 - Badges are inline and `shrink-0`, so they never squash in a flex row.
 
 ## Common mistakes
 
+- **Reaching for `info` to mean "draft" / "not started"** — that's `default` (grey); `info` is blue and reserved for a genuine informational call-out.
 - **Using a Badge as a button** — use [`SelectionPill`](SelectionPill.md) for clickable chips.
 - **Icon-only badge with no text and no `aria-label`** — the status is lost to screen readers (see Accessibility).
 - **Stuffing a sentence into the label** — use a [`Banner`](Banner.md) for messages.

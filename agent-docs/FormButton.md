@@ -68,7 +68,7 @@ The standardized form/record action buttons. They share fixed sizing (44px tall 
 | `type` | `"button" \| "submit" \| "reset"` | `"button"` | Defaults to `button` (safe inside forms). |
 | `className` | `string` | — | Merged onto the base (tailwind-merge keeps your class winning). |
 
-Hover/focus/disabled are native pseudo-class states — never passed as props.
+Hover/focus/disabled are native pseudo-class states — never passed as props. The cursor is `pointer` while the button is enabled and falls back to the platform `default` arrow on `:disabled` (no `not-allowed` glyph) — same convention as [`Button`](Button.md).
 
 ## Usage examples
 

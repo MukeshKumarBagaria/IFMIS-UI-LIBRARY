@@ -200,7 +200,7 @@ export const CtaTray = forwardRef<HTMLDivElement, CtaTrayProps>(
       <div
         ref={ref}
         className={cn(
-          "flex w-full items-center rounded-3xl bg-white p-5",
+          "flex w-full flex-wrap items-center gap-3 rounded-3xl bg-white p-5",
           "shadow-[0_0_50px_0_rgba(0,0,0,0.10)]",
           // A Back button forces the tray to split: Back left, pill right.
           onBack ? "justify-between" : ALIGN[align],
@@ -225,7 +225,7 @@ export const CtaTray = forwardRef<HTMLDivElement, CtaTrayProps>(
           role="group"
           aria-label={ariaLabel}
           className={cn(
-            "flex items-center gap-6 rounded-[20px] px-3 py-2 transition-colors",
+            "flex flex-wrap items-center justify-center gap-x-6 gap-y-3 rounded-[20px] px-3 py-2 transition-colors",
             PILL_BG[activeTone],
           )}
         >

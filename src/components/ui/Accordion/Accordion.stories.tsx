@@ -69,7 +69,7 @@ export const Default: Story = {
         value="s3"
         number="03"
         title="Review &amp; submit"
-        badges={<Badge variant="info">Not started</Badge>}
+        badges={<Badge variant="default">Not started</Badge>}
       >
         <SampleBody />
       </AccordionSection>
@@ -156,7 +156,7 @@ export const WithDisabledSection: Story = {
         number="02"
         title="Locked until prerequisites are met"
         disabled
-        badges={<Badge variant="info">Locked</Badge>}
+        badges={<Badge variant="default">Locked</Badge>}
       >
         <SampleBody />
       </AccordionSection>

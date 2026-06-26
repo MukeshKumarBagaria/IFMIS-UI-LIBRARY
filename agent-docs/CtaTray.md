@@ -114,6 +114,10 @@ const [tone, setTone] = useState("neutral");
 </div>
 ```
 
+## Responsive behaviour
+
+The outer card and the button pill both wrap (`flex flex-wrap`, with `gap` instead of fixed spacing), so a tray with several buttons reflows onto a second line on narrow viewports instead of overflowing or squashing buttons. This is automatic — you don't need to add your own breakpoint classes for the tray itself. It's been verified at down to ~280px wide with five buttons in the pill with zero horizontal overflow.
+
 ## Best practices
 
 - Use the [`FormButton`](FormButton.md) presets so the tints map correctly.
